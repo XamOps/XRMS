@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xammer HRMS | Login</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f0f;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #b0b0b0;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #2575fc, #6a11cb);
+        }
+
+        .message {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .error {
+            background-color: #ff4d4d;
+            color: #fff;
+        }
+
+        .success {
+            background-color: #4caf50;
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #808080;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #1e90ff;
+            text-decoration: none;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 1rem;
+            }
+
+            .login-container h1 {
+                font-size: 1.5rem;
+            }
+
+            input[type="text"], input[type="password"] {
+                padding: 0.65rem;
+            }
+
+            button {
+                padding: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h1>Xammer</h1>
+
+    <!-- Display error or logout messages -->
+    <div th:if="${param.error}" class="message error">Invalid username or password.</div>
+    <div th:if="${param.logout}" class="message success">You have been logged out successfully.</div>
+
+    <form th:action="@{/perform_login}" method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required aria-label="Username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required aria-label="Password">
+        </div>
+
+        <!-- CSRF token -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- Forgot password link -->
+    <a href="#" class="forgot-password">Forgot your password?</a>
+
+    <div class="footer">&copy; 2025 Xammer Inc. All rights reserved.</div>
+</div>
+</body>
+</html>
