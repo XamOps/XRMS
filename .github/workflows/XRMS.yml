@@ -5,10 +5,17 @@ on:
     branches:
       - main
 
+env:
+  DOCKERHUB_REPO: your-dockerhub-username/your-repo-name
+  EC2_APP_PORT: 3000
+  EC2_HOST_PORT: 80
+  EC2_CONTAINER_NAME: your-app-container
+
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -23,19 +30,32 @@ jobs:
 
     - name: Add remote host to known hosts
       run: |
-        ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
       env:
-        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_HOST: ${{ secrets.EC2_HOST }}
 
     - name: Run SSH command on remote server
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USERNAME }}
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          echo "Running deployment script on remote server"
-          # Add your deployment commands here
+          echo "Running deployment script on remote server..."
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          IMAGE_URI="${{ env.DOCKERHUB_REPO }}:latest"
+          echo "Image URI to pull: ${IMAGE_URI}"
+          docker pull $IMAGE_URI
+          docker stop ${{ env.EC2_CONTAINER_NAME }} || true
+          docker rm ${{ env.EC2_CONTAINER_NAME }} || true
+          docker run -d \
+            --name ${{ env.EC2_CONTAINER_NAME }} \
+            -p ${{ env.EC2_HOST_PORT }}:${{ env.EC2_APP_PORT }} \
+            --restart always \
+            $IMAGE_URI
+          echo "Deployment commands finished."
+
+
 
 
 
