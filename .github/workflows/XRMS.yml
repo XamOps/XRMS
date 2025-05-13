@@ -55,10 +55,6 @@ jobs:
             echo "Pulling latest image..."
             docker pull $IMAGE_URI
 
-            echo "Stopping old container..."
-            docker stop $EC2_CONTAINER_NAME || true
-            docker rm $EC2_CONTAINER_NAME || true
-
             echo "Running new container..."
             docker run -d \
               --name $EC2_CONTAINER_NAME \
