@@ -6,10 +6,10 @@ on:
       - main
 
 env:
-  DOCKERHUB_REPO: your-dockerhub-username/your-repo-name
+  DOCKERHUB_REPO: 563568/xrms-01
   EC2_APP_PORT: 3000
   EC2_HOST_PORT: 80
-  EC2_CONTAINER_NAME: your-app-container
+  EC2_CONTAINER_NAME: xrms-app
 
 jobs:
   deploy:
