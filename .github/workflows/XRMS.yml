@@ -1,54 +1,40 @@
-name: Deploy XRMS App to EC2
+name: Deploy to Remote Server
 
 on:
   push:
     branches:
-      - main  # or your desired branch
+      - main
 
 jobs:
   deploy:
-    name: SSH Deploy to EC2
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Deploy Docker container to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Setting variables..."
-            export EC2_CONTAINER_NAME="xrms-container"
-            export EC2_HOST_PORT=8080
-            export EC2_APP_PORT=8080
-            export IMAGE_URI="${{ secrets.DOCKERHUB_USERNAME }}/xrms-01:latest"
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-            echo "Logging into Docker..."
-            echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+    - name: Add remote host to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
-            echo "Pulling latest image..."
-            docker pull $IMAGE_URI
+    - name: Run SSH command on remote server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          echo "Running deployment script on remote server"
+          # Add your deployment commands here, for example:
+          # cd /path/to/your/project && git pull origin main
+          # or any other commands for deployment
 
-            echo "Running new container..."
-            docker run -d \
-              --name $EC2_CONTAINER_NAME \
-              -p $EC2_HOST_PORT:$EC2_APP_PORT \
-              --restart always \
-              $IMAGE_URI
-
-            echo "Waiting for container to start..."
-            sleep 5
-
-            echo "Container status:"
-            docker ps -a | grep $EC2_CONTAINER_NAME
-
-            echo "Recent logs:"
-            docker logs --tail 50 $EC2_CONTAINER_NAME
-
-            echo "Cleanup: Removing unused images..."
-            docker image prune -f
 
