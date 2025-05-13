@@ -52,6 +52,10 @@ jobs:
 
             IMAGE_URI="${{ env.DOCKERHUB_REPO }}:latest"
 
+            echo "Stopping and removing existing container (if any)..."
+            docker stop $EC2_CONTAINER_NAME || true
+            docker rm $EC2_CONTAINER_NAME || true
+
             echo "Pulling latest image..."
             docker pull $IMAGE_URI
 
@@ -62,5 +66,14 @@ jobs:
               --restart always \
               $IMAGE_URI
 
-            echo "Cleaning up old images..."
+            echo "Waiting for container to start..."
+            sleep 5
+
+            echo "Container status:"
+            docker ps -a | grep $EC2_CONTAINER_NAME
+
+            echo "Recent logs:"
+            docker logs --tail 50 $EC2_CONTAINER_NAME
+
+            echo "Cleaning up unused images..."
             docker image prune -f
