@@ -4,88 +4,50 @@ name: Build, Push to Docker Hub & Deploy to EC2
 on:
   push:
     branches:
-      - main # Change this to the branch you want to trigger deployments from
+      - main
 
 env:
-  # Docker Hub Repository Information
-  DOCKERHUB_REPO:563568/xrms-01 # Replace with your Docker Hub repo (username/repo-name)
+  # Docker Hub
+  DOCKERHUB_USERNAME: 563568
+  DOCKERHUB_REPO: xrms-01
 
-  # EC2 Deployment Configuration
-  EC2_APP_PORT: 8081 # The port your application listens on *inside* the Docker container (matches EXPOSE in Dockerfile)
-  EC2_HOST_PORT: 8080# The port on the EC2 instance you want to map the container port to (e.g., 80 for HTTP)
-  EC2_CONTAINER_NAME: XRMS # A desired name for your Docker container on EC2
+  # EC2 Deployment
+  EC2_APP_PORT: 8081
+  EC2_HOST_PORT: 8080
+  EC2_CONTAINER_NAME: XRMS
 
 jobs:
   deploy:
-    name: Deploy Docker Image
-    runs-on: ubuntu-latest # Use a GitHub-hosted runner
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{563568}}
-          password: ${{dckr_pat_yHQuMrR-PEIkUKXo_NbrP_lqtTU}} # Use your Docker Hub token/password from secrets
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: Build, tag, and push image to Docker Hub
-        env:
-          IMAGE_TAG: ${{ github.sha }} # Use the Git commit SHA as the image tag for versioning
-        run: |
-          echo "Building Docker image for Docker Hub..."
-          # Build the image, tagging it with the full Docker Hub repo and version tag
-          docker build -t $DOCKERHUB_REPO:$IMAGE_TAG .
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-          echo "Tagging image with 'latest'..."
-          # Tag the image with 'latest' as well for easy pulling on EC2
-          docker tag $DOCKERHUB_REPO:$IMAGE_TAG $DOCKERHUB_REPO:latest
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}:latest
 
-          echo "Pushing images to Docker Hub..."
-          # Push both the specific version tag and the 'latest' tag
-          docker push $DOCKERHUB_REPO:$IMAGE_TAG
-          docker push $DOCKERHUB_REPO:latest
-          echo "Docker Hub image push complete."
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3 # Action to execute commands on EC2 via SSH
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }} # Use the private key from GitHub Secrets
-          script: |
-            echo "Connecting to EC2 instance for deployment..."
-
-            # Login to Docker Hub on the EC2 instance
-            # This requires Docker to be installed on EC2
-            echo "Logging in to Docker Hub on EC2..."
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-            # Construct the full image URI
-            IMAGE_URI="${{ env.DOCKERHUB_REPO }}:latest"
-
-            echo "Pulling the latest Docker image (${IMAGE_URI})..."
-            # Pull the latest tagged image from Docker Hub
-            docker pull $IMAGE_URI
-
-            echo "Stopping and removing old container (if exists)..."
-            # Stop the currently running container gracefully (if it exists)
-            docker stop $EC2_CONTAINER_NAME || true # '|| true' prevents the workflow from failing if the container doesn't exist
-            # Remove the old container
-            docker rm $EC2_CONTAINER_NAME || true
-
-            echo "Running the new container..."
-            # Run a new container from the latest image
-            docker run -d \
-              --name $EC2_CONTAINER_NAME \
-              -p $EC2_HOST_PORT:$EC2_APP_PORT \
-              --restart always \ # Configure the container to restart automatically if it stops
-              $IMAGE_URI # Use the latest image URI
-
-            echo "Deployment complete. New container '$EC2_CONTAINER_NAME' is running."
-
-            # Optional: Clean up old, unused Docker images on the EC2 instance
-            echo "Cleaning up old images..."
-            docker image prune -f
-
+    - name: SSH into EC2 and deploy container
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          docker pull ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}:latest
+          docker stop ${{ env.EC2_CONTAINER_NAME }} || true
+          docker rm ${{ env.EC2_CONTAINER_NAME }} || true
+          docker run -d --name ${{ env.EC2_CONTAINER_NAME }} -p ${{ env.EC2_HOST_PORT }}:${{ env.EC2_APP_PORT }} ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO }}:latest
