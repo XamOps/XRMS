@@ -23,6 +23,7 @@ RUN ./mvnw package -DskipTests
 
 # STAGE 2: Create the runtime image using JRE 17
 FROM eclipse-temurin:17-jre-focal
+# Set the working directory in the container
 
 # Set the working directory in the container
 WORKDIR /app
