@@ -24,6 +24,8 @@ jobs:
     - name: Add remote host to known hosts
       run: |
         ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+      env:
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
     - name: Run SSH command on remote server
       uses: appleboy/ssh-action@v1.0.3
@@ -33,8 +35,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           echo "Running deployment script on remote server"
-          # Add your deployment commands here, for example:
-          # cd /path/to/your/project && git pull origin main
-          # or any other commands for deployment
+          # Add your deployment commands here
+
 
 
