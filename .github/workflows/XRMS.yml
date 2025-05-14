@@ -6,7 +6,7 @@ on:
       - main # Change this to your main branch if needed
 
 env:
-  # Docker Hub Repository Information - REPLACE WITH YOURS!
+  # Docker Hub Repository Information - REPLACE WITH YOURS!!
   DOCKERHUB_REPO: akshay172/xrms # Your Docker Hub repo name (username/repo-name)
 
   # EC2 Deployment Configuration - REPLACE WITH YOURS!
