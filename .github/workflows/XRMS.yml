@@ -6,12 +6,13 @@ on:
       - main # Change this to your main branch if needed
 
 env:
-  # Docker Hub Repository Information - REPLACE WITH YOURS!!!
+  # Docker Hub Repository Information - REPLACE WITH YOURS!
   DOCKERHUB_REPO: akshay172/xrms # Your Docker Hub repo name (username/repo-name)
 
-  # EC2 Deployment Configuration - REPLACE WITH YOURS!
-  EC2_APP_PORT: 3000 # The port your app uses *inside* its Docker container (check your Dockerfile's EXPOSE)
-  EC2_HOST_PORT: 8081 # The port on your EC2 server you want folks to access your app on (e.g., 80 for standard web)
+  # EC2 Deployment Configuration - EC2_APP_PORT is still useful for documentation
+  EC2_APP_PORT: 3000 # The port your app uses *inside* its Docker container (matches EXPOSE in Dockerfile)
+  # Note: EC2_HOST_PORT is no longer directly used for port mapping with --network host, but keep it for clarity if needed elsewhere.
+  EC2_HOST_PORT: 8081 # The port your app listens on *inside* the container, now directly exposed on the host.
   EC2_CONTAINER_NAME: myhrms_on_ec2 # Give your running container a cool name on EC2
 
 jobs:
@@ -101,12 +102,12 @@ jobs:
           docker rm ${{ env.EC2_CONTAINER_NAME }} || true
 
           # --- REVISED DOCKER RUN COMMAND CONSTRUCTION ---
-          # Construct the base docker run command
-          DOCKER_RUN_CMD="docker run -d --name ${{ env.EC2_CONTAINER_NAME }} -p ${{ env.EC2_HOST_PORT }}:${{ env.EC2_APP_PORT }} --restart always"
+          # Construct the base docker run command with --network host
+          # Removed -p flag as it's not needed with --network host
+          DOCKER_RUN_CMD="docker run -d --network host --name ${{ env.EC2_CONTAINER_NAME }} --restart always"
 
           # Construct the environment variables part of the command
           # Pass database credentials from GitHub Secrets as environment variables to the container
-          # Removed single quotes around ${{ secrets.DB_URL }} to fix JDBC driver error
           DB_ENVS="-e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} -e SPRING_DATASOURCE_USERNAME='${{ secrets.DB_USERNAME }}' -e SPRING_DATASOURCE_PASSWORD='${{ secrets.DB_PASSWORD }}'"
 
           # Optional dialect env (uncomment if needed)
