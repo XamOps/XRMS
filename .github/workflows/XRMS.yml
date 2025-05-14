@@ -75,6 +75,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           echo "Running deployment script on remote server..."
+          
           # Log in to Docker Hub on the EC2 instance using secrets
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           
@@ -90,16 +91,22 @@ jobs:
           # Remove the old container (if it exists)
           docker rm ${{ env.EC2_CONTAINER_NAME }} || true
           
-          # Run a new container from the newly pulled image, passing DB config as environment variables
-          docker run -d \
-            --name ${{ env.EC2_CONTAINER_NAME }} \
-            -p ${{ env.EC2_HOST_PORT }}:${{ env.EC2_APP_PORT }} \
-            --restart always \
-            -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-            -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-            -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            # Uncomment the line below if you need to explicitly set the Hibernate dialect
-            # -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${{ secrets.DB_DIALECT }} \
-            $IMAGE_URI
+          # --- REVISED DOCKER RUN COMMAND CONSTRUCTION ---
+          # Construct the base docker run command
+          DOCKER_RUN_CMD="docker run -d --name ${{ env.EC2_CONTAINER_NAME }} -p ${{ env.EC2_HOST_PORT }}:${{ env.EC2_APP_PORT }} --restart always"
+          
+          # Construct the environment variables part of the command
+          DB_ENVS="-e SPRING_DATASOURCE_URL='${{ secrets.DB_URL }}' -e SPRING_DATASOURCE_USERNAME='${{ secrets.DB_USERNAME }}' -e SPRING_DATASOURCE_PASSWORD='${{ secrets.DB_PASSWORD }}'"
+          
+          # Optional dialect env (uncomment if needed)
+          # if [ -n "${{ secrets.DB_DIALECT }}" ]; then DB_ENVS="$DB_ENVS -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT='${{ secrets.DB_DIALECT }}'"; fi
+
+          # Echo the full command before executing (for debugging)
+          echo "Executing docker run command:"
+          echo "$DOCKER_RUN_CMD $DB_ENVS $IMAGE_URI"
+
+          # Execute the docker run command
+          $DOCKER_RUN_CMD $DB_ENVS $IMAGE_URI
+          # --- END REVISED CONSTRUCTION ---
             
           echo "Deployment commands finished."
