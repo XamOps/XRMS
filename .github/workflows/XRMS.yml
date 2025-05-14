@@ -1,4 +1,4 @@
-name: Build and Deploy to Remote Server
+name: Build and Deploy to Remote Server 
 
 on:
   push:
