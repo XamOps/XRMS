@@ -3,7 +3,7 @@ name: Build and Deploy to Remote Server
 on:
   push:
     branches:
-      - main # Change this to your main branch if needed!
+      - main # Change this to your main branch if needed!!
 
 env:
   # Docker Hub Repository Information - REPLACE WITH YOURS!
