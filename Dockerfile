@@ -35,6 +35,7 @@ EXPOSE 8080
 # Copy the JAR file from the 'builder' stage to the current stage
 # Maven typically puts the JAR in /app/target/your-app-name.jar
 COPY --from=builder /app/target/*.jar app.jar
+# Command to run the application when the container starts
 
 # Command to run the application when the container starts
 # Your application.properties will be inside app.jar
