@@ -3,7 +3,7 @@ name: Build and Deploy to Remote Server
 on:
   push:
     branches:
-      - main # Change this to your main branch if needed!!
+      - main # Change this to your main branch if needed
 
 env:
   # Docker Hub Repository Information - REPLACE WITH YOURS!
@@ -108,11 +108,11 @@ jobs:
 
           # Construct the environment variables part of the command
           # Pass database credentials from GitHub Secrets as environment variables to the container
+          # Removed single quotes around ${{ secrets.DB_URL }} to fix JDBC driver error
           DB_ENVS="-e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} -e SPRING_DATASOURCE_USERNAME='${{ secrets.DB_USERNAME }}' -e SPRING_DATASOURCE_PASSWORD='${{ secrets.DB_PASSWORD }}'"
 
-          # Optional dialect env (uncomment if needed)
-          # If you need to explicitly set the Hibernate dialect via environment variable
-          # if [ -n "${{ secrets.DB_DIALECT }}" ]; then DB_ENVS="$DB_ENVS -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT='${{ secrets.DB_DIALECT }}'"; fi
+          # Explicitly set the Hibernate dialect via environment variable (uncommented)
+          DB_ENVS="$DB_ENVS -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${{ secrets.DB_DIALECT }}"
 
           # Echo the full command before executing (for debugging)
           echo "Executing docker run command:"
