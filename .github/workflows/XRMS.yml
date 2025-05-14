@@ -1,4 +1,4 @@
-name: Deploy to Remote Server
+name: Build and Deploy to Remote Server
 
 on:
   push:
@@ -13,12 +13,36 @@ env:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Build and Deploy Docker Image
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: ${{ env.DOCKERHUB_REPO }}:latest
 
     - name: Set up SSH key
       run: |
@@ -54,9 +78,3 @@ jobs:
             --restart always \
             $IMAGE_URI
           echo "Deployment commands finished."
-
-
-
-
-
-
