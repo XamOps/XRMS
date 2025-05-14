@@ -6,10 +6,10 @@ on:
       - main
 
 env:
-  DOCKERHUB_REPO: 563568/xrms-01
+  DOCKERHUB_REPO: akshay172/xrms
   EC2_APP_PORT: 3000
   EC2_HOST_PORT: 80
-  EC2_CONTAINER_NAME: xrms-app
+  EC2_CONTAINER_NAME: myhrms_on_ec2
 
 jobs:
   deploy:
