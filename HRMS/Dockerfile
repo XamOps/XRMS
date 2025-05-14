@@ -11,6 +11,10 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+# --- ADDED: Make the Maven wrapper script executable ---
+RUN chmod +x mvnw
+# -----------------------------------------------------
+
 # Download dependencies. Using go-offline first can speed up subsequent builds if pom.xml hasn't changed.
 # -B runs in batch mode (non-interactive)
 RUN ./mvnw dependency:go-offline -B
