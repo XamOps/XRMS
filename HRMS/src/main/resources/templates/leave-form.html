@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Leave Management</title>
+    <link rel="icon" type="image/x-icon" href="/images/x2.png">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+ <style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 30px;
+        margin: 0;
+        min-height: 100vh; /* Ensure body takes at least the height of the viewport */
+        box-sizing: border-box;
+        overflow-y: hidden; /* Prevent vertical scrolling on the main body */
+    }
+
+    .container {
+        display: flex;
+        width: 95%;
+        max-width: 1400px;
+        gap: 40px;
+        height: auto; /* Adjust height based on content */
+    }
+
+    .form-section {
+        background-color: #262626;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+        flex: 1; /* Takes up equal available width */
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        /* Ensure form doesn't exceed viewport height initially */
+        max-height: 80vh; /* Adjust as needed based on your form content */
+        overflow-y: auto; /* Allow scrolling within the form if its content overflows */
+    }
+
+    .status-section {
+        background-color: #262626;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+        flex: 1; /* Takes up equal available width */
+        max-height: 80vh; /* Match form's max-height */
+        overflow-y: auto; /* Allow scrolling within the status section */
+        display: flex;
+        flex-direction: column;
+    }
+
+    h1, h2 {
+        color: #64b5f6;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #bdbdbd;
+        font-weight: 500;
+    }
+
+    input[type="text"],
+    select {
+        width: calc(100% - 24px);
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #424242;
+        border-radius: 8px;
+        background-color: #303030;
+        color: #e0e0e0;
+        box-sizing: border-box;
+        font-size: 16px;
+    }
+
+    textarea {
+        width: calc(100% - 24px);
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #424242;
+        border-radius: 8px;
+        background-color: #303030;
+        color: #e0e0e0;
+        box-sizing: border-box;
+        font-size: 16px;
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .leave-balance {
+        background-color: #303030;
+        color: #e0e0e0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-left: 6px solid #42a5f5;
+    }
+
+    .leave-balance p {
+        margin: 6px 0;
+    }
+
+    button[type="submit"] {
+        background-color: #64b5f6;
+        color: #212121;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        margin-top: 10px;
+    }
+
+    button[type="submit"]:disabled {
+        background-color: #616161;
+        cursor: not-allowed;
+        color: #9e9e9e;
+        box-shadow: none;
+    }
+
+    button[type="submit"]:hover:enabled {
+        background-color: #42a5f5;
+        transform: scale(1.02);
+    }
+
+    p a {
+        color: #42a5f5;
+        text-decoration: none;
+        margin-top: 15px;
+        display: block;
+        text-align: center;
+        font-size: 14px;
+        transition: color 0.3s ease;
+    }
+
+    p a:hover {
+        text-decoration: underline;
+        color: #64b5f6;
+    }
+
+    .request-item {
+        background-color: #303030;
+        color: #e0e0e0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 6px solid #64b5f6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .request-item:hover {
+        transform: scale(1.01);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .request-info p {
+        margin: 6px 0;
+        font-size: 14px;
+    }
+
+    .status-badge {
+        display: inline-block; /* Ensure width property works */
+        padding: 10px 15px;
+        border-radius: 24px;
+        font-weight: 600;
+        font-size: 13px;
+        text-align: center; /* Center the text within the button */
+        min-width: 190px; 
+        box-sizing: border-box; /* Include padding in the width calculation */
+    }
+
+    .pending-manager {
+        background-color: #ffb74d; /* Amber */
+        color: #212121;
+    }
+
+    .pending-admin {
+        background-color: #81d4fa; /* Light blue */
+        color: #212121;
+    }
+
+    .approved {
+        background-color: #8bc34a; /* Green */
+        color: #212121;
+    }
+
+    .rejected {
+        background-color: #e57373; /* Red */
+        color: #212121;
+    }
+
+    .no-requests {
+        color: #757575;
+        font-style: italic;
+        font-size: 16px;
+    }
+
+    .hidden-request {
+        display: none;
+    }
+
+    #viewMoreBtn {
+        background-color: #424242;
+        color: #e0e0e0;
+        border: 1px solid #616161;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 10px; /* Adjust margin */
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    }
+
+    #viewMoreBtn:hover {
+        background-color: #616161;
+        transform: scale(1.02);
+    }
+
+    /* Cool Loader Styles */
+    .loader-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 12px;
+        z-index: 10;
+        display: none; /* Hidden by default */
+    }
+
+    .loader {
+        border: 5px solid #e0e0e0;
+        border-top: 5px solid #64b5f6; /* Cool blue loader */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .button-loader {
+        border: 3px solid #212121;
+        border-top: 3px solid #42a5f5; /* Slightly darker blue loader */
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 0.8s linear infinite;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        display: none; /* Hidden by default */
+    }
+
+    /* Error Message */
+    .error-message {
+        color: #f44336; /* Red error */
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    /* Success Message */
+    .success-message {
+        color: #4caf50; /* Green success */
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    /* Leave Request Item Actions */
+    .request-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .request-actions button {
+        background: none;
+        border: none;
+        color: #42a5f5; /* Cool blue icons */
+        cursor: pointer;
+        font-size: 18px; /* Larger icons */
+        transition: color 0.3s ease, transform 0.2s ease-in-out;
+    }
+
+    .request-actions button:hover {
+        color: #64b5f6;
+        transform: scale(1.1);
+    }
+
+    /* Modal for Leave Details */
+    #leaveDetailsModal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #303030;
+        color: #e0e0e0;
+        padding: 30px; /* Larger padding for modal */
+        border-radius: 12px; /* Rounded modal */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.9); /* Deeper modal shadow */
+        z-index: 1000;
+        min-width: 400px; /* Minimum width for better readability */
+    }
+
+    #leaveDetailsModal h2 {
+        color: #42a5f5; /* Cool blue modal heading */
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    #leaveDetailsModal p {
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    #leaveDetailsModal button {
+        background-color: #616161;
+        color: #e0e0e0;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    }
+
+    #leaveDetailsModal button:hover {
+        background-color: #757575;
+        transform: scale(1.05);
+    }
+</style>
+    </head>
+
+<body>
+<div class="container">
+    <div class="form-section">
+        <h1>Request Leave</h1>
+
+        <div th:if="${leaveBalance}" class="leave-balance">
+            <p><strong>Casual Leave Balance:</strong> <span th:text="${leaveBalance.casualLeave}"></span> days</p>
+            <p><strong>Paid Leave Balance:</strong> <span th:text="${leaveBalance.paidLeave}"></span> days</p>
+            <p><strong>Sick Leave Balance:</strong> <span th:text="${leaveBalance.sickLeave}"></span> days</p>
+        </div>
+
+        <form th:action="@{/leave/submit}" method="post" th:object="${leaveRequest}" id="leaveForm">
+            <div class="loader-container" id="formLoader">
+                <div class="loader"></div>
+            </div>
+
+            <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+            <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+
+            <div>
+                <label for="leaveType">Leave Type:</label>
+                <select id="leaveType" th:field="*{leaveType}" required>
+                    <option value="">Select Leave Type</option>
+                    <option value="Casual Leave">Casual Leave</option>
+                    <option value="Paid Leave">Paid Leave</option>
+                    <option value="Sick Leave">Sick Leave</option>
+                    <option value="Half Day">Half Day</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="startDate">Start Date:</label>
+                <input type="text" id="startDate" th:field="*{startDate}" class="datepicker" required />
+            </div>
+
+            <div>
+                <label for="endDate">End Date:</label>
+                <input type="text" id="endDate" th:field="*{endDate}" class="datepicker" required />
+            </div>
+
+            <div>
+                <label for="teamName">Team:</label>
+                <select id="teamName" th:field="*{teamName}" required>
+                    <option value="">Select Team</option>
+                    <option value="Development">Bussines</option>
+                    <option value="Marketing">DevOps</option>
+
+                </select>
+            </div>
+
+            <div>
+                <label for="reason">Reason:</label>
+                <textarea id="reason" th:field="*{reason}" required></textarea>
+            </div>
+
+            <button type="submit" id="submitButton">
+                Submit Request
+                <div class="button-loader" id="buttonLoader"></div>
+            </button>
+        </form>
+
+        <p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+    </div>
+
+    <div class="status-section">
+    <h2>Your Recent Leave Requests</h2>
+
+    <div id="leaveRequestStatusContainer">
+        <div th:each="request, iterStat : ${myLeaveRequests}"
+             class="request-item"
+             th:classappend="${iterStat.index > 2} ? ' hidden-request'">
+
+            <div class="request-info">
+                <p><strong>Type:</strong> <span th:text="${request.leaveType}"></span></p>
+                <p><strong>Dates:</strong>
+                    <span th:text="${#temporals.format(request.startDate, 'yyyy-MM-dd')}"></span> to
+                    <span th:text="${#temporals.format(request.endDate, 'yyyy-MM-dd')}"></span>
+                </p>
+                <p><strong>Submitted:</strong>
+                    <span th:text="${#temporals.format(request.submissionDate, 'yyyy-MM-dd HH:mm')}"></span>
+                </p>
+            </div>
+
+            <div class="request-actions">
+                <button title="View Details"
+                        th:onclick="'showDetails(\'' + ${request.id} + '\')'">
+                    <i class="fas fa-eye"></i>
+                </button>
+
+                <button title="Cancel Request"
+                        th:if="${request.leaveStatus.name() == 'PENDING_MANAGER' or request.leaveStatus.name() == 'PENDING_ADMIN'}"
+                        th:onclick="'cancelRequest(\'' + ${request.id} + '\')'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <span class="status-badge"
+                  th:classappend="${request.leaveStatus.name().toLowerCase().replace('_', '-')}"
+                  th:text="${request.leaveStatus.name().replace('_', ' ')}">
+            </span>
+        </div>
+
+        <div th:if="${#lists.size(myLeaveRequests) > 3}" id="viewMoreContainer">
+            <button id="viewMoreBtn" type="button">View More</button>
+        </div>
+
+        <div th:if="${#lists.isEmpty(myLeaveRequests)}" class="no-requests">
+            No leave requests submitted yet.
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="leaveDetailsModal"
+     style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background-color: #303030; color: #e0e0e0; padding: 30px; border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.9); z-index: 1000; min-width: 400px;">
+    <h2>Leave Request Details</h2>
+    <div id="leaveDetailsContent"></div>
+    <button onclick="document.getElementById('leaveDetailsModal').style.display='none'">Close</button>
+</div>
+    <script>
+        $(function () {
+            $(".datepicker").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            const submitButton = document.querySelector('button[type="submit"]');
+            const formLoader = document.getElementById('formLoader');
+            const buttonLoader = document.getElementById('buttonLoader');
+            const leaveForm = document.querySelector('form');
+
+            if (leaveForm && submitButton) {
+                leaveForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    submitButton.disabled = true;
+                    buttonLoader.style.display = 'inline-block';
+
+                    const formData = new FormData(leaveForm);
+
+                    fetch(leaveForm.action, {
+                        method: leaveForm.method,
+                        body: formData,
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(text) });
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        submitButton.disabled = false;
+                        buttonLoader.style.display = 'none';
+                        alert('Leave request submitted successfully!');
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        submitButton.disabled = false;
+                        buttonLoader.style.display = 'none';
+                        alert('Error submitting leave request: ' + error);
+                        console.error('Error:', error);
+                    });
+                });
+            }
+
+            const viewMoreBtn = document.getElementById('viewMoreBtn');
+            const hiddenRequests = document.querySelectorAll('.hidden-request');
+            const statusSection = document.querySelector('.status-section');
+
+            if (viewMoreBtn && hiddenRequests.length > 0 && statusSection) {
+                viewMoreBtn.addEventListener('click', function () {
+                    hiddenRequests.forEach(request => {
+                        request.style.display = 'flex';
+                    });
+                    viewMoreBtn.style.display = 'none';
+                });
+            }
+        });
+
+        function showDetails(requestId) {
+            const detailsContent = document.getElementById('leaveDetailsContent');
+            detailsContent.innerHTML = `<p>Fetching details for request ID: ${requestId}...</p>`;
+            document.getElementById('leaveDetailsModal').style.display = 'block';
+
+            fetch(`/leave/details/${requestId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let detailsHTML = `
+                        <p><strong>Leave Type:</strong> ${data.leaveType}</p>
+                        <p><strong>Start Date:</strong> ${data.startDate}</p>
+                        <p><strong>End Date:</strong> ${data.endDate}</p>
+                        <p><strong>Reason:</strong> ${data.reason}</p>
+                        <p><strong>Status:</strong> ${data.leaveStatus.name.replace('_', ' ')}</p>
+                        `;
+                    detailsContent.innerHTML = detailsHTML;
+                })
+                .catch(error => {
+                    detailsContent.innerHTML = `<p>Error fetching details.</p>`;
+                    console.error("Error fetching leave details:", error);
+                });
+        }
+
+        function cancelRequest(requestId) {
+            if (confirm('Are you sure you want to cancel this leave request?')) {
+                fetch(`/leave/cancel/${requestId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Add any necessary headers like CSRF token
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Leave request cancelled successfully.');
+                        window.location.reload();
+                    } else {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                })
+                .catch(error => {
+                    alert('Error cancelling leave request: ' + error);
+                    console.error('Error cancelling leave:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
