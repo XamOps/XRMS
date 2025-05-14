@@ -1,39 +1,28 @@
-# ======================
 # STAGE 1: Build the application using Maven and JDK 17
-# ======================
 FROM maven:3.9-eclipse-temurin-17 AS builder
 LABEL stage=builder
 
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy Maven wrapper and POM files first to cache dependencies
+# Copy the Maven wrapper files and pom.xml
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
-# Pre-fetch dependencies to leverage Docker layer caching
-RUN ./mvnw dependency:go-offline -B --no-transfer-progress
+# Fix permission issue
+RUN chmod +x mvnw
 
-# Copy the full source code
+# Download dependencies
+RUN ./mvnw dependency:go-offline -B
+
+# Copy the rest of your application's source code
 COPY src ./src
 
-# Build the application (skip tests for faster build)
-RUN ./mvnw package -DskipTests --no-transfer-progress
+# Package the application (skip tests for faster builds)
+RUN ./mvnw package -DskipTests
 
-# ======================
-# STAGE 2: Create the runtime image with JRE 17
-# ======================
+# STAGE 2: Create the runtime image using JRE 17
 FROM eclipse-temurin:17-jre-focal
+# Set the working directory in the container
 
-# Set the working directory
 WORKDIR /app
-
-# Expose the application port
-EXPOSE 8080
-
-# Copy the packaged JAR from the builder stage
-COPY --from=builder /app/target/*.jar app.jar
-
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
