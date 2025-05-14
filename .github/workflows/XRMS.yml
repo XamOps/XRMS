@@ -75,15 +75,31 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           echo "Running deployment script on remote server..."
+          # Log in to Docker Hub on the EC2 instance using secrets
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          
+          # Define the full image URI
           IMAGE_URI="${{ env.DOCKERHUB_REPO }}:latest"
           echo "Image URI to pull: ${IMAGE_URI}"
+          
+          # Pull the latest Docker image
           docker pull $IMAGE_URI
+          
+          # Stop the currently running container (if it exists)
           docker stop ${{ env.EC2_CONTAINER_NAME }} || true
+          # Remove the old container (if it exists)
           docker rm ${{ env.EC2_CONTAINER_NAME }} || true
+          
+          # Run a new container from the newly pulled image, passing DB config as environment variables
           docker run -d \
             --name ${{ env.EC2_CONTAINER_NAME }} \
             -p ${{ env.EC2_HOST_PORT }}:${{ env.EC2_APP_PORT }} \
             --restart always \
+            -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+            -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+            -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            # Uncomment the line below if you need to explicitly set the Hibernate dialect
+            # -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${{ secrets.DB_DIALECT }} \
             $IMAGE_URI
+            
           echo "Deployment commands finished."
