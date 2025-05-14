@@ -3,33 +3,26 @@ name: Build and Deploy to Remote Server
 on:
   push:
     branches:
-      - main # Change this to your main branch if needed
+      - main
 
 env:
-  # Docker Hub Repository Information - REPLACE WITH YOURS!
-  DOCKERHUB_REPO: akshay172/xrms # Your Docker Hub repo name (username/repo-name)
-
-  # EC2 Deployment Configuration - EC2_APP_PORT is still useful for documentation
-  EC2_APP_PORT: 3000 # The port your app uses *inside* its Docker container (matches EXPOSE in Dockerfile)
-  # Note: EC2_HOST_PORT is no longer directly used for port mapping with --network host, but keep it for clarity if needed elsewhere.
-  EC2_HOST_PORT: 8081 # The port your app listens on *inside* the container, now directly exposed on the host.
-  EC2_CONTAINER_NAME: myhrms_on_ec2 # Give your running container a cool name on EC2
+  DOCKERHUB_REPO: akshay172/xrms
+  EC2_APP_PORT: 3000
+  EC2_HOST_PORT: 8081
+  EC2_CONTAINER_NAME: myhrms_on_ec2
 
 jobs:
   deploy:
     name: Build and Deploy Docker Image
-    runs-on: ubuntu-latest # Use a GitHub-hosted runner
+    runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Step 2: Set up Docker Buildx for multi-platform builds
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    # Step 3: Cache Docker layers to speed up builds
     - name: Cache Docker layers
       uses: actions/cache@v3
       with:
@@ -38,88 +31,68 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
-    # Step 4: Log in to Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    # Step 5: Build and push Docker image from HRMS folder
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
-        context: ./HRMS # Assumes your Dockerfile and application code are in a subfolder named HRMS
-        file: ./HRMS/Dockerfile # Path to your Dockerfile
+        context: ./HRMS
+        file: ./HRMS/Dockerfile
         push: true
-        tags: ${{ env.DOCKERHUB_REPO }}:latest # Tag the image with your repo name and 'latest'
+        tags: ${{ env.DOCKERHUB_REPO }}:latest
 
-    # Step 6: Set up SSH key for EC2
     - name: Set up SSH key
       run: |
-        mkdir -p ~/.ssh # Create .ssh directory if it doesn't exist
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa # Write the private key from secrets to a file
-        chmod 600 ~/.ssh/id_rsa # Set secure permissions for the private key file
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # Use your SSH_PRIVATE_KEY secret
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Step 7: Add EC2 host to known_hosts
     - name: Add remote host to known hosts
       run: |
-        # Add the EC2 host's public key to known_hosts to avoid SSH prompts
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-      env:
-        # Use the EC2_HOST secret you created
-        REMOTE_HOST: ${{ secrets.EC2_HOST }} # Note: Renamed from REMOTE_HOST to EC2_HOST for consistency with previous steps
 
-    # Step 8: SSH into EC2 and deploy Docker container
     - name: Run SSH command on remote server
-      uses: appleboy/ssh-action@v1.0.3 # Action to execute commands on EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.EC2_HOST }} # Use your EC2_HOST secret
-        username: ${{ secrets.EC2_USER }} # Use your EC2_USER secret
-        key: ${{ secrets.SSH_PRIVATE_KEY }} # Use your SSH_PRIVATE_KEY secret
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          echo "Running deployment script on remote server..."
+          echo "Starting remote deployment..."
 
-          # Log in to Docker Hub on the EC2 instance using secrets
-          # This is needed for the EC2 instance to pull the image if your Docker Hub repo is private
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
 
-          # Define the full image URI to pull
           IMAGE_URI="${{ env.DOCKERHUB_REPO }}:latest"
-          echo "Image URI to pull: ${IMAGE_URI}"
+          echo "Pulling latest image: $IMAGE_URI"
+          docker pull $IMAGE_URI || true
 
-          # Pull the latest Docker image from Docker Hub onto the EC2 instance
-          docker pull $IMAGE_URI
-
-          # Stop the currently running container with the specified name (if it exists)
-          # '|| true' prevents the script from failing if the container is not found
-          echo "Stopping old container '${{ env.EC2_CONTAINER_NAME }}' (if exists)..."
+          echo "Stopping old container: ${{ env.EC2_CONTAINER_NAME }}"
           docker stop ${{ env.EC2_CONTAINER_NAME }} || true
-          # Remove the old container (if it exists)
-          echo "Removing old container '${{ env.EC2_CONTAINER_NAME }}' (if exists)..."
+
+          echo "Removing old container: ${{ env.EC2_CONTAINER_NAME }}"
           docker rm ${{ env.EC2_CONTAINER_NAME }} || true
 
-          # --- REVISED DOCKER RUN COMMAND CONSTRUCTION ---
-          # Construct the base docker run command with --network host
-          # Removed -p flag as it's not needed with --network host
           DOCKER_RUN_CMD="docker run -d --network host --name ${{ env.EC2_CONTAINER_NAME }} --restart always"
 
-          # Construct the environment variables part of the command
-          # Pass database credentials from GitHub Secrets as environment variables to the container
-          # Removed single quotes around ${{ secrets.DB_URL }} to fix JDBC driver error
-          DB_ENVS="-e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} -e SPRING_DATASOURCE_USERNAME='${{ secrets.DB_USERNAME }}' -e SPRING_DATASOURCE_PASSWORD='${{ secrets.DB_PASSWORD }}'"
+          DB_ENVS="-e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+                   -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+                   -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                   -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${{ secrets.DB_DIALECT }}"
 
-          # Explicitly set the Hibernate dialect via environment variable (uncommented)
-          DB_ENVS="$DB_ENVS -e SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${{ secrets.DB_DIALECT }}"
-
-          # Echo the full command before executing (for debugging)
-          echo "Executing docker run command:"
+          echo "Executing docker run:"
           echo "$DOCKER_RUN_CMD $DB_ENVS $IMAGE_URI"
-
-          # Execute the docker run command to start the new container
           $DOCKER_RUN_CMD $DB_ENVS $IMAGE_URI
-          # --- END REVISED CONSTRUCTION ---
 
-          echo "Deployment commands finished."
+          echo "Waiting for the app to start..."
+          sleep 10
+
+          echo "Checking health endpoint (if available)..."
+          curl -f http://localhost:8081/actuator/health || echo "Health check failed or actuator not enabled."
+
+          echo "Deployment completed."
