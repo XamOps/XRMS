@@ -61,6 +61,7 @@
             margin-bottom: 0.6rem;
             font-weight: 500;
             transition: all 0.3s ease;
+            background-color: #1E1E1E; /* Added background color for consistency */
         }
 
         .nav-links a i {
@@ -75,6 +76,11 @@
             box-shadow: 3px 3px 10px rgba(255, 143, 0, 0.25);
             transform: translateX(4px);
         }
+/* 
+        .nav-links a.active {
+            border-left: 3px solid #FF8F00;
+            padding-left: 0.9rem;
+        } */
 
         .logout {
             background: linear-gradient(to right, #FF8F00, #F57C00);
@@ -84,13 +90,14 @@
             font-weight: bold;
             color: white;
             cursor: pointer;
-            transition: background 0.3s ease, box-shadow 0.3s ease;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
 
         .logout:hover {
             background: linear-gradient(to right, #F57C00, #FF8F00);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transform: scale(1.02);
         }
 
         .main {
@@ -104,34 +111,53 @@
         .header {
             margin-bottom: 2rem;
             display: flex;
-            justify-content: space-between;
-            align-items: baseline;
+            align-items: center; /* Align items vertically in the header */
+            gap: 1.5rem; /* Space between icon and text */
         }
 
-        .header h1 {
-            font-size: 2.2rem;
+        .header i {
+            font-size: 2.5rem;
+            color: #FF8F00; /* Example icon color */
+        }
+
+        .header div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header div h1 {
+            font-size: 2.5rem;
             color: #FFFFFF;
-            margin-bottom: 0;
+            margin-bottom: 0.3rem; /* Reduced margin */
+            font-weight: 700;
+            letter-spacing: -1px;
         }
 
-        .header .sub {
+        .header div .sub {
             color: #9E9E9E;
             font-size: 1rem;
+        }
+
+        .dashboard-widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .card {
             background: #1E1E1E;
             padding: 1.75rem;
             border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-            margin-bottom: 2.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 0 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             border: 1px solid #303030;
         }
 
         .card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 12px 28px rgba(255, 143, 0, 0.2);
+            box-shadow: 0 12px 28px rgba(255, 143, 0, 0.2), inset 0 0 8px rgba(0, 0, 0, 0.15);
+            border-color: #444444;
         }
 
         .card .label {
@@ -145,15 +171,23 @@
             font-weight: 500;
             color: #FFFFFF;
             margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .card .attendance-controls {
+        .card .value i {
+            font-size: 1.2rem;
+            color: #81C784;
+        }
+
+        .card.attendance-card .attendance-controls {
             display: flex;
             gap: 1.2rem;
             margin-top: 1.2rem;
         }
 
-        .card button {
+        .card.attendance-card button {
             padding: 0.7rem 1.75rem;
             background: linear-gradient(to right, #F57C00, #FF8F00);
             border: none;
@@ -166,22 +200,22 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .card button:hover {
+        .card.attendance-card button:hover {
             background: linear-gradient(to right, #FF8F00, #F57C00);
             box-shadow: 0 8px 16px rgba(255, 143, 0, 0.3);
         }
 
-        .card .message {
+        .card.attendance-card .message {
             margin-top: 1.5rem;
             font-size: 1rem;
             font-weight: 500;
         }
 
-        .card .success-message {
+        .card.attendance-card .success-message {
             color: #81C784;
         }
 
-        .card .error-message {
+        .card.attendance-card .error-message {
             color: #E57373;
         }
 
@@ -201,12 +235,22 @@
             font-weight: 500;
             border-bottom: 1px solid #303030;
             padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upcoming-events h3 i {
+            font-size: 1.2rem;
         }
 
         .birthday-item, .holiday-item {
             margin-bottom: 0.75rem;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid #2C2C2C;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .birthday-item:last-child, .holiday-item:last-child {
@@ -281,12 +325,22 @@
             }
 
             .header {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-direction: row; /* Keep icon and text in a row */
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .header i {
+                font-size: 2rem;
+            }
+
+            .header div {
+                align-items: flex-start; /* Align text to the start */
             }
 
             .header h1 {
-                margin-bottom: 0.5rem;
+                margin-bottom: 0.3rem;
+                font-size: 2rem;
             }
 
             .card {
@@ -294,7 +348,7 @@
                 margin-bottom: 1.5rem;
             }
 
-            .card .attendance-controls {
+            .card.attendance-card .attendance-controls {
                 flex-direction: column;
                 gap: 0.75rem;
             }
@@ -302,6 +356,29 @@
             .upcoming-events {
                 flex-direction: column;
                 gap: 1.5rem;
+            }
+
+            .upcoming-events h3 {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .upcoming-events h3 i {
+                font-size: 1.1rem;
+            }
+
+            .birthday-item, .holiday-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .birthday-date, .holiday-date {
+                margin-top: 0.2rem;
+            }
+
+            .dashboard-widgets {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -311,13 +388,11 @@
     <div>
         <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
         <div class="nav-links">
-            <a href="#"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="#" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
             <a href="#"><i class="fa-solid fa-users"></i> Employees</a>
             <a href="#"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-            <a th:if="${user.roles.toString() == 'ROLE_USER_MANAGER'}" href="/manager/dashboard">
-                <i class="fa-solid fa-inbox"></i> Team Requests
-            </a>
-            <a href="/leave/apply"><i class="fa-solid fa-envelope-open-text"></i> Leave Requests</a>
+            <a th:if="${user.roles.toString() == 'ROLE_USER_MANAGER'}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a>
+            <a href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
         </div>
     </div>
     <div class="logout" onclick="confirmLogout()">
@@ -327,53 +402,73 @@
 
 <div class="main">
     <div class="header">
-        <h1 th:text="${'Welcome back, ' + username + ' 👋'}">Welcome back, admin 👋</h1>
-<div class="sub" th:text="${#temporals.format(todayDate, 'EEEE, MMMM dd, ''•'' hh:mm a')}">Friday, May 02, 2025 • 03:23 AM</div>
+        <i class="fa-solid fa-user" style="font-size: 2.8rem;"></i> <div>
+            <h1 th:text="${'Welcome back, ' + username + ' 👋'}">Welcome back, admin 👋</h1>
+            <div class="sub" th:text="${#temporals.format(todayDate, 'EEEE, MMMM dd, ''•'' hh:mm a')}">Wednesday, May 14, 2025 • 05:01 PM</div>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="label">Attendance</div>
-<div id="attendance-display">
-    <p class="value" id="checkInDisplay" th:if="${checkInTime != null}">
-        ✅ Checked In: <span th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>
-    </p>
-    <p class="value" id="notCheckedIn" th:if="${checkInTime == null}">
-        ❌ Not checked in yet
-    </p>
-    <p class="value" id="checkOutDisplay" th:if="${checkOutTime != null}">
-        ✅ Checked Out: <span th:text="${#temporals.format(checkOutTime, 'hh:mm:ss a')}"></span>
-    </p>
-    <p class="value" id="notCheckedOut" th:if="${checkInTime != null and checkOutTime == null}">
-        ⏳ Checked In At: <span th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>, Not checked out yet
-    </p>
-</div>
-        <div class="attendance-controls">
-            <button id="checkInBtn" th:if="${checkInTime == null}" onclick="handleCheckIn()">
-                <i class="fa-solid fa-sign-in"></i> Check In
-            </button>
-            <button id="checkOutBtn" th:if="${checkInTime != null and checkOutTime == null}" onclick="handleCheckOut()">
-                <i class="fa-solid fa-sign-out"></i> Check Out
-            </button>
+    <div class="dashboard-widgets">
+        <div class="card attendance-card">
+            <div class="label">Attendance</div>
+            <div id="attendance-display">
+                <p class="value" id="checkInDisplay" th:if="${checkInTime != null}">
+                    <i class="fa-solid fa-check-circle"></i> Checked In: <span th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>
+                </p>
+                <p class="value" id="notCheckedIn" th:if="${checkInTime == null}">
+                    <i class="fa-solid fa-xmark-circle"></i> Not checked in yet
+                </p>
+                <p class="value" id="checkOutDisplay" th:if="${checkOutTime != null}">
+                    <i class="fa-solid fa-check-double"></i> Checked Out: <span th:text="${#temporals.format(checkOutTime, 'hh:mm:ss a')}"></span>
+                </p>
+                <p class="value" id="notCheckedOut" th:if="${checkInTime != null and checkOutTime == null}">
+                    <i class="fa-solid fa-clock"></i> Checked In At: <span th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>, Not checked out yet
+                </p>
+            </div>
+            <div class="attendance-controls">
+                <button id="checkInBtn" th:if="${checkInTime == null}" onclick="handleCheckIn()">
+                    <i class="fa-solid fa-sign-in"></i> Check In
+                </button>
+                <button id="checkOutBtn" th:if="${checkInTime != null and checkOutOut == null}" onclick="handleCheckOut()">
+                    <i class="fa-solid fa-sign-out"></i> Check Out
+                </button>
+            </div>
+
+            <div id="attendanceMessage" class="message"></div>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
         </div>
 
-        <div id="attendanceMessage" class="message"></div>
-        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+        <div class="card">
+            <div class="label">Leave Requests</div>
+            <p class="value">
+                <i class="fa-solid fa-envelope-open-text" style="color: #FF8F00;"></i> Manage your leave requests here.
+            </p>
+            <a href="/leave/apply" style="text-decoration: none;">
+                <button style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                    <i class="fa-solid fa-paper-plane"></i> Apply for Leave
+                </button>
+            </a>
+        </div>
     </div>
 
     <div class="upcoming-events">
         <div class="card upcoming-birthdays">
-            <h3>Upcoming Birthdays</h3>
+            <h3><i class="fa-solid fa-birthday-cake" style="color: #FF8F00;"></i> Upcoming Birthdays</h3>
             <div th:each="birthday : ${upcomingBirthdays}" class="birthday-item">
-                <span class="birthday-name" th:text="${birthday.firstName + ' ' + birthday.lastName}">John Doe</span><br/>
+                <div>
+                    <span class="birthday-name" th:text="${birthday.firstName + ' ' + birthday.lastName}">John Doe</span>
+                </div>
                 <span class="birthday-date" th:text="${#temporals.format(birthday.birthDate, 'MMMM dd')}">May 10</span>
             </div>
             <p th:if="${upcomingBirthdays == null or upcomingBirthdays.isEmpty()}">No upcoming birthdays.</p>
         </div>
 
         <div class="card upcoming-holidays">
-            <h3>Upcoming Holidays</h3>
+            <h3><i class="fa-solid fa-calendar-alt" style="color: #FF8F00;"></i> Upcoming Holidays</h3>
             <div th:each="holiday : ${upcomingHolidays}" class="holiday-item">
-                <span class="holiday-name" th:text="${holiday.name}">Republic Day</span><br/>
+                <div>
+                    <span class="holiday-name" th:text="${holiday.name}">Republic Day</span>
+                </div>
                 <span class="holiday-date" th:text="${#temporals.format(holiday.date, 'MMMM dd')}">January 26</span>
             </div>
             <p th:if="${upcomingHolidays == null or upcomingHolidays.isEmpty()}">No upcoming holidays.</p>
@@ -385,6 +480,18 @@
     const csrfToken = [[${_csrf.token}]];
     const csrfHeaderName = [[${_csrf.headerName}]];
 
+    // Set active class on the current navigation link
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const currentPath = window.location.pathname;
+
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath || (currentPath.startsWith('/dashboard') && link.getAttribute('href') === '#')) {
+                link.classList.add('active');
+            }
+        });
+    });
+
     function handleCheckIn() {
         fetch('/dashboard/checkin', {
             method: 'POST',
@@ -393,43 +500,43 @@
                 [csrfHeaderName]: csrfToken
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                const messageDiv = document.getElementById('attendanceMessage');
-                if (data.status === 'success') {
-                    const checkInTimeUTC = new Date(data.checkInTime); // JavaScript Date object correctly parses ISO 8601
-                    const checkInTimeFormatted = formatDate(checkInTimeUTC);
-                    const attendanceDisplay = document.getElementById('attendance-display');
-                    const attendanceControls = document.querySelector('.attendance-controls');
+        .then(response => response.json())
+        .then(data => {
+            const messageDiv = document.getElementById('attendanceMessage');
+            if (data.status === 'success') {
+                const checkInTimeUTC = new Date(data.checkInTime);
+                const checkInTimeFormatted = formatDate(checkInTimeUTC);
+                const attendanceDisplay = document.getElementById('attendance-display');
+                const attendanceControls = document.querySelector('.attendance-controls');
 
-                    attendanceDisplay.innerHTML = `
-                        <p class="value" id="checkInDisplay">
-                            ✅ Checked In: <span>${checkInTimeFormatted}</span>
-                        </p>
-                        <p class="value" id="notCheckedOut">
-                            ⏳ Checked In At: <span>${checkInTimeFormatted}</span>, Not checked out yet
-                        </p>
-                        <p class="value hidden" id="checkOutDisplay"></p>
-                        <p class="value hidden" id="notCheckedIn"></p>
-                    `;
+                attendanceDisplay.innerHTML = `
+                    <p class="value" id="checkInDisplay">
+                        <i class="fa-solid fa-check-circle"></i> Checked In: <span>${checkInTimeFormatted}</span>
+                    </p>
+                    <p class="value" id="notCheckedOut">
+                        <i class="fa-solid fa-clock"></i> Checked In At: <span>${checkInTimeFormatted}</span>, Not checked out yet
+                    </p>
+                    <p class="value hidden" id="checkOutDisplay"></p>
+                    <p class="value hidden" id="notCheckedIn"></p>
+                `;
 
-                    attendanceControls.innerHTML = `
-                        <button id="checkOutBtn" onclick="handleCheckOut()"><i class="fa-solid fa-sign-out"></i> Check Out</button>
-                    `;
+                attendanceControls.innerHTML = `
+                    <button id="checkOutBtn" onclick="handleCheckOut()"><i class="fa-solid fa-sign-out"></i> Check Out</button>
+                `;
 
-                    messageDiv.textContent = 'Successfully checked in at ' + checkInTimeFormatted;
-                    messageDiv.className = 'message success-message';
-                } else {
-                    messageDiv.textContent = data.message;
-                    messageDiv.className = 'message error-message';
-                }
-            })
-            .catch(error => {
-                console.error('Error during check-in:', error);
-                const messageDiv = document.getElementById('attendanceMessage');
-                messageDiv.textContent = 'Failed to check in. Please try again.';
+                messageDiv.textContent = 'Successfully checked in at ' + checkInTimeFormatted;
+                messageDiv.className = 'message success-message';
+            } else {
+                messageDiv.textContent = data.message;
                 messageDiv.className = 'message error-message';
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Error during check-in:', error);
+            const messageDiv = document.getElementById('attendanceMessage');
+            messageDiv.textContent = 'Failed to check in. Please try again.';
+            messageDiv.className = 'message error-message';
+        });
     }
 
     function handleCheckOut() {
@@ -440,51 +547,52 @@
                 [csrfHeaderName]: csrfToken
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                const messageDiv = document.getElementById('attendanceMessage');
-                if (data.status === 'success') {
-                    const checkOutTimeUTC = new Date(data.checkOutTime); // JavaScript Date object correctly parses ISO 8601
-                    const checkOutTimeFormatted = formatDate(checkOutTimeUTC);
-                    const attendanceDisplay = document.getElementById('attendance-display');
-                    const attendanceControls = document.querySelector('.attendance-controls');
+        .then(response => response.json())
+        .then(data => {
+            const messageDiv = document.getElementById('attendanceMessage');
+            if (data.status === 'success') {
+                const checkOutTimeUTC = new Date(data.checkOutTime);
+                const checkOutTimeFormatted = formatDate(checkOutTimeUTC);
+                const attendanceDisplay = document.getElementById('attendance-display');
+                const attendanceControls = document.querySelector('.attendance-controls');
 
-                    attendanceDisplay.innerHTML = `
-                        <p class="value" id="checkOutDisplay">
-                            ✅ Checked Out: <span>${checkOutTimeFormatted}</span>
-                        </p>
-                        <p class="value hidden" id="checkInDisplay"></p>
-                        <p class="value hidden" id="notCheckedIn"></p>
-                        <p class="value hidden" id="notCheckedOut"></p>
-                    `;
+                attendanceDisplay.innerHTML = `
+                    <p class="value" id="checkOutDisplay">
+                        <i class="fa-solid fa-check-double"></i> Checked Out: <span>${checkOutTimeFormatted}</span>
+                    </p>
+                    <p class="value hidden" id="checkInDisplay"></p>
+                    <p class="value hidden" id="notCheckedIn"></p>
+                    <p class="value hidden" id="notCheckedOut"></p>
+                `;
 
-                    attendanceControls.innerHTML = `
-                        <button id="checkInBtn" onclick="handleCheckIn()"><i class="fa-solid fa-sign-in"></i> Check In</button>
-                    `;
+                attendanceControls.innerHTML = `
+                    <button id="checkInBtn" onclick="handleCheckIn()"><i class="fa-solid fa-sign-in"></i> Check In</button>
+                `;
 
-                    messageDiv.textContent = 'Successfully checked out at ' + checkOutTimeFormatted;
-                    messageDiv.className = 'message success-message';
-                } else {
-                    messageDiv.textContent = data.message;
-                    messageDiv.className = 'message error-message';
-                }
-            })
-            .catch(error => {
-                console.error('Error during check-out:', error);
-                const messageDiv = document.getElementById('attendanceMessage');
-                messageDiv.textContent = 'Failed to check out. Please try again.';
+                messageDiv.textContent = 'Successfully checked out at ' + checkOutTimeFormatted;
+                messageDiv.className = 'message success-message';
+            } else {
+                messageDiv.textContent = data.message;
                 messageDiv.className = 'message error-message';
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Error during check-out:', error);
+            const messageDiv = document.getElementById('attendanceMessage');
+            messageDiv.textContent = 'Failed to check out. Please try again.';
+            messageDiv.className = 'message error-message';
+        });
     }
 
     function formatDate(dateTime) {
-        // This will format the UTC time to the user's local time zone
         return dateTime.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true});
     }
 
     function confirmLogout() {
         if (confirm("Are you sure you want to logout?")) {
-            window.location.href = "/logout"; // Spring Security's default logout URL
+            window.location.href = "/logout";
         }
     }
 </script>
+</body>
+</html>

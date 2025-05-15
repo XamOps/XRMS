@@ -308,9 +308,9 @@
 
             <div class="attendance-filter">
                 <div class="col-md-4 search-container">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center mb-1">
                         <input type="text" class="form-control bg-dark text-white border-0 me-2" id="searchUser"
-                               placeholder="Search Users" onkeyup="filterUsers(this.value)">
+                               placeholder="Search Users (leave blank for all)" onkeyup="suggestUsers(this.value)">
                     </div>
                     <ul id="searchResults" class="search-results"></ul>
                     <div id="searchHistory" class="search-history" style="display: none;">
@@ -349,8 +349,8 @@
                         <td th:text="${#temporals.format(attendance.checkInTime, 'hh:mm a')}">09:00 AM</td>
                         <td th:text="${#temporals.format(attendance.checkOutTime, 'hh:mm a')}">05:00 PM</td>
                         <td>
-                                    <span class="badge bg-success bg-opacity-75 px-3 py-2"
-                                          th:text="${attendance.duration}">8h 0m</span>
+                            <span class="badge bg-success bg-opacity-75 px-3 py-2"
+                                  th:text="${attendance.duration}">8h 0m</span>
                         </td>
                         <td>
                             <form th:action="@{/admin/attendance/reset/checkout/{username}(username=${attendance.username})}"
@@ -376,12 +376,12 @@
 </div>
 
 <script th:inline="javascript">
-    const allUsernames = /*[[${usernames}]]*/ [];
     let searchHistory = JSON.parse(localStorage.getItem('userSearchHistory')) || [];
     const searchResultsList = document.getElementById('searchResults');
     const searchHistoryDiv = document.getElementById('searchHistory');
     const historyItemsSpan = document.getElementById('historyItems');
     const searchInput = document.getElementById('searchUser');
+    let suggestionTimeout;
 
     function displaySearchHistory() {
         historyItemsSpan.innerHTML = '';
@@ -390,85 +390,108 @@
             button.textContent = item;
             button.onclick = () => {
                 searchInput.value = item;
-                filterUsers(item);
-                filterAttendance(); // Optionally filter attendance on history click
-            };
-            historyItemsSpan.appendChild(button);
-        });
-        searchHistoryDiv.style.display = searchHistory.length > 0 ? 'block' : 'none';
-    }
+                suggestUsers(item); // Trigger suggestion to filter tablefilterAttendance(); // Optionally filter attendance on history click
+};
+historyItemsSpan.appendChild(button);
+});
+searchHistoryDiv.style.display = searchHistory.length > 0 ? 'block' : 'none';
+}
 
-    function updateSearchHistory(term) {
-        if (!searchHistory.includes(term)) {
-            searchHistory.push(term);
-            localStorage.setItem('userSearchHistory', JSON.stringify(searchHistory));
-            displaySearchHistory();
-        }
-    }
-//test
-    function clearSearchHistory() {
-        searchHistory = [];
-        localStorage.removeItem('userSearchHistory');
+function updateSearchHistory(term) {
+    if (!searchHistory.includes(term)) {
+        searchHistory.push(term);
+        localStorage.setItem('userSearchHistory', JSON.stringify(searchHistory));
         displaySearchHistory();
     }
+}
 
-    function filterUsers(searchText) {
-        const searchTextLower = searchText.toLowerCase();
-        const filteredUsers = allUsernames.filter(username =>
-            username.toLowerCase().includes(searchTextLower)
-        );
-
-        searchResultsList.innerHTML = '';
-        if (searchTextLower && filteredUsers.length > 0) {
-            searchResultsList.style.display = 'block';
-            filteredUsers.slice(0, 5).forEach(user => {
-                const listItem = document.createElement('li');
-                listItem.textContent = user;
-                listItem.onclick = () => {
-                    document.getElementById('searchUser').value = user;
-                    searchResultsList.style.display = 'none';
-                    updateSearchHistory(user);
-                    filterAttendance(); // Optionally filter attendance on suggestion click
-                };
-                searchResultsList.appendChild(listItem);
-            });
-        } else {
-            searchResultsList.style.display = 'none';
-        }
-
-        // Directly filter the table rows as the user types
-        const tableBody = document.getElementById('attendanceTableBody');
-        const rows = tableBody.getElementsByTagName('tr');
-        const searchTextUpper = searchText.toUpperCase();
-
-        for (let i = 0; i < rows.length; i++) {
-            const usernameColumn = rows[i].getElementsByTagName('td')[0];
-            if (usernameColumn) {
-                const usernameTextUpper = usernameColumn.textContent.toUpperCase();
-                rows[i].style.display = searchTextUpper === "" || usernameTextUpper.indexOf(searchTextUpper) > -1 ? "" : "none";
-            }
-        }
-    }
-
-    // Close search results when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.closest('.search-container')) {
-            searchResultsList.style.display = 'none';
-        }
-    });
-
-    // Initial display of search history
+function clearSearchHistory() {
+    searchHistory = [];
+    localStorage.removeItem('userSearchHistory');
     displaySearchHistory();
+}
 
-    function filterAttendance() {
-        const date = document.getElementById('filterDate').value;
-        const searchInput = document.getElementById('searchUser').value;
-        window.location.href = `/admin/dashboard?date=${date}&user=${searchInput}`;
+function suggestUsers(searchText) {
+    clearTimeout(suggestionTimeout);
+    if (searchText.trim() === "") {
+        searchResultsList.style.display = 'none';
+        filterTable(""); // Show all users in the table
+        return;
     }
 
-    function confirmLogout() {
-        return confirm("Are you sure you want to logout?");
+    suggestionTimeout = setTimeout(() => {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        $.ajax({
+            url: '/admin/users/suggestions', // Replace with your server endpoint for username suggestions
+            type: 'GET',
+            data: { query: searchText },
+            beforeSend: (xhr) => {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            },
+            success: (data) => {
+                searchResultsList.innerHTML = '';
+                if (data && data.length > 0) {
+                    searchResultsList.style.display = 'block';
+                    data.slice(0, 5).forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = user;
+                        listItem.onclick = () => {
+                            document.getElementById('searchUser').value = user;
+                            searchResultsList.style.display = 'none';
+                            updateSearchHistory(user);
+                            filterTable(user); // Filter the table based on the selected user
+                        };
+                        searchResultsList.appendChild(listItem);
+                    });
+                } else {
+                    searchResultsList.style.display = 'none';
+                }
+                filterTable(searchText); // Also filter the table as suggestions load (optional, can be removed if you only want to filter on suggestion click)
+            },
+            error: (error) => {
+                console.error('Error fetching user suggestions:', error);
+                searchResultsList.innerHTML = '<li class="text-danger">Error fetching suggestions</li>';
+                searchResultsList.style.display = 'block';
+            }
+        });
+    }, 300); // Delay the search by 300ms to avoid excessive requests
+}
+
+function filterTable(searchText) {
+    const tableBody = document.getElementById('attendanceTableBody');
+    const rows = tableBody.getElementsByTagName('tr');
+    const searchTextUpper = searchText.toUpperCase();
+
+    for (let i = 0; i < rows.length; i++) {
+        const usernameColumn = rows[i].getElementsByTagName('td')[0];
+        if (usernameColumn) {
+            const usernameTextUpper = usernameColumn.textContent.toUpperCase();
+            rows[i].style.display = searchTextUpper === "" || usernameTextUpper.indexOf(searchTextUpper) > -1 ? "" : "none";
+        }
     }
+}
+
+// Close search results when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.search-container')) {
+        searchResultsList.style.display = 'none';
+    }
+});
+
+// Initial display of search history
+displaySearchHistory();
+
+function filterAttendance() {
+    const date = document.getElementById('filterDate').value;
+    const searchInput = document.getElementById('searchUser').value;
+    window.location.href = `/admin/dashboard?date=${date}&user=${searchInput}`;
+}
+
+function confirmLogout() {
+    return confirm("Are you sure you want to logout?");
+}
 </script>
 </body>
 </html>

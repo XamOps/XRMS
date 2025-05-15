@@ -49,7 +49,7 @@ public class DashboardController {
 
     private final ZoneId kolkataZone = ZoneId.of("Asia/Kolkata");
     // Corrected dateFormatter
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy").withZone(kolkataZone);
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, ''•'' hh:mm a").withZone(kolkataZone);
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withZone(kolkataZone);
     private final DateTimeFormatter dateTimeFormatterUTC = DateTimeFormatter.ISO_INSTANT; // Use ISO_INSTANT for UTC
 
@@ -60,7 +60,7 @@ public class DashboardController {
     }
 
     // ✅ Dashboard View
-@GetMapping("/dashboard")
+    @GetMapping("/dashboard")
     public String dashboard(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -81,22 +81,28 @@ public class DashboardController {
             model.addAttribute("currentTime", timeFormatter.format(nowInKolkata));
 
             Attendance todayAttendance = attendanceService.getTodayAttendance(username);
-            boolean canCheckIn = true;
             ZonedDateTime checkInTimeZoned = null;
             ZonedDateTime checkOutTimeZoned = null;
+            boolean canCheckIn = true;
             boolean canCheckOut = false;
             String checkOutMessage = null;
 
             if (todayAttendance != null) {
                 if (todayAttendance.getCheckInTime() != null) {
-                    checkInTimeZoned = ZonedDateTime.ofInstant(todayAttendance.getCheckInTime().toInstant(ZoneOffset.UTC), kolkataZone);
-                    model.addAttribute("checkInTime", checkInTimeZoned); // Pass the ZonedDateTime
+                    // Assume the LocalDateTime from the database is already in the desired timezone (or close)
+                    // Convert it to ZonedDateTime using the Kolkata zone.
+                    checkInTimeZoned = todayAttendance.getCheckInTime().atZone(kolkataZone);
+                    log.info("Retrieved and zoned checkInTime: {}", checkInTimeZoned);
+                    model.addAttribute("checkInTime", checkInTimeZoned);
                 } else {
                     model.addAttribute("checkInTime", null);
                 }
                 if (todayAttendance.getCheckOutTime() != null) {
-                    checkOutTimeZoned = ZonedDateTime.ofInstant(todayAttendance.getCheckOutTime().toInstant(ZoneOffset.UTC), kolkataZone);
-                    model.addAttribute("checkOutTime", checkOutTimeZoned); // Pass the ZonedDateTime
+                    // Assume the LocalDateTime from the database is already in the desired timezone (or close)
+                    // Convert it to ZonedDateTime using the Kolkata zone.
+                    checkOutTimeZoned = todayAttendance.getCheckOutTime().atZone(kolkataZone);
+                    log.info("Retrieved and zoned checkOutTime: {}", checkOutTimeZoned);
+                    model.addAttribute("checkOutTime", checkOutTimeZoned);
                 } else {
                     model.addAttribute("checkOutTime", null);
                 }

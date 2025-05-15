@@ -78,4 +78,7 @@ public interface UserService {
     List<User> getAllUsers();
     void saveUser(User user);
       void delete(Long id);
+      List<String> searchUsernames(String query);
+      List<String> findUsernamesContaining(String query);
+
 }

@@ -83,6 +83,14 @@ public class AdminController {
         return "dashboard-admin";
     }
 
+        @GetMapping("/users/suggestions")
+    @ResponseBody
+    public ResponseEntity<List<String>> getUserSuggestions(@RequestParam("query") String query) {
+        List<String> suggestions = userService.findUsernamesContaining(query);
+        return ResponseEntity.ok(suggestions);
+    }
+
+
     // Handler for resetting checkout time
     @PostMapping("/attendance/reset/checkout/{username}")
     public String resetCheckout(@PathVariable String username,

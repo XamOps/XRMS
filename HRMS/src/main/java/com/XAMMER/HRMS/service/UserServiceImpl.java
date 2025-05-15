@@ -22,10 +22,10 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    @Override
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+    // @Override
+    // public Optional<User> findByUsername(String username) {
+    //     return userRepository.findByUsername(username);
+    // }
 @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id); // Returns Optional<User>
@@ -72,12 +72,12 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<String> getAllUsernames() {
-        return userRepository.findAll().stream()
-                .map(User::getUsername) // Assuming your User entity has a getUsername() method
-                .collect(Collectors.toList());
-    }
+    // @Override
+    // public List<String> getAllUsernames() {
+    //     return userRepository.findAll().stream()
+    //             .map(User::getUsername) // Assuming your User entity has a getUsername() method
+    //             .collect(Collectors.toList());
+    // }
 
     @Override
     public User getUserByUsername(String username) {
@@ -96,4 +96,31 @@ public class UserServiceImpl implements UserService {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'saveUser'");
     }
+    @Override
+public List<String> searchUsernames(String query) {
+    return userRepository.findByUsernameContainingIgnoreCase(query)
+                         .stream()
+                         .map(User::getUsername)
+                         .collect(Collectors.toList());
+}
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public List<String> getAllUsernames() {
+        return userRepository.findAll().stream()
+                .map(User::getUsername)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> findUsernamesContaining(String query) {
+        return userRepository.findByUsernameContainingIgnoreCase(query).stream()
+                .map(User::getUsername)
+                .collect(Collectors.toList());
+    }
+
 }
