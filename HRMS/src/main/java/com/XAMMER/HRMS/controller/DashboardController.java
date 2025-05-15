@@ -166,7 +166,8 @@ public class DashboardController {
             Attendance attendance = attendanceService.checkIn(username);
             response.put("status", "success");
             // Format the stored UTC time to ISO 8601 with 'Z'
-            response.put("checkInTime", dateTimeFormatterUTC.format(attendance.getCheckInTime().toInstant(ZoneOffset.UTC)));
+            //response.put("checkInTime", dateTimeFormatterUTC.format(attendance.getCheckInTime().toInstant(ZoneOffset.UTC)));
+            response.put("checkInTime", dateTimeFormatterUTC.format(attendance.getCheckInTime().atZone(kolkataZone).toInstant()));
         } catch (IllegalStateException e) {
             response.put("status", "error");
             response.put("message", e.getMessage());
@@ -193,7 +194,8 @@ public class DashboardController {
             Attendance attendance = attendanceService.checkOut(username);
             response.put("status", "success");
             // Format the stored UTC time to ISO 8601 with 'Z'
-            response.put("checkOutTime", dateTimeFormatterUTC.format(attendance.getCheckOutTime().toInstant(ZoneOffset.UTC)));
+            //response.put("checkOutTime", dateTimeFormatterUTC.format(attendance.getCheckOutTime().toInstant(ZoneOffset.UTC)));
+            response.put("checkOutTime", dateTimeFormatterUTC.format(attendance.getCheckOutTime().atZone(kolkataZone).toInstant()));
         } catch (IllegalStateException e) {
             response.put("status", "error");
             response.put("message", e.getMessage());
