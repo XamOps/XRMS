@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.NoSuchElementException; 
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
@@ -46,7 +46,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                         manager.getEmail(),
                         applicant.getUsername() + " " + applicant.getLastName(),
                         leaveRequest.getStartDate(),
-                        leaveRequest.getEndDate(), // Include the endDate here
+                        leaveRequest.getEndDate(), // Include the endDate here!
                         leaveRequest.getReason()
                 );
             }
