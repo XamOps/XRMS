@@ -25,7 +25,7 @@ public class EmailServiceImpl implements EmailService {
   DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
   String formattedStartDate = startDate.format(dateFormatter);
   String formattedEndDate = endDate.format(dateFormatter);
-  message.setText("A new leave request has been submitted by " + requesterName + " for the period from " + formattedStartDate + " to " + formattedEndDate + " for the following reason: " + reason + "." + "\n" + "Please review it in the dashboard.");
+  message.setText("A new leave request has been submitted by " + requesterName + " for the period from " + formattedStartDate + " to " + formattedEndDate + " for the following reason: " + reason + "." + "\n\n" + "Please review it in the dashboard.");
   mailSender.send(message);
  }
 
