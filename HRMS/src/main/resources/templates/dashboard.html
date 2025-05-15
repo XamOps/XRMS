@@ -412,18 +412,20 @@
         <div class="card attendance-card">
             <div class="label">Attendance</div>
             <div id="attendance-display">
+
+                 <p class="value" id="notCheckedIn" th:if="${checkInTime == null}">
+                    <i class="fa-solid fa-xmark-circle"></i> Not checked in yet
+                </p>
                 <p class="value" id="checkInDisplay" th:if="${checkInTime != null}">
                     <i class="fa-solid fa-check-circle"></i> Checked In: <span th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>
                 </p>
-                <p class="value" id="notCheckedIn" th:if="${checkInTime == null}">
-                    <i class="fa-solid fa-xmark-circle"></i> Not checked in yet
+                 <p class="value" id="notCheckedOut" th:if="${checkInTime != null and checkOutTime == null}">
+                    <i class="fa-solid fa-clock"></i> Not checked out yet
                 </p>
                 <p class="value" id="checkOutDisplay" th:if="${checkOutTime != null}">
                     <i class="fa-solid fa-check-double"></i> Checked Out: <span th:text="${#temporals.format(checkOutTime, 'hh:mm:ss a')}"></span>
                 </p>
-                <p class="value" id="notCheckedOut" th:if="${checkInTime != null and checkOutTime == null}">
-                    <i class="fa-solid fa-clock"></i> Checked In At: <span th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>, Not checked out yet
-                </p>
+   
             </div>
             <div class="attendance-controls">
                 <button id="checkInBtn" th:if="${checkInTime == null}" onclick="handleCheckIn()">
@@ -524,9 +526,7 @@
                     <p class="value" id="checkInDisplay">
                         <i class="fa-solid fa-check-circle"></i> Checked In: <span>${checkInTimeFormatted}</span>
                     </p>
-                    <p class="value" id="notCheckedOut">
-                        <i class="fa-solid fa-clock"></i> Checked In At: <span>${checkInTimeFormatted}</span>, Not checked out yet
-                    </p>
+
                     <p class="value hidden" id="checkOutDisplay"></p>
                     <p class="value hidden" id="notCheckedIn"></p>
                 `;
