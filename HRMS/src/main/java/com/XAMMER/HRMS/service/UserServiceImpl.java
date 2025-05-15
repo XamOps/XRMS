@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getUpcomingBirthdays() {
         LocalDate today = LocalDate.now();
-        LocalDate todayPlusTwoWeeks = today.plus(6, ChronoUnit.WEEKS);
+        LocalDate todayPlusTwoWeeks = today.plus(6, ChronoUnit.MONTHS);
 
         return userRepository.findAll().stream()
                 .filter(user -> {
