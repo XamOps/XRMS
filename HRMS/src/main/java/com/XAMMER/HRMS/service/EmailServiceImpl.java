@@ -1,10 +1,12 @@
 package com.XAMMER.HRMS.service;
 
-import com.XAMMER.HRMS.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -12,16 +14,20 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-private String fromAddress = "xrms@xammer.in" ; // Replace with your email
-    @Override
-    public void sendLeaveRequestNotification(String to, String requesterName) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setFrom(fromAddress);
-        message.setSubject("New Leave Request from " + requesterName);
-        message.setText("A new leave request has been submitted by " + requesterName + ". Please review it in the dashboard.");
-        mailSender.send(message);
-    }
+    private String fromAddress = "xrms@xammer.in"; // Replace with your email
+
+@Override
+ public void sendLeaveRequestNotification(String to, String requesterName, LocalDate startDate, LocalDate endDate, String reason) {
+  SimpleMailMessage message = new SimpleMailMessage();
+  message.setTo(to);
+  message.setFrom(fromAddress);
+  message.setSubject("New Leave Request from " + requesterName);
+  DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+  String formattedStartDate = startDate.format(dateFormatter);
+  String formattedEndDate = endDate.format(dateFormatter);
+  message.setText("A new leave request has been submitted by " + requesterName + " for the period from " + formattedStartDate + " to " + formattedEndDate + " for the following reason: " + reason + "." + "\n" + "Please review it in the dashboard.");
+  mailSender.send(message);
+ }
 
     @Override
     public void sendLeaveRequestApprovalNotification(String to, String requesterName) {
@@ -41,5 +47,17 @@ private String fromAddress = "xrms@xammer.in" ; // Replace with your email
         message.setSubject("Your Leave Request has been Rejected");
         message.setText("Your leave request has been rejected with the following reason: " + reason + ". Please check your dashboard for details.");
         mailSender.send(message);
+    }
+
+    @Override
+    public void sendLeaveRequestNotification(String to, String requesterName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendLeaveRequestNotification'");
+    }
+
+    @Override
+    public void sendLeaveRequestNotification(String to, String requesterName, LocalDate appliedDate, String reason) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendLeaveRequestNotification'");
     }
 }

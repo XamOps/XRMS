@@ -42,7 +42,7 @@ public class HolidayServiceImpl implements HolidayService {
     @Override
     public List<Holiday> getUpcomingHolidays() {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
-        LocalDate todayPlusOneMonth = today.plus(5, ChronoUnit.MONTHS);
+        LocalDate todayPlusOneMonth = today.plus(12, ChronoUnit.MONTHS);
 
         List<Holiday> upcoming = holidayRepository.findUpcomingHolidays(today).stream()
                 .filter(holiday -> !holiday.getDate().isAfter(todayPlusOneMonth))

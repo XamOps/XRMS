@@ -1,13 +1,14 @@
 package com.XAMMER.HRMS.service;
 
 import com.XAMMER.HRMS.model.LeaveRequest;
-import com.XAMMER.HRMS.model.User;
 import com.XAMMER.HRMS.model.Roles;
+import com.XAMMER.HRMS.model.User;
 import com.XAMMER.HRMS.repository.LeaveRequestRepository;
 import com.XAMMER.HRMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,7 +25,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Autowired
     private EmailService emailService;
 
-    @Override
+@Override
     public LeaveRequest submitLeaveRequest(User applicant, LeaveRequest leaveRequest) {
         leaveRequest.setUser(applicant);
         leaveRequest.setSubmissionDate(LocalDateTime.now());
@@ -41,8 +42,13 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             LeaveRequest savedRequest = leaveRequestRepository.save(leaveRequest);
 
             if (manager != null) {
-                emailService.sendLeaveRequestNotification(manager.getEmail(),
-                        applicant.getUsername() + " " + applicant.getLastName());
+                emailService.sendLeaveRequestNotification(
+                        manager.getEmail(),
+                        applicant.getUsername() + " " + applicant.getLastName(),
+                        leaveRequest.getStartDate(),
+                        leaveRequest.getEndDate(), // Include the endDate here
+                        leaveRequest.getReason()
+                );
             }
 
             return savedRequest;
@@ -57,13 +63,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
             notifyAdmins(savedRequest, "(Manager's Request)");
             //emailService.sendLeaveRequestNotification(applicant.getEmail(),
-                    //"Your Leave Request has been submitted for Admin Approval");
+            //                                       "Your Leave Request has been submitted for Admin Approval");
 
             return savedRequest;
         }
 
         return null;
     }
+
+ 
 
     @Override
     public LeaveRequest updateLeaveRequestStatus(Long id, String status, User approver, String rejectionReason) {
@@ -198,12 +206,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
     }
 
-    private void notifyAdmins(LeaveRequest request, String messageSuffix) {
+   private void notifyAdmins(LeaveRequest request, String messageSuffix) {
         List<User> admins = userRepository.findByRoles(Roles.ROLE_ADMIN);
         for (User admin : admins) {
             emailService.sendLeaveRequestNotification(
                     admin.getEmail(),
-                    request.getUser().getUsername() + " " + request.getUser().getLastName() + " " + messageSuffix
+                    request.getUser().getUsername() + " " + request.getUser().getLastName() + " " + messageSuffix,
+                    request.getStartDate(),
+                    request.getEndDate(), // Include the endDate here
+                    request.getReason()
             );
         }
     }
