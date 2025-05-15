@@ -418,9 +418,10 @@
                 Submit Request
                 <div class="button-loader" id="buttonLoader"></div>
             </button>
-        </form>
 
-        <p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+<p><a th:href="@{https://xrms.xammer.in/dashboard}">Back to Dashboard</a></p>            </form>
+
+        <!-- <p><a th:href="@{/dashboard}">Back to Dashboard</a></p> -->
     </div>
 
     <div class="status-section">
@@ -514,8 +515,7 @@
                         submitButton.disabled = false;
                         buttonLoader.style.display = 'none';
                         alert('Leave request submitted successfully!');
-                        window.location.reload();
-                    })
+                       window.location.href = 'https://xrms.xammer.in/dashboard'; })
                     .catch(error => {
                         submitButton.disabled = false;
                         buttonLoader.style.display = 'none';
