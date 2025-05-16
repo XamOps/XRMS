@@ -57,6 +57,8 @@ public class LeaveRequest {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    private Integer numberOfDays; // Added numberOfDays field
+
     private LocalDateTime submissionDate; // Added submissionDate field
 
     public enum ApprovalStatus {
@@ -96,5 +98,18 @@ public class LeaveRequest {
 
     public void setSubmissionDate(LocalDateTime submissionDate) { // Setter for submissionDate
         this.submissionDate = submissionDate;
+    }
+
+    public Integer getNumberOfDays() { // Getter for numberOfDays
+        return numberOfDays;
+    }
+
+    public void setNumberOfDays(Integer numberOfDays) { // Setter for numberOfDays
+        this.numberOfDays = numberOfDays;
+    }
+
+    public LeaveRequest orElse(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
 }

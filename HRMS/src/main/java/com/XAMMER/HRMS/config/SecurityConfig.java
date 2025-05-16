@@ -92,6 +92,9 @@ public class SecurityConfig {
 
             .requestMatchers("/admin/dashboard").hasRole("ADMIN")
             .requestMatchers("/admin/attendance/reset/**").hasRole("ADMIN") // ✅ Add this line
+                            .requestMatchers("/leave/cancel/**").authenticated() // Important: Ensure authenticated users can access cancel
+                .requestMatchers("/leave/details/**").authenticated() // Ensure authenticated users can access details
+
             .anyRequest().authenticated()
     )
     

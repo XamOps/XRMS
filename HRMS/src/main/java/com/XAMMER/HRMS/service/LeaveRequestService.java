@@ -22,4 +22,5 @@ public interface LeaveRequestService {
     void rejectLeaveRequestByManager(Long requestId, User manager, String rejectionReason);
     void approveLeaveRequestByAdmin(Long requestId, User admin);
     void rejectLeaveRequestByAdmin(Long requestId, User admin, String rejectionReason);
+    void cancelLeaveRequest(Long id, User user);
 }

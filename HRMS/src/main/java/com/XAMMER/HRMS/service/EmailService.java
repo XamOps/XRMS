@@ -8,6 +8,10 @@ public interface EmailService {
     void sendLeaveRequestRejectionNotification(String to, String requesterName, String reason);
         void sendLeaveRequestNotification(String to, String requesterName, LocalDate appliedDate, String reason);
             void sendLeaveRequestNotification(String to, String requesterName, LocalDate startDate, LocalDate endDate, String reason);
+            void sendLeaveRequestCancellationNotification(String email, String string, LocalDate startDate,
+                    LocalDate endDate);
+            void sendLeaveRequestCancellationNotificationToApprover(String email, String string, LocalDate startDate,
+                    LocalDate endDate);
 
 
 }

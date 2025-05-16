@@ -2,8 +2,11 @@ package com.XAMMER.HRMS.controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -90,11 +93,39 @@ public class LeaveRequestController {
     // Reject leave - Handles rejection reason via request parameter
     @GetMapping("/reject/{id}")
     public String rejectLeave(@PathVariable Long id, Principal principal,
-                              @RequestParam(value = "reason", required = false) String reason) {
+                                     @RequestParam(value = "reason", required = false) String reason) {
         userService.findByUsername(principal.getName())
                 .ifPresent(rejector -> {
                     leaveRequestService.rejectLeaveRequest(id, rejector, reason);
                 });
         return "redirect:/leave/requests";
     }
+
+    // Get leave request details for modal
+    @GetMapping("/details/{id}")
+    @ResponseBody
+    public LeaveRequest getLeaveRequestDetails(@PathVariable Long id) {
+        return leaveRequestService.getLeaveRequestById(id).orElse(null);
+    }
+
+    // Cancel leave request
+ @PostMapping("/cancel/{id}")
+@ResponseBody
+public ResponseEntity<String> cancelLeaveRequest(@PathVariable Long id, Principal principal) {
+    return userService.findByUsername(principal.getName())
+            .map(user -> {
+                try {
+                    leaveRequestService.cancelLeaveRequest(id, user);
+                    return ResponseEntity.ok("Leave request cancelled successfully.");
+                } catch (NoSuchElementException e) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave request not found.");
+                } catch (IllegalStateException e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace(); // Log the error properly
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to cancel leave request.");
+                }
+            })
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found"));
+}
 }

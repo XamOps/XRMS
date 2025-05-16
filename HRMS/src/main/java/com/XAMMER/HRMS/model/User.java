@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -77,6 +78,18 @@ public class User {
         throw new UnsupportedOperationException("Unimplemented method 'getCheckInTime'");
     }
 
-    // Lombok's @Data will generate getFirstName(), setFirstName(),
-    // getLastName(), setLastName(), and other standard getters and setters.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    // Lombok's @Data will still generate other methods
 }

@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.NoSuchElementException; 
+import java.util.NoSuchElementException;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
@@ -25,10 +26,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Autowired
     private EmailService emailService;
 
-@Override
+    @Override
     public LeaveRequest submitLeaveRequest(User applicant, LeaveRequest leaveRequest) {
         leaveRequest.setUser(applicant);
         leaveRequest.setSubmissionDate(LocalDateTime.now());
+
+        // Calculate the number of days
+        long days = ChronoUnit.DAYS.between(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1;
+        leaveRequest.setNumberOfDays((int) days);
 
         if (applicant.getRoles() == null) {
             throw new IllegalArgumentException("User role cannot be null");
@@ -46,7 +51,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                         manager.getEmail(),
                         applicant.getUsername() + " " + applicant.getLastName(),
                         leaveRequest.getStartDate(),
-                        leaveRequest.getEndDate(), // Include the endDate here!
+                        leaveRequest.getEndDate(),
                         leaveRequest.getReason()
                 );
             }
@@ -63,7 +68,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
             notifyAdmins(savedRequest, "(Manager's Request)");
             //emailService.sendLeaveRequestNotification(applicant.getEmail(),
-            //                                       "Your Leave Request has been submitted for Admin Approval");
+            //                                        "Your Leave Request has been submitted for Admin Approval");
 
             return savedRequest;
         }
@@ -71,7 +76,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         return null;
     }
 
- 
 
     @Override
     public LeaveRequest updateLeaveRequestStatus(Long id, String status, User approver, String rejectionReason) {
@@ -206,16 +210,50 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
     }
 
-   private void notifyAdmins(LeaveRequest request, String messageSuffix) {
+    private void notifyAdmins(LeaveRequest request, String messageSuffix) {
         List<User> admins = userRepository.findByRoles(Roles.ROLE_ADMIN);
         for (User admin : admins) {
             emailService.sendLeaveRequestNotification(
                     admin.getEmail(),
                     request.getUser().getUsername() + " " + request.getUser().getLastName() + " " + messageSuffix,
                     request.getStartDate(),
-                    request.getEndDate(), // Include the endDate here
+                    request.getEndDate(),
                     request.getReason()
             );
         }
     }
+
+@Override
+public void cancelLeaveRequest(Long requestId, User user) {
+    LeaveRequest request = getLeaveRequestById(requestId);
+
+    if (request.getUser().equals(user) &&
+        (request.getLeaveStatus() == LeaveRequest.LeaveStatus.PENDING_MANAGER ||
+         request.getLeaveStatus() == LeaveRequest.LeaveStatus.PENDING_ADMIN)) {
+
+        LeaveRequest.LeaveStatus originalStatus = request.getLeaveStatus();
+        request.setLeaveStatus(LeaveRequest.LeaveStatus.REJECTED);
+        request.setRejectionReason("Cancelled by user");
+        leaveRequestRepository.save(request);
+
+        // Notify the appropriate approver only
+        if (originalStatus == LeaveRequest.LeaveStatus.PENDING_MANAGER && request.getManager() != null) {
+            emailService.sendLeaveRequestCancellationNotificationToApprover(
+                    request.getManager().getEmail(),
+                    request.getUser().getUsername() + " " + request.getUser().getLastName(),
+                    request.getStartDate(),
+                    request.getEndDate()
+            );
+        } else if (originalStatus == LeaveRequest.LeaveStatus.PENDING_ADMIN && request.getAdmin() != null) {
+            emailService.sendLeaveRequestCancellationNotificationToApprover(
+                    request.getAdmin().getEmail(),
+                    request.getUser().getUsername() + " " + request.getUser().getLastName(),
+                    request.getStartDate(),
+                    request.getEndDate()
+            );
+        }
+
+    } 
+}
+
 }
