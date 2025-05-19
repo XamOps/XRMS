@@ -2,7 +2,6 @@ package com.XAMMER.HRMS.service;
 
 import com.XAMMER.HRMS.model.User;
 import com.XAMMER.HRMS.repository.UserRepository;
-import com.XAMMER.HRMS.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +21,9 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    // @Override
-    // public Optional<User> findByUsername(String username) {
-    //     return userRepository.findByUsername(username);
-    // }
-@Override
+    @Override
     public Optional<User> findById(Long id) {
-        return userRepository.findById(id); // Returns Optional<User>
+        return userRepository.findById(id);
     }
 
     @Override
@@ -72,37 +67,27 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    // @Override
-    // public List<String> getAllUsernames() {
-    //     return userRepository.findAll().stream()
-    //             .map(User::getUsername) // Assuming your User entity has a getUsername() method
-    //             .collect(Collectors.toList());
-    // }
-
     @Override
     public User getUserByUsername(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUserByUsername'");
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     @Override
     public List<User> getAllUsers() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllUsers'");
+        return userRepository.findAll();
     }
 
     @Override
     public void saveUser(User user) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'saveUser'");
+        userRepository.save(user);
     }
+
     @Override
-public List<String> searchUsernames(String query) {
-    return userRepository.findByUsernameContainingIgnoreCase(query)
-                         .stream()
-                         .map(User::getUsername)
-                         .collect(Collectors.toList());
-}
+    public List<String> searchUsernames(String query) {
+        return userRepository.findByUsernameContainingIgnoreCase(query).stream()
+                .map(User::getUsername)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public Optional<User> findByUsername(String username) {
@@ -123,4 +108,15 @@ public List<String> searchUsernames(String query) {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Optional<User> getUserById(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getUserById'");
+    }
+
+    @Override
+    public List<User> findAllEmployees() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findAllEmployees'");
+    }
 }

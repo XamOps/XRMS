@@ -80,5 +80,9 @@ public interface UserService {
       void delete(Long id);
       List<String> searchUsernames(String query);
       List<String> findUsernamesContaining(String query);
+      Optional<User> getUserById(Long id);
+      List<User> findAllEmployees();
+
+      
 
 }

@@ -87,13 +87,14 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize ->
         authorize
 .requestMatchers("/login", "/error", "/css/**", "/js/**", "/images/**", "/sounds/**").permitAll()            //.requestMatchers("/dashboard").authenticated()
-            .requestMatchers("/dashboard").hasAnyRole("USER","USER_MANAGER")
-            .requestMatchers("/manager/dashboard").hasRole("USER_MANAGER") // Secure manager dashboard
-
-            .requestMatchers("/admin/dashboard").hasRole("ADMIN")
-            .requestMatchers("/admin/attendance/reset/**").hasRole("ADMIN") // ✅ Add this line
-                            .requestMatchers("/leave/cancel/**").authenticated() // Important: Ensure authenticated users can access cancel
+                .requestMatchers("/dashboard").hasAnyRole("USER","USER_MANAGER")
+                .requestMatchers("/manager/dashboard").hasRole("USER_MANAGER") // Secure manager dashboard
+                .requestMatchers("/admin/dashboard").hasRole("ADMIN")
+                .requestMatchers("/admin/attendance/reset/**").hasRole("ADMIN") // ✅ Add this line
+                .requestMatchers("/leave/cancel/**").authenticated() // Important: Ensure authenticated users can access cancel
                 .requestMatchers("/leave/details/**").authenticated() // Ensure authenticated users can access details
+                .requestMatchers("/employees/profile").authenticated() // ✅ Add this line to secure employee profile
+
 
             .anyRequest().authenticated()
     )

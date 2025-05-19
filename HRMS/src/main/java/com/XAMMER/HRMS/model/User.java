@@ -1,6 +1,7 @@
 package com.XAMMER.HRMS.model;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +18,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collections;
 import java.util.Objects;
 
 @Data
@@ -25,7 +31,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserDetails { // Implement UserDetails
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,8 +60,18 @@ public class User {
 
     private LocalDate birthDate;
 
+    // New fields from the reference image
+    private String employeeId;
+    private String phone;
+    private String address;
+    private LocalDate joiningDate;
+    private String department;
+    private String jobTitle;
+    private String gender; // Consider using an Enum for this
+    private String maritalStatus; // Consider using an Enum for this
+
     @OneToMany(mappedBy = "user")
-    private List<Attendance> attendances;
+    private List<Attendance> attendances; // Keep this if you've implemented attendance
 
     @OneToMany(mappedBy = "user")
     private List<LeaveRequest> leaveRequests; // Assuming you have a LeaveRequest entity
@@ -63,19 +79,29 @@ public class User {
     @OneToMany(mappedBy = "manager")
     private List<User> subordinates; // To easily find direct reports of a manager
 
-    public void setCheckOutTime(Object object) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setCheckOutTime'");
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(roles.name()));
     }
 
-    public String getAttendanceDate() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAttendanceDate'");
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // You can implement logic based on your requirements
     }
 
-    public String getCheckInTime() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCheckInTime'");
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // You can implement logic based on your requirements
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // You can implement logic based on your requirements
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // You can implement logic based on your requirements
     }
 
     @Override
@@ -90,6 +116,8 @@ public class User {
     public int hashCode() {
         return Objects.hash(id);
     }
+        private String profilePictureUrl; // Add this field
+
 
     // Lombok's @Data will still generate other methods
 }

@@ -73,7 +73,7 @@ public class DashboardController {
         Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isPresent()) {
             User loggedInUser = userOptional.get();
-            model.addAttribute("user", loggedInUser);
+            model.addAttribute("employee", loggedInUser); // Changed "user" to "employee"
 
             ZonedDateTime nowInKolkata = ZonedDateTime.now(kolkataZone);
             // Pass the ZonedDateTime object directly
