@@ -2,6 +2,8 @@ package com.XAMMER.HRMS.service;
 
 import com.XAMMER.HRMS.model.LeaveRequest;
 import com.XAMMER.HRMS.model.User;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LeaveRequestService {
@@ -23,4 +25,6 @@ public interface LeaveRequestService {
     void approveLeaveRequestByAdmin(Long requestId, User admin);
     void rejectLeaveRequestByAdmin(Long requestId, User admin, String rejectionReason);
     void cancelLeaveRequest(Long id, User user);
+    List<LeaveRequest> getLeaveRequestsForUserAndDate(User orElse, LocalDate date);
+    boolean isEmployeeOnLeave(Long id, LocalDate effectiveDate);
 }

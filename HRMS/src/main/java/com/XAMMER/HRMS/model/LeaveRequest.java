@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime; // Or LocalDate, depending on your needs
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "leave_requests")
@@ -18,7 +18,7 @@ public class LeaveRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER) // Changed to EAGER
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -57,9 +57,9 @@ public class LeaveRequest {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    private Integer numberOfDays; // Added numberOfDays field
+    private Integer numberOfDays;
 
-    private LocalDateTime submissionDate; // Added submissionDate field
+    private LocalDateTime submissionDate;
 
     public enum ApprovalStatus {
         PENDING,
@@ -74,7 +74,7 @@ public class LeaveRequest {
         REJECTED
     }
 
-
+    // Lombok's @Data will generate these, but keeping them explicit for clarity if you prefer
     public LocalDate getStartDate() {
         return startDate;
     }
@@ -83,28 +83,27 @@ public class LeaveRequest {
         return endDate;
     }
 
-
-    public LeaveStatus getLeaveStatus() { // Add getter
+    public LeaveStatus getLeaveStatus() {
         return leaveStatus;
     }
 
-    public void setLeaveStatus(LeaveStatus leaveStatus) { // Add setter
+    public void setLeaveStatus(LeaveStatus leaveStatus) {
         this.leaveStatus = leaveStatus;
     }
 
-    public LocalDateTime getSubmissionDate() { // Getter for submissionDate
+    public LocalDateTime getSubmissionDate() {
         return submissionDate;
     }
 
-    public void setSubmissionDate(LocalDateTime submissionDate) { // Setter for submissionDate
+    public void setSubmissionDate(LocalDateTime submissionDate) {
         this.submissionDate = submissionDate;
     }
 
-    public Integer getNumberOfDays() { // Getter for numberOfDays
+    public Integer getNumberOfDays() {
         return numberOfDays;
     }
 
-    public void setNumberOfDays(Integer numberOfDays) { // Setter for numberOfDays
+    public void setNumberOfDays(Integer numberOfDays) {
         this.numberOfDays = numberOfDays;
     }
 

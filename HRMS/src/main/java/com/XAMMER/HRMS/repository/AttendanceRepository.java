@@ -26,5 +26,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByCheckInTimeBetweenOrderByUser_UsernameAscCheckInTimeAsc(LocalDateTime startOfDay, LocalDateTime endOfDay);
     Optional<Attendance> findByUserAndAttendanceDateAndCheckOutTimeIsNull(User user, LocalDate today);
     Optional<Attendance> findByUserIdAndAttendanceDate(Long id, LocalDate today);
+    
     Optional<Attendance> findByUserIdAndAttendanceDateAndCheckOutTimeIsNull(Long userId, LocalDate date);
 }

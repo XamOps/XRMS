@@ -426,11 +426,11 @@
         <div class="nav-links">
             <a href="#" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
             <a href="/employees/profile"><i class="fa-solid fa-users"></i> Employee Profile</a>
-            <a href="#"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a>
+            <a href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+            <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a>
             <a href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
-            <!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a> -->
-             <a href="#"><i class="fa-solid fa-cog"></i> Settings</a>
+            <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a>
+            <a href="#"><i class="fa-solid fa-cog"></i> Settings</a>
         </div>
     </div>
     <div class="logout" onclick="confirmLogout()">
@@ -460,62 +460,52 @@
                        class="fa-solid fa-user-circle fa-2x" style="color: #9E9E9E;"></i>
                 </div>
                 <div class="employee-info">
-<h2 class="employee-name" th:text="${ username }">Your Name</h2>
-    <p class="employee-designation"
-       th:text="${employee != null ? employee.jobTitle : 'Designation'}">Your Designation</p>
-</div>
+                    <h2 class="employee-name" th:text="${ username }">Your Name</h2>
+                    <p class="employee-designation"
+                       th:text="${employee != null ? employee.jobTitle : 'Designation'}">Your Designation</p>
+                </div>
             </div>
             <div class="employee-details">
                 <p><strong>Member Since:</strong> <span
-        th:text="${joiningDateFormatted != null ? joiningDateFormatted : 'N/A'}">N/A</span>
+                        th:text="${joiningDateFormatted != null ? joiningDateFormatted : 'N/A'}">N/A</span>
                 </p>
- <!-- <p>
-    <strong>Time at XRMS:</strong>
-    <span th:if="${employee != null and employee.joiningDate != null}">
-        <th:block th:with="years=${#temporals.years(todayDate.toLocalDate(), employee.joiningDate)}">
-            <span th:if="${years > 0}" th:text="${years + ' year' + (years > 1 ? 's' : '')}"></span>
-            <th:block th:with="months=${#temporals.months(todayDate.toLocalDate().minusYears(years), employee.joiningDate)}">
-                <span th:if="${months > 0}" th:text="${(years > 0 ? ' and ' : '') + months + ' month' + (months > 1 ? 's' : '')}"></span>
-            </th:block>
-        </th:block>
-    </span>
-    <span th:unless="${employee != null and employee.joiningDate != null}">N/A</span>
-</p> -->
                 </div>
         </div>
 
-        <div class="card attendance-card">
-            <div class="label">Attendance</div>
-            <div id="attendance-display">
-                <p class="value"
-                   id="notCheckedIn" th:if="${checkInTime == null}">
-                    <i class="fa-solid fa-xmark-circle"></i> Not checked in yet
-                </p>
-                <p class="value" id="checkInDisplay" th:if="${checkInTime != null}">
-                    <i class="fa-solid fa-check-circle"></i> Checked In:
-                    <span
+<div class="card attendance-card" style="cursor: pointer;">
+    <div onclick="window.location.href='/attendance/view'" style="cursor: pointer;">
+        <div class="label">Attendance</div>
+        <div id="attendance-display">
+            <p class="value"
+               id="notCheckedIn" th:if="${checkInTime == null}">
+                <i class="fa-solid fa-xmark-circle"></i> Not checked in yet
+            </p>
+            <p class="value" id="checkInDisplay" th:if="${checkInTime != null}">
+                <i class="fa-solid fa-check-circle"></i> Checked In:
+                <span
                         th:text="${#temporals.format(checkInTime, 'hh:mm:ss a')}"></span>
-                </p>
-                <p class="value" id="notCheckedOut" th:if="${checkInTime != null and checkOutTime == null}">
-                    <i class="fa-solid fa-clock"></i> Not checked out yet
-                </p>
-                <p class="value" id="checkOutDisplay" th:if="${checkOutTime != null}">
-                    <i class="fa-solid fa-check-double"></i> Checked Out: <span
-                        th:text="${#temporals.format(checkOutTime, 'hh:mm:ss a')}"></span>
-                </p>
-            </div>
-            <div class="attendance-controls">
-                <button id="checkInBtn" th:if="${checkInTime ==null}" onclick="handleCheckIn()">
-                    <i class="fa-solid fa-sign-in"></i> Check In
-                </button>
-                <button id="checkOutBtn" th:if="${checkInTime != null and checkOutTime == null}"
-                        onclick="handleCheckOut()">
-                    <i class="fa-solid fa-sign-out"></i> Check Out
-                </button>
-            </div>
-            <div id="attendanceMessage" class="message"></div>
-            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            </p>
+            <p class="value" id="notCheckedOut" th:if="${checkInTime != null and checkOutTime == null}">
+                <i class="fa-solid fa-clock"></i> Not checked out yet
+            </p>
+            <p class="value" id="checkOutDisplay" th:if="${checkOutTime != null}">
+                <i class="fa-solid fa-check-double"></i> Checked Out: <span
+                    th:text="${#temporals.format(checkOutTime, 'hh:mm:ss a')}"></span>
+            </p>
         </div>
+    </div>
+    <div class="attendance-controls">
+        <button id="checkInBtn" th:if="${checkInTime ==null}" onclick="handleCheckIn(event)">
+            <i class="fa-solid fa-sign-in"></i> Check In
+        </button>
+        <button id="checkOutBtn" th:if="${checkInTime != null and checkOutTime == null}"
+                onclick="handleCheckOut(event)">
+            <i class="fa-solid fa-sign-out"></i> Check Out
+        </button>
+    </div>
+    <div id="attendanceMessage" class="message"></div>
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+</div>
 
         <div class="card">
             <div class="label">Leave Requests</div>
@@ -622,92 +612,94 @@
         return kolkataFormatter.format(utcDate);
     }
 
-    function handleCheckIn() {
-        fetch('/dashboard/checkin', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const messageDiv = document.getElementById('attendanceMessage');
-                if (data.status === 'success') {
-                    const checkInTimeFormatted = formatInKolkata(data.checkInTime);
-                    const attendanceDisplay = document.getElementById('attendance-display');
-                    const attendanceControls = document.querySelector('.attendance-controls');
+function handleCheckIn(event) {
+    event.stopPropagation(); // Prevent the card's onclick from firing
+    fetch('/dashboard/checkin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [csrfHeaderName]: csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const messageDiv = document.getElementById('attendanceMessage');
+        if (data.status === 'success') {
+            const checkInTimeFormatted = formatInKolkata(data.checkInTime);
+            const attendanceDisplay = document.getElementById('attendance-display');
+            const attendanceControls = document.querySelector('.attendance-controls');
 
-                    attendanceDisplay.innerHTML = `
-                        <p class="value" id="checkInDisplay">
-                            <i class="fa-solid fa-check-circle"></i> Checked In: <span>${checkInTimeFormatted}</span>
-                        </p>
-                        <p class="value hidden" id="checkOutDisplay"></p>
-                        <p class="value hidden" id="notCheckedIn"></p>
-                    `;
+            attendanceDisplay.innerHTML = `
+                                <p class="value" id="checkInDisplay">
+                                    <i class="fa-solid fa-check-circle"></i> Checked In: <span>${checkInTimeFormatted}</span>
+                                </p>
+                                <p class="value hidden" id="checkOutDisplay"></p>
+                                <p class="value hidden" id="notCheckedIn"></p>
+                            `;
 
-                    attendanceControls.innerHTML = `
-                        <button id="checkOutBtn" onclick="handleCheckOut()"><i class="fa-solid fa-sign-out"></i> Check Out</button>
-                    `;
+            attendanceControls.innerHTML = `
+                                <button id="checkOutBtn" onclick="handleCheckOut(event)"><i class="fa-solid fa-sign-out"></i> Check Out</button>
+                            `;
 
-                    messageDiv.textContent = 'Successfully checked in at ' + checkInTimeFormatted;
-                    messageDiv.className = 'message success-message';
-                } else {
-                    messageDiv.textContent = data.message;
-                    messageDiv.className = 'message error-message';
-                }
-            })
-            .catch(error => {
-                console.error('Error during check-in:', error);
-                const messageDiv = document.getElementById('attendanceMessage');
-                messageDiv.textContent = 'Failed to check in. Please try again.';
-                messageDiv.className = 'message error-message';
-            });
-    }
+            messageDiv.textContent = 'Successfully checked in at ' + checkInTimeFormatted;
+            messageDiv.className = 'message success-message';
+        } else {
+            messageDiv.textContent = data.message;
+            messageDiv.className = 'message error-message';
+        }
+    })
+    .catch(error => {
+        console.error('Error during check-in:', error);
+        const messageDiv = document.getElementById('attendanceMessage');
+        messageDiv.textContent = 'Failed to check in. Please try again.';
+        messageDiv.className = 'message error-message';
+    });
+}
 
-    function handleCheckOut() {
-        fetch('/dashboard/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const messageDiv = document.getElementById('attendanceMessage');
-                if (data.status === 'success') {
-                    const checkOutTimeFormatted = formatInKolkata(data.checkOutTime);
-                    const attendanceDisplay = document.getElementById('attendance-display');
-                    const attendanceControls = document.querySelector('.attendance-controls');
+function handleCheckOut(event) {
+    event.stopPropagation(); // Prevent the card's onclick from firing
+    fetch('/dashboard/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [csrfHeaderName]: csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const messageDiv = document.getElementById('attendanceMessage');
+        if (data.status === 'success') {
+            const checkOutTimeFormatted = formatInKolkata(data.checkOutTime);
+            const attendanceDisplay = document.getElementById('attendance-display');
+            const attendanceControls = document.querySelector('.attendance-controls');
 
-                    attendanceDisplay.innerHTML = `
-                        <p class="value" id="checkOutDisplay">
-                            <i class="fa-solid fa-check-double"></i> Checked Out: <span>${checkOutTimeFormatted}</span>
-                        </p>
-                        <p class="value hidden" id="checkInDisplay"></p>
-                        <p class="value hidden" id="notCheckedIn"></p>
-                        <p class="value hidden" id="notCheckedOut"></p>
-                    `;
+            attendanceDisplay.innerHTML = `
+                                <p class="value" id="checkOutDisplay">
+                                    <i class="fa-solid fa-check-double"></i> Checked Out: <span>${checkOutTimeFormatted}</span>
+                                </p>
+                                <p class="value hidden" id="checkInDisplay"></p>
+                                <p class="value hidden" id="notCheckedIn"></p>
+                                <p class="value hidden" id="notCheckedOut"></p>
+                            `;
 
-                    attendanceControls.innerHTML = `
-                        <button id="checkInBtn" onclick="handleCheckIn()"><i class="fa-solid fa-sign-in"></i> Check In</button>
-                    `;
+            attendanceControls.innerHTML = `
+                                <button id="checkInBtn" onclick="handleCheckIn(event)"><i class="fa-solid fa-sign-in"></i> Check In</button>
+                            `;
 
-                    messageDiv.textContent = 'Successfully checked out at ' + checkOutTimeFormatted;
-                    messageDiv.className = 'message success-message';
-                } else {
-                    messageDiv.textContent = data.message;
-                    messageDiv.className = 'message error-message';
-                }
-            })
-            .catch(error => {
-                console.error('Error during check-out:', error);
-                const messageDiv = document.getElementById('attendanceMessage');
-                messageDiv.textContent = 'Failed to check out. Please try again.';
-                messageDiv.className = 'message error-message';
-            });
-    }
+            messageDiv.textContent = 'Successfully checked out at ' + checkOutTimeFormatted;
+            messageDiv.className = 'message success-message';
+        } else {
+            messageDiv.textContent = data.message;
+            messageDiv.className = 'message error-message';
+        }
+    })
+    .catch(error => {
+        console.error('Error during check-out:', error);
+        const messageDiv = document.getElementById('attendanceMessage');
+        messageDiv.textContent = 'Failed to check out. Please try again.';
+        messageDiv.className = 'message error-message';
+    });
+}
 
     function confirmLogout() {
         if (confirm("Are you sure you want to logout?")) {

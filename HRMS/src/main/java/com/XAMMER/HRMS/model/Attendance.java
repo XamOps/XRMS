@@ -25,8 +25,9 @@ public class Attendance {
 
     @Column(name = "username")
     private String username;
+
     @Column(name = "checkout_status")
-    private String checkoutStatus = "USER";
+    private String checkoutStatus = "USER"; // Default value set
 
     private LocalDateTime checkOutTime;
 
@@ -50,6 +51,7 @@ public class Attendance {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public String getCheckoutStatus() {
         return checkoutStatus;
     }
@@ -58,50 +60,24 @@ public class Attendance {
         this.checkoutStatus = checkoutStatus;
     }
 
+    // Corrected implementation for isAdminReset()
+    public boolean isAdminReset() {
+        return "ADMIN_RESET".equals(this.checkoutStatus);
+    }
+
+    public Object getAdminReset() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAdminReset'");
+    }
+
+    public Attendance getCheckIn() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCheckIn'");
+    }
+
+    public Object getCheckOut() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCheckOut'");
+    }
     
-//     // Getters and setters
-//     public Long getId() {
-//         return id;
-//     }
-
-//     public void setId(Long id) {
-//         this.id = id;
-//     }
-
-//     public User getUser() {
-//         return user;
-//     }
-
-//     public void setUser(User user) {
-//         this.user = user;
-//     }
-
-//     public LocalDateTime getCheckInTime() {
-//         return checkInTime;
-//     }
-
-//     public void setCheckInTime(LocalDateTime checkInTime) {
-//         this.checkInTime = checkInTime;
-//     }
-
-//     public LocalDateTime getCheckOutTime() {
-//         return checkOutTime;
-//     }
-
-//     public void setCheckOutTime(LocalDateTime checkOutTime) {
-//         this.checkOutTime = checkOutTime;
-//     }
-
-//     public LocalDate getAttendanceDate() {
-//         return attendanceDate;
-//     }
-
-//     public void setAttendanceDate(LocalDate attendanceDate) {
-//         this.attendanceDate = attendanceDate;
-//     }
-
-//     public Object getUsername() {
-//         // TODO Auto-generated method stub
-//         throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
-//     }
 }

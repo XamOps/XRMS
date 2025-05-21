@@ -256,4 +256,20 @@ public void cancelLeaveRequest(Long requestId, User user) {
     } 
 }
 
+
+@Override
+public List<LeaveRequest> getLeaveRequestsForUserAndDate(User user, LocalDate date) {
+    if (user == null) {
+        return List.of(); // Or handle null user appropriately
+    }
+    return leaveRequestRepository.findByUserAndStartDateLessThanEqualAndEndDateGreaterThanEqual(user, date, date);
+}
+
+
+@Override
+public boolean isEmployeeOnLeave(Long id, LocalDate effectiveDate) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'isEmployeeOnLeave'");
+}
+
 }

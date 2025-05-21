@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.Duration; // Import Duration
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+
+    @Autowired
+    private EntityManager entityManager; // Ensure this is injected if used for flush()
 
     @Autowired
     public AttendanceServiceImpl(AttendanceRepository attendanceRepository, UserRepository userRepository) {
@@ -44,74 +48,75 @@ public class AttendanceServiceImpl implements AttendanceService {
                 });
     }
 
-@Override
-public Attendance checkIn(String username) {
-    User user = getUserOrThrowException(username);
-    LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+    @Override
+    public Attendance checkIn(String username) {
+        User user = getUserOrThrowException(username);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-    // Check if already checked in today with no checkout
-    if (attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, today).isPresent()) {
-        String errorMessage = "User " + username + " is already checked in and hasn't checked out today.";
-        logger.warn(errorMessage);
-        throw new IllegalStateException(errorMessage);
-    }
-
-    // Check if already checked in and checked out today
-    if (attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNotNull(user, today).isPresent()) {
-        String errorMessage = "User " + username + " has already checked in and checked out today.";
-        logger.warn(errorMessage);
-        throw new IllegalStateException(errorMessage);
-    }
-
-    // If no record found for today, check for any existing check-in without checkout
-    attendanceRepository.findByUserAndCheckOutTimeIsNull(user).ifPresent(existingAttendance -> {
-        String errorMessage = "User " + username + " has a pending check-in from " + existingAttendance.getAttendanceDate() + " at " + existingAttendance.getCheckInTime() + ". Please check out first.";
-        logger.warn(errorMessage);
-        throw new IllegalStateException(errorMessage);
-    });
-
-    Attendance attendance = new Attendance();
-    attendance.setUser(user);
-    attendance.setCheckInTime(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime());
-    attendance.setAttendanceDate(today);
-    attendance.setUsername(username);
-    Attendance savedAttendance = attendanceRepository.save(attendance);
-    logger.info("User {} checked in at {}", username, savedAttendance.getCheckInTime());
-    return savedAttendance;
-}
-@Override
-public Attendance checkOut(String username) {
-    User user = getUserOrThrowException(username);
-    LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
-    Optional<Attendance> currentAttendanceOptional = attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, today);
-
-    if (currentAttendanceOptional.isEmpty()) {
-        // ... (your existing logic for missed checkout) ...
-        LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Kolkata")).minusDays(1);
-        Optional<Attendance> yesterdayAttendance = attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, yesterday);
-        if (yesterdayAttendance.isPresent()) {
-            String errorMessage = "Cannot checkout today. Your checkout for yesterday was missed. Please contact the administrator for a reset.";
-            logger.warn(errorMessage);
-            throw new IllegalStateException(errorMessage);
-        } else {
-            String errorMessage = "No active check-in found for user: " + username + " today.";
+        // Check if already checked in today with no checkout
+        if (attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, today).isPresent()) {
+            String errorMessage = "User " + username + " is already checked in and hasn't checked out today.";
             logger.warn(errorMessage);
             throw new IllegalStateException(errorMessage);
         }
+
+        // Check if already checked in and checked out today
+        if (attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNotNull(user, today).isPresent()) {
+            String errorMessage = "User " + username + " has already checked in and checked out today.";
+            logger.warn(errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
+
+        // If no record found for today, check for any existing check-in without checkout
+        attendanceRepository.findByUserAndCheckOutTimeIsNull(user).ifPresent(existingAttendance -> {
+            String errorMessage = "User " + username + " has a pending check-in from " + existingAttendance.getAttendanceDate() + " at " + existingAttendance.getCheckInTime() + ". Please check out first.";
+            logger.warn(errorMessage);
+            throw new IllegalStateException(errorMessage);
+        });
+
+        Attendance attendance = new Attendance();
+        attendance.setUser(user);
+        attendance.setCheckInTime(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime());
+        attendance.setAttendanceDate(today);
+        attendance.setUsername(username);
+        Attendance savedAttendance = attendanceRepository.save(attendance);
+        logger.info("User {} checked in at {}", username, savedAttendance.getCheckInTime());
+        return savedAttendance;
     }
 
-    Attendance currentAttendance = currentAttendanceOptional.get();
-    if (currentAttendance.getCheckOutTime() != null) {
-        String errorMessage = "User " + username + " has already checked out today.";
-        logger.warn(errorMessage);
-        throw new IllegalStateException(errorMessage);
+    @Override
+    public Attendance checkOut(String username) {
+        User user = getUserOrThrowException(username);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        Optional<Attendance> currentAttendanceOptional = attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, today);
+
+        if (currentAttendanceOptional.isEmpty()) {
+            LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Kolkata")).minusDays(1);
+            Optional<Attendance> yesterdayAttendance = attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, yesterday);
+            if (yesterdayAttendance.isPresent()) {
+                String errorMessage = "Cannot checkout today. Your checkout for yesterday was missed. Please contact the administrator for a reset.";
+                logger.warn(errorMessage);
+                throw new IllegalStateException(errorMessage);
+            } else {
+                String errorMessage = "No active check-in found for user: " + username + " today.";
+                logger.warn(errorMessage);
+                throw new IllegalStateException(errorMessage);
+            }
+        }
+
+        Attendance currentAttendance = currentAttendanceOptional.get();
+        if (currentAttendance.getCheckOutTime() != null) {
+            String errorMessage = "User " + username + " has already checked out today.";
+            logger.warn(errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
+
+        currentAttendance.setCheckOutTime(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime());
+        Attendance updatedAttendance = attendanceRepository.save(currentAttendance);
+        logger.info("User {} checked out at {}", username, updatedAttendance.getCheckOutTime());
+        return updatedAttendance;
     }
 
-    currentAttendance.setCheckOutTime(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime());
-    Attendance updatedAttendance = attendanceRepository.save(currentAttendance);
-    logger.info("User {} checked out at {}", username, updatedAttendance.getCheckOutTime());
-    return updatedAttendance;
-}
     @Override
     public void recordCheckIn(String username) {
         User user = getUserOrThrowException(username);
@@ -217,25 +222,23 @@ public Attendance checkOut(String username) {
         attendanceRepository.deleteByUser(user);
         logger.warn("All attendance records deleted for user: {}", username);
     }
-@Override
-@Transactional
-public void resetForTodayCheckIn(String username) {
-    User user = getUserOrThrowException(username);
-    LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
-    List<Attendance> todayAttendanceList = attendanceRepository.findByUserAndAttendanceDate(user, today);
 
-    if (!todayAttendanceList.isEmpty()) {
-        attendanceRepository.deleteAll(todayAttendanceList);
-        // Force immediate synchronization with the database
-        entityManager.flush();
-        logger.warn("All attendance records for today deleted for user: {}", username);
-    } else {
-        logger.info("No attendance record found for user {} today to reset.", username);
+    @Override
+    @Transactional
+    public void resetForTodayCheckIn(String username) {
+        User user = getUserOrThrowException(username);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        List<Attendance> todayAttendanceList = attendanceRepository.findByUserAndAttendanceDate(user, today);
+
+        if (!todayAttendanceList.isEmpty()) {
+            attendanceRepository.deleteAll(todayAttendanceList);
+            entityManager.flush(); // Force immediate synchronization with the database
+            logger.warn("All attendance records for today deleted for user: {}", username);
+        } else {
+            logger.info("No attendance record found for user {} today to reset.", username);
+        }
     }
-}
 
-@Autowired
-private EntityManager entityManager;
     @Override
     public boolean canCheckIn(String username) {
         User user = getUserOrThrowException(username);
@@ -270,38 +273,36 @@ private EntityManager entityManager;
         return attendanceRepository.findByAttendanceDateAndCheckOutTimeIsNull(yesterday);
     }
 
-@Override
-@Transactional
-public boolean resetCheckoutTime(String username) {
-    return userRepository.findByUsername(username)
-            .map(user -> {
-                LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
-                List<Attendance> attendances = attendanceRepository.findByUserAndAttendanceDateOrderByCheckInTimeDesc(user, today);
-
-                if (!attendances.isEmpty()) {
-                    Attendance latestAttendance = attendances.get(0);
-                    latestAttendance.setCheckOutTime(null);
-                    attendanceRepository.save(latestAttendance);
-                    logger.warn("Checkout time reset for user {} on {}", username, today);
-                    return true;
-                } else {
-                    logger.warn("No attendance record found for user {} on {}", username, today);
-                    return false;
-                }
-            })
-            .orElse(false);
-}
-
     @Override
-    public Object calculateDuration(Attendance attendance) {
-        if (attendance.getCheckInTime() != null && attendance.getCheckOutTime() != null) {
-            java.time.Duration duration = java.time.Duration.between(attendance.getCheckInTime(), attendance.getCheckOutTime());
-            long hours = duration.toHours();
-            long minutes = duration.toMinutesPart();
-            return String.format("%02d:%02d", hours, minutes);
-        }
-        return "-";
+    @Transactional
+    public boolean resetCheckoutTime(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+                    List<Attendance> attendances = attendanceRepository.findByUserAndAttendanceDateOrderByCheckInTimeDesc(user, today);
+
+                    if (!attendances.isEmpty()) {
+                        Attendance latestAttendance = attendances.get(0);
+                        latestAttendance.setCheckOutTime(null);
+                        attendanceRepository.save(latestAttendance);
+                        logger.warn("Checkout time reset for user {} on {}", username, today);
+                        return true;
+                    } else {
+                        logger.warn("No attendance record found for user {} on {}", username, today);
+                        return false;
+                    }
+                })
+                .orElse(false);
     }
+@Override
+// Changed return type from Object to long
+public long calculateDuration(Attendance attendance) {
+    if (attendance.getCheckInTime() != null && attendance.getCheckOutTime() != null) {
+        Duration duration = Duration.between(attendance.getCheckInTime(), attendance.getCheckOutTime());
+        return duration.toMinutes(); // Return duration in minutes
+    }
+    return 0L; // Return 0 minutes if times are not set
+}
 
     @Override
     @Transactional
@@ -319,26 +320,20 @@ public boolean resetCheckoutTime(String username) {
         }
     }
 
-    // @Override
-    // public void resetCheckoutTime(String username, LocalDate date) {
-    //     throw new UnsupportedOperationException("Unimplemented method 'resetCheckoutTime(String username, LocalDate date)' - Consider using other resetCheckout methods.");
-    // }
-
-
-   @Override
+    @Override
     @Transactional
     public boolean resetCheckoutTimeForDate(String username, LocalDate resetDate) {
         logger.info("Attempting to reset checkout for user: {} on date {} to 23:59 (ADMIN RESET)", username, resetDate);
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            // Find the attendance record for the user and date WHERE checkout_time IS NULL
             Optional<Attendance> attendanceOptional = attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, resetDate);
             if (attendanceOptional.isPresent()) {
-                Attendance attendance = attendanceOptional.get(); // Get the Attendance object from the Optional
+                Attendance attendance = attendanceOptional.get();
                 LocalDateTime endOfDay = resetDate.atTime(LocalTime.MAX);
                 attendance.setCheckOutTime(endOfDay);
-                attendance.setCheckoutStatus("ADMIN_RESET");
+                // Make sure your Attendance model has a 'checkoutStatus' field
+                // attendance.setCheckoutStatus("ADMIN_RESET");
                 attendanceRepository.save(attendance);
                 logger.info("Checkout reset successfully for user: {} on date {} to {} (ADMIN RESET)", username, resetDate, endOfDay);
                 return true;
@@ -360,12 +355,17 @@ public boolean resetCheckoutTime(String username) {
         for (Attendance attendance : attendanceList) {
             if (attendance.getCheckOutTime() == null) {
                 attendance.setCheckOutTime(LocalDateTime.of(date, LocalTime.MAX)); // Set to end of the day
-                attendance.setCheckoutStatus("ADMIN_RESET"); // Also set the status here if this method is used
+                // Make sure your Attendance model has a 'checkoutStatus' field
+                // attendance.setCheckoutStatus("ADMIN_RESET");
                 attendanceRepository.save(attendance);
                 logger.warn("Checkout time reset for user {} on date {} to {}", username, date, LocalDateTime.of(date, LocalTime.MAX));
             }
         }
     }
 
-
+    @Override
+    public List<Attendance> getAttendanceRecordsForUserAndDate(Long id, LocalDate effectiveDate) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRecordsForUserAndDate'");
+    }
 }

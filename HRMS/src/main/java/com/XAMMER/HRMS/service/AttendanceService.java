@@ -30,8 +30,8 @@ public interface AttendanceService {
     Attendance getAttendanceByDate(String username, LocalDate yesterday);
     void resetCheckout(String username, LocalDate yesterday);
     List<Attendance> getUsersWithMissedCheckoutYesterday();
-    Object calculateDuration(Attendance attendance);
-    boolean resetDailyAttendance(String username);
+long calculateDuration(Attendance attendance);    boolean resetDailyAttendance(String username);
     boolean resetCheckoutTime(String username);
     boolean resetCheckoutTimeForDate(String username, LocalDate resetDate);
+    List<Attendance> getAttendanceRecordsForUserAndDate(Long id, LocalDate effectiveDate);
 }
