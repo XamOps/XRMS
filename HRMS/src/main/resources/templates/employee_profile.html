@@ -304,7 +304,7 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
 <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
 <div class="nav-links">
-<a href="/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+<a href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
 <a href="/employees/profile" class="active"><i class="fa-solid fa-users"></i> Employee</a>
 <a href="#"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
 <a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a>
@@ -480,4 +480,3 @@ function confirmLogout() {
 </script>
 </body>
 </html>
-
