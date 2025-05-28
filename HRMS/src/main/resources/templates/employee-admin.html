@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -467,782 +468,1017 @@
             <a href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
              <a href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Team Requests</a>
 
-            <!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a> -->
-            <!-- <a href="#"><i class="fa-solid fa-cog"></i> Settings</a> -->
-        </div>
+            </div>
     </div>
     <div class="logout" onclick="confirmLogout()">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
     </div>
 </div>
 
-        <!-- <div class="px-4 py-6">
-            <form action="/logout" method="post" onsubmit="return confirmLogout();">
-                <button type="submit" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium">
-                    <i class="bi bi-box-arrow-left mr-2"></i>
-                    Logout
-                </button>
-            </form>
-        </div> -->
-    <!-- </div> -->
+        <div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 sidebar-open:ml-64">
 
+    
+        <div class="header">
+            <div class="header-welcome">
+                <h1 th:text="${'EMPLOYEE MANAGEMENT ' + ' 👋'}">EMPLOYEE MANGEMENT 👋</h1>
+            </div>
+            </div>
 
-    <!-- <div class="main"> -->
-    <div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 sidebar-open:ml-64">
-
-   
-    <div class="header">
-        <div class="header-welcome">
-            <h1 th:text="${'EMPLOYEE MANAGEMENT ' + ' 👋'}">EMPLOYEE MANGEMENT 👋</h1>
-        </div>
-        </div>
-
-    <div class="flex-1 overflow-y-auto p-6">
-        <div class="bg-gray-1000 rounded-xl p-6 mb-6 shadow-lg">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="md:col-span-2">
-                    <label for="employeeSearch" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SEARCH EMPLOYEES</label>
-                    <div class="relative">
-                        <input type="text" id="searchUser" placeholder="Type to search employees..."
-                               class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                               onkeyup="suggestUsers(this.value)">
-
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <i class="bi bi-search text-gray-500"></i>
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="bg-gray-1000 rounded-xl p-6 mb-6 shadow-lg">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="employeeSearch" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SEARCH EMPLOYEES</label>
+                        <div class="relative">
+                            <input type="text" id="employeeSearch" placeholder="Search by name, username, email or ID..."
+                                   class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="bi bi-search text-gray-500"></i>
+                            </div>
                         </div>
+                        <ul id="employeeSearchResults" class="search-results absolute z-10 mt-1 w-full bg-gray-800 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto border border-gray-700"></ul>
                     </div>
-                    <ul id="employeeSearchResults" class="search-results absolute z-10 mt-1 w-full bg-gray-800 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto border border-gray-700"></ul>
-                </div>
 
-                <div>
-                    <label for="filterDepartment" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">DEPARTMENT</label>
-                    <select id="filterDepartment" class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <option value="">All Departments</option>
-                        <option value="DevOps">DevOps</option>
-                        <option value="Business">Business</option>
-                        <option value="Marketing">Marketing</option>
-                    </select>
-                </div>
-
-                <div class="flex items-end">
-                    <button onclick="filterEmployees()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide">
-                        <i class="bi bi-funnel-fill mr-2"></i>
-                        FILTER
-                    </button>
-                    <button onclick="openAddEmployeeModal()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide ml-2">
-                        <i class="bi bi-plus-circle mr-2"></i>
-                        ADD
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6" id="employeeCardsContainer">
-            </div>
-
-        <div class="flex justify-center mt-6">
-            <nav class="inline-flex rounded-md shadow">
-                <button class="pagination-btn px-3 py-1 rounded-l-md" onclick="changePage(-1)">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <button class="pagination-btn px-3 py-1 border-l border-gray-700 active">1</button>
-                <button class="pagination-btn px-3 py-1 border-l border-gray-700">2</button>
-                <button class="pagination-btn px-3 py-1 border-l border-gray-700">3</button>
-                <button class="pagination-btn px-3 py-1 border-l border-gray-700 rounded-r-md" onclick="changePage(1)">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </nav>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="addEmployeeModal">
-    <div class="modal-content">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-orange-400">Add New Employee</h3>
-                <button onclick="closeAddEmployeeModal()" class="text-gray-400 hover:text-white">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <form id="addEmployeeForm" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="firstName" class="block text-sm font-medium text-gray-400 mb-1">First Name</label>
-                        <input type="text" id="firstName" class="form-input w-full px-4 py-2 rounded-lg">
-                    </div>
-                    <div>
-                        <label for="lastName" class="block text-sm font-medium text-gray-400 mb-1">Last Name</label>
-                        <input type="text" id="lastName" class="form-input w-full px-4 py-2 rounded-lg">
-                    </div>
-                </div>
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                    <input type="email" id="email" class="form-input w-full px-4 py-2 rounded-lg">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="department" class="block text-sm font-medium text-gray-400 mb-1">Department</label>
-                        <select id="department" class="form-input w-full px-4 py-2 rounded-lg">
-                            <option value="">Select Department</option>
+                                        <div>
+                        <label for="filterDepartment" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">DEPARTMENT</label>
+                        <select id="filterDepartment" class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="">All Departments</option>
                             <option value="DevOps">DevOps</option>
                             <option value="Business">Business</option>
                             <option value="Marketing">Marketing</option>
                         </select>
                     </div>
-                    <div>
-                        <label for="position" class="block text-sm font-medium text-gray-400 mb-1">Job Title</label>
-                        <input type="text" id="position" class="form-input w-full px-4 py-2 rounded-lg">
+
+                    <div class="flex items-end">
+                        <button onclick="filterEmployees()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide">
+                            <i class="bi bi-funnel-fill mr-2"></i>
+                            FILTER
+                        </button>
+                        <button onclick="openAddEmployeeModal()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide ml-2">
+                            <i class="bi bi-plus-circle mr-2"></i>
+                            ADD
+                        </button>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="joinDate" class="block text-sm font-medium text-gray-400 mb-1">Join Date</label>
-                        <input type="date" id="joinDate" class="form-input w-full px-4 py-2 rounded-lg">
-                    </div>
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-400 mb-1">Phone</label>
-                        <input type="tel" id="phone" class="form-input w-full px-4 py-2 rounded-lg">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter password" autocomplete="new-password">
-                </div>
-
-                <div>
-                    <label for="roles" class="block text-sm font-medium text-gray-400 mb-1">Role</label>
-                    <select id="roles" class="form-input w-full px-4 py-2 rounded-lg">
-                        <option value="">Select Role</option>
-                        <option value="ROLE_USER">USER</option>
-                        <option value="ROLE_USER_MANAGER">MANAGER</option>
-                        <option value="ROLE_ADMIN">ADMIN</option>
-                    </select>
-                </div>
-
-
-
-                <div class="pt-4 flex justify-end space-x-3">
-                    <button type="button" onclick="closeAddEmployeeModal()" class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg">
-                        Add Employee
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="employeeDetailsModal">
-    <div class="modal-content">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-orange-400">Employee Details</h3>
-                <button onclick="closeEmployeeDetailsModal()" class="text-gray-400 hover:text-white">
-                    <i class="bi bi-x-lg"></i>
-                </button>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-6 mb-6">
-                <div class="flex flex-col items-center">
-                    <div class="employee-avatar w-24 h-24 mb-4" id="detailAvatar">JD</div>
-                    <span class="text-xs px-2 py-1 rounded-full status-active mb-2" id="detailStatus">Active</span>
-                    <div class="flex space-x-2">
-                        <button class="action-btn bg-transparent hover:bg-orange-500 text-orange-400 hover:text-white py-1 px-3 border border-orange-500 rounded text-sm" onclick="editEmployeeDetails()">
-                            <i class="bi bi-pencil-square mr-1"></i> Edit
-                        </button>
-                        <button class="action-btn bg-transparent hover:bg-red-500 text-red-400 hover:text-white py-1 px-3 border border-red-500 rounded text-sm" onclick="deleteEmployee()">
-                            <i class="bi bi-trash mr-1"></i> Delete
-                        </button>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6" id="employeeCardsContainer">
                 </div>
 
-                <div class="flex-1">
-                    <h4 class="text-lg font-semibold text-white mb-2" id="detailName">John Doe</h4>
-                    <p class="text-gray-400 text-sm mb-4" id="detailJobTitle">Senior Developer | EMP001</p>
+            <div class="flex justify-center mt-6">
+                <nav class="inline-flex rounded-md shadow">
+                    <button class="pagination-btn px-3 py-1 rounded-l-md" onclick="changePage(-1)">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="pagination-btn px-3 py-1 border-l border-gray-700 active">1</button>
+                    <button class="pagination-btn px-3 py-1 border-l border-gray-700">2</button>
+                    <button class="pagination-btn px-3 py-1 border-l border-gray-700">3</button>
+                    <button class="pagination-btn px-3 py-1 border-l border-gray-700 rounded-r-md" onclick="changePage(1)">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="addEmployeeModal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-orange-400">Add New Employee</h3>
+                    <button onclick="closeAddEmployeeModal()" class="text-gray-400 hover:text-white">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <form id="addEmployeeForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-400 mb-1">First Name</label>
+                            <input type="text" id="firstName" class="form-input w-full px-4 py-2 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-400 mb-1">Last Name</label>
+                            <input type="text" id="lastName" class="form-input w-full px-4 py-2 rounded-lg">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                        <input type="email" id="email" class="form-input w-full px-4 py-2 rounded-lg">
+                    </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <p class="text-gray-400 text-sm mb-1">Email</p>
-                            <p class="text-white" id="detailEmail">john.doe@xammer.com</p>
+                            <label for="department" class="block text-sm font-medium text-gray-400 mb-1">Department</label>
+                            <select id="department" class="form-input w-full px-4 py-2 rounded-lg">
+                                <option value="">Select Department</option>
+                                <option value="DevOps">DevOps</option>
+                                <option value="Business">Business</option>
+                                <option value="Marketing">Marketing</option>
+                            </select>
                         </div>
                         <div>
-                            <p class="text-gray-400 text-sm mb-1">Phone</p>
-                            <p class="text-white" id="detailPhone">+1 (555) 123-4567</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm mb-1">Department</p>
-                            <p class="text-white" id="detailDepartment">Development</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm mb-1">Join Date</p>
-                            <p class="text-white" id="detailJoinDate">May 12, 2020</p>
+                            <label for="position" class="block text-sm font-medium text-gray-400 mb-1">Job Title</label>
+                            <input type="text" id="position" class="form-input w-full px-4 py-2 rounded-lg">
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="border-t border-gray-800 pt-4">
-                <h5 class="text-md font-semibold text-orange-400 mb-3">Attendance Summary</h5>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                    <div class="bg-gray-800 p-3 rounded-lg">
-                        <p class="text-gray-400 text-sm mb-1">Total Days</p>
-                        <p class="text-white text-xl font-semibold" id="totalDays">245</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="joinDate" class="block text-sm font-medium text-gray-400 mb-1">Join Date</label>
+                            <input type="date" id="joinDate" class="form-input w-full px-4 py-2 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-400 mb-1">Phone</label>
+                            <input type="tel" id="phone" class="form-input w-full px-4 py-2 rounded-lg">
+                        </div>
                     </div>
-                    <div class="bg-gray-800 p-3 rounded-lg attendance-present">
-                        <p class="text-gray-400 text-sm mb-1">Present</p>
-                        <p class="text-white text-xl font-semibold" id="presentDays">230</p>
-                    </div>
-                    <div class="bg-gray-800 p-3 rounded-lg attendance-absent">
-                        <p class="text-gray-400 text-sm mb-1">Absent</p>
-                        <p class="text-white text-xl font-semibold" id="absentDays">15</p>
-                    </div>
+                                <div class="mb-4">
+                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" id="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter password" autocomplete="new-password">
                 </div>
-            </div>
 
-            <div class="pt-4 flex justify-end">
-                <button onclick="closeEmployeeDetailsModal()" class="btn-primary px-4 py-2 rounded-lg">
-                    Close
-                </button>
+                        <div>
+                            <label for="roles" class="block text-sm font-medium text-gray-400 mb-1">Role</label>
+                            <select id="roles" class="form-input w-full px-4 py-2 rounded-lg">
+                                <option value="">Select Role</option>
+                                <option value="ROLE_USER">USER</option>
+                                <option value="ROLE_USER_MANAGER">MANAGER</option>
+                                <option value="ROLE_ADMIN">ADMIN</option>
+                            </select>
+                        </div>
+
+                
+
+                    <div class="pt-4 flex justify-end space-x-3">
+                        <button type="button" onclick="closeAddEmployeeModal()" class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg">
+                            Add Employee
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
-<script>
-    // Get CSRF token from meta tags
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    <div class="modal-overlay" id="employeeDetailsModal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-orange-400">Employee Details</h3>
+                    <button onclick="closeEmployeeDetailsModal()" class="text-gray-400 hover:text-white">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 mb-6">
+                    <div class="flex flex-col items-center">
+                        <div class="employee-avatar w-24 h-24 mb-4" id="detailAvatar">JD</div>
+                        <span class="text-xs px-2 py-1 rounded-full status-active mb-2" id="detailStatus">Active</span>
+                        <div class="flex space-x-2">
+                            <button class="action-btn bg-transparent hover:bg-orange-500 text-orange-400 hover:text-white py-1 px-3 border border-orange-500 rounded text-sm" onclick="editEmployeeDetails()">
+                                <i class="bi bi-pencil-square mr-1"></i> Edit
+                            </button>
+                            <button class="action-btn bg-transparent hover:bg-red-500 text-red-400 hover:text-white py-1 px-3 border border-red-500 rounded text-sm" onclick="deleteEmployee()">
+                                <i class="bi bi-trash mr-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <h4 class="text-lg font-semibold text-white mb-2" id="detailName">John Doe</h4>
+                        <p class="text-gray-400 text-sm mb-1" id="detailUsername"></p> <p class="text-gray-400 text-sm mb-4" id="detailJobTitle">Senior Developer | EMP001</p>
+
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-400 text-sm mb-1">Email</p>
+                                <p class="text-white" id="detailEmail">john.doe@xammer.com</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm mb-1">Phone</p>
+                                <p class="text-white" id="detailPhone">+1 (555) 123-4567</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm mb-1">Department</p>
+                                <p class="text-white" id="detailDepartment">Development</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm mb-1">Join Date</p>
+                                <p class="text-white" id="detailJoinDate">May 12, 2020</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-800 pt-4">
+                    <h5 class="text-md font-semibold text-orange-400 mb-3">Attendance Summary</h5>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <p class="text-gray-400 text-sm mb-1">Total Days</p>
+                            <p class="text-white text-xl font-semibold" id="totalDays">245</p>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg attendance-present">
+                            <p class="text-gray-400 text-sm mb-1">Present</p>
+                            <p class="text-white text-xl font-semibold" id="presentDays">230</p>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg attendance-absent">
+                            <p class="text-gray-400 text-sm mb-1">Absent</p>
+                            <p class="text-white text-xl font-semibold" id="absentDays">15</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="closeEmployeeDetailsModal()" class="btn-primary px-4 py-2 rounded-lg">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Get CSRF token from meta tags
+// Current page for pagination
+// Get CSRF token from meta tags
+// Get CSRF token from meta tags
+const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.querySelector('.sidebar-overlay');
-    const mainContent = document.querySelector('.main');
-    const sidebarToggleButton = document.querySelector('.sidebar-toggle-button');
+    const mainContent = document.querySelector('.main'); // This was '.main', but the actual main content div is different.
+                                                       // Corrected to select the dynamically adjusting main content area.
+    const actualMainContent = document.querySelector('.flex-1.flex.flex-col.overflow-hidden');
 
-    // Current page for pagination
-    let currentPage = 1;
-    let totalPages = 1;
-    let employees = []; // This will hold all fetched employees
-    let filteredEmployees = []; // This will hold employees after search/filter
 
-    // Initialize the page
-    document.addEventListener('DOMContentLoaded', function() {
-        fetchEmployees();
-        // Removed the direct keyup listener for filterEmployees, as suggestUsers will handle it
-    });
+// Current page for pagination
+let currentPage = 1;
+let totalPages = 1;
+let employees = []; // This will hold all fetched employees
+let filteredEmployees = []; // This will hold employees after search/filter
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    fetchEmployees();
+    // Correctly target the main content area that shifts
+    const mainAreaToShift = document.querySelector('.flex-1.flex.flex-col.overflow-hidden.h-full');
+    if (!mainAreaToShift.classList.contains('sidebar-open:ml-64')) {
+         // This class is for Tailwind, if we need manual style:
+         // mainAreaToShift.style.marginLeft = '0';
+    }
+});
 
     function toggleSidebar() {
+        const mainAreaToShift = document.querySelector('.flex-1.flex.flex-col.overflow-hidden.h-full');
         sidebar.classList.toggle('open');
         sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-        mainContent.classList.toggle('sidebar-open');
+        // Toggle Tailwind class for margin, or manually adjust margin
+        if (sidebar.classList.contains('open')) {
+            mainAreaToShift.classList.add('ml-64'); // Assuming ml-64 is desired margin when open
+            mainAreaToShift.classList.remove('ml-0');
+        } else {
+            mainAreaToShift.classList.remove('ml-64');
+            mainAreaToShift.classList.add('ml-0');
+        }
     }
 
     function closeSidebar() {
+        const mainAreaToShift = document.querySelector('.flex-1.flex.flex-col.overflow-hidden.h-full');
         sidebar.classList.remove('open');
         sidebarOverlay.style.display = 'none';
-        mainContent.classList.remove('sidebar-open');
+        mainAreaToShift.classList.remove('ml-64');
+        mainAreaToShift.classList.add('ml-0');
     }
 
-    function confirmLogout() {
-        return confirm("Are you sure you want to logout?");
-    }
+function confirmLogout() {
+    // Default confirm dialog
+    // if (confirm("Are you sure you want to logout?")) {
+    //     // Create a form dynamically
+    //     const form = document.createElement('form');
+    //     form.method = 'POST';
+    //     form.action = '/logout'; // Thymeleaf will resolve this
 
-    // --- Fetch Employees from Backend (using findAll) ---
-    function fetchEmployees() {
-        console.log("Fetching employees from backend using /admin/employees/api...");
+    //     // Add CSRF token
+    //     const csrfInput = document.createElement('input');
+    //     csrfInput.type = 'hidden';
+    //     csrfInput.name = csrfHeaderName; // Use the header name for the input name as well, or specific name like _csrf
+    //     csrfInput.value = csrfToken;
+    //     form.appendChild(csrfInput);
 
-        fetch('/admin/employees/api', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeaderName]: csrfToken
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 401 || response.status === 403) {
-                        alert('Authentication failed or not authorized. Please log in again.');
-                        window.location.href = '/login';
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                }
-                return response.json();
-            })
-            .then(data => {
-                employees = data.map(user => {
-                    const displayId = user.id;
+    //     document.body.appendChild(form);
+    //     form.submit();
+    // }
+     // SweetAlert2 logout confirmation
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You will be logged out.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--primary)',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, logout!',
+        background: '#272727', // Dark background for the modal
+        color: '#E0E0E0'       // Light text color
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/logout'; // Thymeleaf should resolve this
 
-                    return {
-                        id: displayId,
-                        internalId: user.id,
-                        username: user.username,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        department: user.department,
-                        jobTitle: user.jobTitle,
-                        phone: user.phone,
-                        joinDate: user.joiningDate,
-                        presentDays: user.presentDays || 0,
-                        absentDays: user.absentDays || 0,
-                        totalDays: (user.presentDays || 0) + (user.absentDays || 0),
-                        roles: user.roles
-                    };
-                });
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            // Ensure the name matches what Spring Security expects, typically "_csrf"
+            csrfInput.name = '_csrf'; // Or use csrfHeaderName if configured that way for form posts
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
 
-                console.log("Employees array after fetching and mapping (check IDs):", employees);
-
-                filteredEmployees = [...employees];
-                renderEmployeeCards();
-                updatePagination();
-            })
-            .catch(error => {
-                console.error('Error fetching employees:', error);
-                alert('Failed to load employee data. Please try again later.');
-            });
-    }
-
-    // Render employee cards
-    function renderEmployeeCards() {
-        const container = document.getElementById('employeeCardsContainer');
-        container.innerHTML = '';
-
-        const itemsPerPage = 8;
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const employeesToRender = filteredEmployees.slice(startIndex, endIndex);
-
-        if (employeesToRender.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-500 text-lg py-10">No employees found matching your criteria.</p>';
-            return;
-        }
-
-        employeesToRender.forEach(employee => {
-            const card = document.createElement('div');
-            card.className = 'employee-card p-6 cursor-pointer';
-            card.onclick = () => {
-                console.log("Card Clicked. Viewing details for employee.id:", employee.id);
-                viewEmployeeDetails(employee.id);
-            };
-
-            const initials = employee.firstName.charAt(0) + employee.lastName.charAt(0);
-            const joinDateObj = new Date(employee.joinDate);
-            const joinDate = isNaN(joinDateObj.getTime()) ? 'N/A' : joinDateObj.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-
-            card.innerHTML = `
-                <div class="employee-avatar mb-4">${initials}</div>
-                <h3 class="text-xl font-semibold text-white text-center mb-1">${employee.firstName} ${employee.lastName}</h3>
-                <p class="text-gray-400 text-sm text-center mb-2">${employee.jobTitle}</p>
-                <div class="flex justify-between items-center mb-3">
-                    <span class="text-sm text-gray-400">${employee.id}</span>
-                    <span class="text-xs px-2 py-1 rounded-full status-active">Active</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-400">${employee.department}</span>
-                    <span class="text-orange-400">Joined: ${joinDate}</span>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    // Search functionality variables
-    let suggestionTimeout;
-    let currentFocus = -1;
-    const searchResultsList = document.getElementById('employeeSearchResults');
-    const searchInput = document.getElementById('searchUser');
-
-    function suggestUsers(searchText) {
-        clearTimeout(suggestionTimeout);
-
-        if (searchText.trim() === "") {
-            searchResultsList.style.display = 'none';
-            searchResultsList.innerHTML = '';
-            currentFocus = -1;
-            // When search box is empty, show all employees
-            filteredEmployees = [...employees];
-            currentPage = 1;
-            renderEmployeeCards();
-            updatePagination();
-            return;
-        }
-
-        suggestionTimeout = setTimeout(() => {
-            const results = employees.filter(emp =>
-                emp.firstName.toLowerCase().includes(searchText.toLowerCase()) ||
-                emp.lastName.toLowerCase().includes(searchText.toLowerCase()) ||
-                emp.email.toLowerCase().includes(searchText.toLowerCase()) ||
-                emp.id.toString().toLowerCase().includes(searchText.toLowerCase())
-            );
-
-            searchResultsList.innerHTML = '';
-            currentFocus = -1;
-
-            if (results.length > 0) {
-                searchResultsList.style.display = 'block';
-                results.slice(0, 5).forEach(employee => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${employee.firstName} ${employee.lastName} (${employee.id})`;
-                    listItem.classList.add('px-4', 'py-2', 'cursor-pointer', 'hover:bg-orange-600', 'hover:text-white', 'rounded-md');
-                    listItem.onclick = () => {
-                        searchInput.value = `${employee.firstName} ${employee.lastName}`;
-                        searchResultsList.style.display = 'none';
-                        // Filter the employee cards to show just this selected employee
-                        filteredEmployees = [employee];
-                        currentPage = 1;
-                        renderEmployeeCards();
-                        updatePagination();
-                    };
-                    searchResultsList.appendChild(listItem);
-                });
-            } else {
-                searchResultsList.innerHTML = '<li class="px-4 py-2 text-gray-400">No matching employees found</li>';
-                searchResultsList.style.display = 'block';
-            }
-        }, 300); // Debounce time for suggestions
-    }
-
-    // Keyboard navigation for search suggestions
-    searchInput.addEventListener("keydown", function(e) {
-        const items = searchResultsList.getElementsByTagName("li");
-
-        if (e.key === "ArrowDown") {
-            currentFocus++;
-            addActive(items);
-            e.preventDefault(); // Prevent cursor from moving in input
-        } else if (e.key === "ArrowUp") {
-            currentFocus--;
-            addActive(items);
-            e.preventDefault(); // Prevent cursor from moving in input
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            if (currentFocus > -1 && items[currentFocus]) {
-                items[currentFocus].click(); // Simulate a click on the active item
-            } else {
-                // If no suggestion is selected, perform a general filter based on current input
-                filterEmployees();
-                searchResultsList.style.display = 'none'; // Hide suggestions after search
-            }
-        } else if (e.key === "Escape") { // Added Escape key to close suggestions
-            searchResultsList.style.display = 'none';
-            currentFocus = -1;
+            document.body.appendChild(form);
+            form.submit();
         }
     });
+}
 
-    // Close suggestions when clicking outside
-    document.addEventListener("click", function(e) {
-        if (!searchInput.contains(e.target) && !searchResultsList.contains(e.target)) {
-            searchResultsList.style.display = 'none';
+
+// --- Fetch Employees from Backend (using findAll) ---
+function fetchEmployees() {
+    console.log("Fetching employees from backend using /admin/employees/api...");
+
+    // Using fetch API to call your existing findAll() method
+    fetch('/admin/employees/api', { // Assuming your backend has an endpoint like this for findAll()
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            [csrfHeaderName]: csrfToken // Include CSRF if your backend requires it for GET (usually not needed)
         }
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                alert('Authentication failed or not authorized. Please log in again.');
+                window.location.href = '/login';
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        }
+        return response.json();
+    })
+.then(data => {
+    employees = data.map(user => {
+        const displayId = user.id; 
+
+        return {
+            id: displayId, 
+            internalId: user.id, 
+            username: user.username, // Make sure username is available
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            department: user.department,
+            jobTitle: user.jobTitle,
+            phone: user.phone,
+            joinDate: user.joiningDate, 
+            presentDays: user.presentDays || 0,
+            absentDays: user.absentDays || 0,
+            totalDays: (user.presentDays || 0) + (user.absentDays || 0),
+            roles: user.roles,
+            password: user.password // Assuming password might be needed for edit, though typically not sent back
+        };
     });
 
+    console.log("Employees array after fetching and mapping (check IDs and usernames):", employees); 
 
-    function addActive(items) {
-        if (!items) return;
+    filteredEmployees = [...employees];
+    renderEmployeeCards();
+    updatePagination();
+})
+    .catch(error => {
+        console.error('Error fetching employees:', error);
+        alert('Failed to load employee data. Please try again later.');
+    });
+}
 
-        // Remove active class from all items
-        for (let i = 0; i < items.length; i++) {
-            items[i].classList.remove("bg-orange-600", "text-white");
-        }
+// Render employee cards
+function renderEmployeeCards() {
+    const container = document.getElementById('employeeCardsContainer');
+    container.innerHTML = '';
 
-        // Add active class to current item
-        if (currentFocus >= items.length) currentFocus = 0;
-        if (currentFocus < 0) currentFocus = items.length - 1;
+    const itemsPerPage = 8;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const employeesToRender = filteredEmployees.slice(startIndex, endIndex);
 
-        if (items[currentFocus]) {
-            items[currentFocus].classList.add("bg-orange-600", "text-white");
-            items[currentFocus].scrollIntoView({
-                block: "nearest"
-            });
-        }
+    if (employeesToRender.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 text-lg py-10">No employees found matching your criteria.</p>';
+        return;
     }
 
-    function filterEmployees() {
-        const searchText = document.getElementById('searchUser').value.toLowerCase();
-        const department = document.getElementById('filterDepartment').value;
-
-        // Ensure suggestions are hidden when the "Filter" button is explicitly used
-        searchResultsList.style.display = 'none';
-
-
-        filteredEmployees = employees.filter(employee => {
-            const nameMatch = `${employee.firstName} ${employee.lastName}`.toLowerCase().includes(searchText) ||
-                employee.email.toLowerCase().includes(searchText) ||
-                employee.id.toString().toLowerCase().includes(searchText); // Filter by frontend ID
-            const departmentMatch = department === '' || employee.department === department;
-
-            return nameMatch && departmentMatch;
-        });
-
-        currentPage = 1;
-        renderEmployeeCards();
-        updatePagination();
-    }
-
-    // Pagination functions
-    function changePage(direction) {
-        if (direction === -1 && currentPage > 1) {
-            currentPage--;
-        } else if (direction === 1 && currentPage < totalPages) {
-            currentPage++;
-        }
-
-        renderEmployeeCards();
-        updatePagination();
-    }
-
-    function updatePagination() {
-        const itemsPerPage = 8;
-        totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
-
-        const paginationContainer = document.querySelector('.inline-flex.rounded-md.shadow');
-        paginationContainer.innerHTML = '';
-
-        const prevButton = document.createElement('button');
-        prevButton.className = 'pagination-btn px-3 py-1 rounded-l-md';
-        prevButton.onclick = () => changePage(-1);
-        prevButton.disabled = currentPage === 1;
-        prevButton.innerHTML = '<i class="bi bi-chevron-left"></i>';
-        paginationContainer.appendChild(prevButton);
-
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.className = `pagination-btn px-3 py-1 border-l border-gray-700 ${i === currentPage ? 'active' : ''}`;
-            pageButton.textContent = i;
-            pageButton.onclick = (function(page) {
-                return function() {
-                    currentPage = page;
-                    renderEmployeeCards();
-                    updatePagination();
-                };
-            })(i);
-            paginationContainer.appendChild(pageButton);
-        }
-
-        const nextButton = document.createElement('button');
-        nextButton.className = 'pagination-btn px-3 py-1 border-l border-gray-700 rounded-r-md';
-        nextButton.onclick = () => changePage(1);
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.innerHTML = '<i class="bi bi-chevron-right"></i>';
-        paginationContainer.appendChild(nextButton);
-    }
-
-    // Modal functions
-    function openAddEmployeeModal() {
-        document.getElementById('addEmployeeModal').classList.add('active');
-    }
-
-    function closeAddEmployeeModal() {
-        document.getElementById('addEmployeeModal').classList.remove('active');
-        // Reset form and modal title/button when closing
-        document.getElementById('addEmployeeForm').reset();
-        document.getElementById('addEmployeeForm').removeAttribute('data-employee-id');
-        document.getElementById('addEmployeeForm').removeAttribute('data-internal-id'); // Clear internal ID
-        document.querySelector('#addEmployeeModal h3').textContent = 'Add New Employee';
-        document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Add Employee';
-    }
-
-    function viewEmployeeDetails(employeeId) {
-        console.log("viewEmployeeDetails called with employeeId:", employeeId);
-        const employee = employees.find(emp => emp.id === employeeId);
-        if (!employee) {
-            console.error("Employee not found in 'employees' array for ID:", employeeId);
-            return;
-        }
-        console.log("Found employee object:", employee);
-
-        const joinDateObj = new Date(employee.joinDate);
-        const joinDate = isNaN(joinDateObj.getTime()) ? 'N/A' : joinDateObj.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-
-        document.getElementById('detailAvatar').textContent =
-            employee.firstName.charAt(0) + employee.lastName.charAt(0);
-        document.getElementById('detailName').textContent =
-            `${employee.firstName} ${employee.lastName}`;
-        document.getElementById('detailJobTitle').textContent =
-            `${employee.jobTitle} | ${employee.id}`;
-        document.getElementById('detailEmail').textContent = employee.email;
-        document.getElementById('detailPhone').textContent = employee.phone;
-        document.getElementById('detailDepartment').textContent = employee.department;
-        document.getElementById('detailJoinDate').textContent = joinDate;
-        document.getElementById('totalDays').textContent = employee.totalDays;
-        document.getElementById('presentDays').textContent = employee.presentDays;
-        document.getElementById('absentDays').textContent = employee.absentDays;
-
-        document.getElementById('employeeDetailsModal').setAttribute('data-employee-id', employee.id);
-        document.getElementById('employeeDetailsModal').setAttribute('data-internal-id', employee.internalId);
-        document.getElementById('employeeDetailsModal').classList.add('active');
-    }
-
-    function closeEmployeeDetailsModal() {
-        document.getElementById('employeeDetailsModal').classList.remove('active');
-    }
-
-    function editEmployeeDetails() {
-        console.log("editEmployeeDetails function called!");
-
-        const employeeIdString = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
-        const internalIdString = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id');
-
-        const employeeId = parseInt(employeeIdString);
-        const internalId = parseInt(internalIdString);
-
-        console.log("Employee ID from modal (frontend - parsed):", employeeId);
-        console.log("Internal ID from modal (backend - parsed):", internalId);
-
-        if (isNaN(employeeId) || isNaN(internalId)) {
-            console.error("Error: Employee ID or Internal ID is not a valid number.");
-            return;
-        }
-
-        // Find the employee using the employeeId (which is the backend's ID)
-        const employee = employees.find(emp => emp.id === employeeId);
-
-        if (employee) {
-            // Populate the add/edit employee modal with existing data
-            document.getElementById('firstName').value = employee.firstName;
-            document.getElementById('lastName').value = employee.lastName;
-            document.getElementById('email').value = employee.email;
-            document.getElementById('department').value = employee.department;
-            document.getElementById('position').value = employee.jobTitle;
-            document.getElementById('joinDate').value = employee.joinDate; // Date input expects YYYY-MM-DD
-            document.getElementById('phone').value = employee.phone;
-            document.getElementById('roles').value = employee.roles[0]; // Assuming one role for simplicity
-
-            // Set the modal title and button text for editing
-            document.querySelector('#addEmployeeModal h3').textContent = 'Edit Employee';
-            document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Save Changes';
-
-            // Store the employee's ID on the form for submission
-            document.getElementById('addEmployeeForm').setAttribute('data-employee-id', employee.id);
-            document.getElementById('addEmployeeForm').setAttribute('data-internal-id', employee.internalId); // CRUCIAL for backend update
-
-            // Open the modal
-            openAddEmployeeModal();
-            closeEmployeeDetailsModal(); // Close details modal after opening edit modal
-        } else {
-            console.error("Employee not found for editing with ID:", employeeId);
-            alert("Error: Employee not found for editing.");
-        }
-    }
-
-
-    // Handle Add/Edit Employee Form Submission
-    document.getElementById('addEmployeeForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        const employeeId = document.getElementById('addEmployeeForm').getAttribute('data-employee-id');
-        const internalId = document.getElementById('addEmployeeForm').getAttribute('data-internal-id'); // Get internal ID
-
-        const isEditing = !!employeeId; // Check if employeeId exists for editing
-
-        const employeeData = {
-            id: isEditing ? internalId : null, // Use internalId for updates, null for new
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            email: document.getElementById('email').value,
-            department: document.getElementById('department').value,
-            jobTitle: document.getElementById('position').value,
-            joiningDate: document.getElementById('joinDate').value,
-            phone: document.getElementById('phone').value,
-            password: document.getElementById('password').value,
-            roles: [document.getElementById('roles').value]
+    employeesToRender.forEach(employee => {
+        const card = document.createElement('div');
+        card.className = 'employee-card p-6 cursor-pointer';
+        card.onclick = () => {
+            console.log("Card Clicked. Viewing details for employee.id:", employee.id); 
+            viewEmployeeDetails(employee.id);
         };
 
-        let url = '/admin/employees/add'; // Default for adding
-        let method = 'POST';
+        const initials = employee.firstName.charAt(0) + employee.lastName.charAt(0);
+        const joinDateObj = new Date(employee.joinDate);
+        const joinDate = isNaN(joinDateObj.getTime()) ? 'N/A' : joinDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-        if (isEditing) {
-            url = `/admin/employees/update/${internalId}`; // Use internalId for update endpoint
-            method = 'PUT';
+        card.innerHTML = `
+            <div class="employee-avatar mb-4">${initials}</div>
+            <h3 class="text-xl font-semibold text-white text-center mb-1">${employee.firstName} ${employee.lastName}</h3>
+            <p class="text-gray-400 text-sm text-center mb-0">${employee.username || ''}</p> <p class="text-gray-400 text-sm text-center mb-2">${employee.jobTitle}</p>
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm text-gray-400">ID: ${employee.id}</span>
+                <span class="text-xs px-2 py-1 rounded-full status-active">Active</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-400">${employee.department}</span>
+                <span class="text-orange-400">Joined: ${joinDate}</span>
+            </div>
+            <div class="mt-3 flex justify-between text-xs">
+                <span class="px-2 py-1 rounded attendance-present">Present: ${employee.presentDays}</span>
+                <span class="px-2 py-1 rounded attendance-absent">Absent: ${employee.absentDays}</span>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Employee search functionality (dynamic suggestions)
+document.getElementById('employeeSearch').addEventListener('input', function(e) {
+    const searchText = e.target.value.trim().toLowerCase();
+    if (searchText.length > 1) { // Start searching after 1 character
+        searchEmployees(searchText);
+    } else {
+        document.getElementById('employeeSearchResults').style.display = 'none';
+        // If search box is cleared, revert to showing employees based on current department filter
+        filterEmployees(); 
+    }
+});
+
+function searchEmployees(query) {
+    const results = employees.filter(emp =>
+        emp.firstName.toLowerCase().includes(query) ||
+        emp.lastName.toLowerCase().includes(query) ||
+        (emp.username && emp.username.toLowerCase().includes(query)) || // Search by username
+        emp.email.toLowerCase().includes(query) ||
+        emp.id.toString().toLowerCase().includes(query) 
+    );
+
+    const resultsList = document.getElementById('employeeSearchResults');
+    resultsList.innerHTML = '';
+
+    if (results.length > 0) {
+        results.forEach(employee => {
+            const li = document.createElement('li');
+            li.textContent = `${employee.firstName} ${employee.lastName} (${employee.username || employee.id})`; // Show username or ID
+            li.className = 'px-4 py-2 cursor-pointer hover:bg-orange-600 hover:text-white rounded-md';
+            li.onclick = function() {
+                document.getElementById('employeeSearch').value = `${employee.firstName} ${employee.lastName}`;
+                resultsList.style.display = 'none';
+                console.log("Search Result Clicked. Viewing details for employee.id:", employee.id); 
+                viewEmployeeDetails(employee.id); 
+            };
+            resultsList.appendChild(li);
+        });
+        resultsList.style.display = 'block';
+    } else {
+        const li = document.createElement('li');
+        li.textContent = 'No matching employees found';
+        li.className = 'px-4 py-2 text-gray-400';
+        resultsList.appendChild(li);
+        resultsList.style.display = 'block';
+    }
+}
+
+// Filter button functionality
+function filterEmployees() {
+    const searchText = document.getElementById('employeeSearch').value.toLowerCase();
+    const department = document.getElementById('filterDepartment').value;
+
+    filteredEmployees = employees.filter(employee => {
+        const nameMatch = `${employee.firstName} ${employee.lastName}`.toLowerCase().includes(searchText) ||
+                             (employee.username && employee.username.toLowerCase().includes(searchText)) || // Filter by username
+                             employee.email.toLowerCase().includes(searchText) ||
+                             employee.id.toString().toLowerCase().includes(searchText); 
+        const departmentMatch = department === '' || employee.department === department;
+
+        return nameMatch && departmentMatch;
+    });
+
+    currentPage = 1;
+    renderEmployeeCards();
+    updatePagination();
+    document.getElementById('employeeSearchResults').style.display = 'none'; // Hide suggestions after filtering
+}
+
+
+// Pagination functions
+function changePage(direction) {
+    if (direction === -1 && currentPage > 1) {
+        currentPage--;
+    } else if (direction === 1 && currentPage < totalPages) {
+        currentPage++;
+    }
+
+    renderEmployeeCards();
+    updatePagination();
+}
+
+function updatePagination() {
+    const itemsPerPage = 8;
+    totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+    if (totalPages < 1) totalPages = 1; // Ensure at least one page even if no results
+
+    const paginationContainer = document.querySelector('.inline-flex.rounded-md.shadow');
+    paginationContainer.innerHTML = ''; // Clear existing buttons
+
+    const prevButton = document.createElement('button');
+    prevButton.className = 'pagination-btn px-3 py-1 rounded-l-md';
+    prevButton.onclick = () => changePage(-1);
+    prevButton.disabled = currentPage === 1;
+    prevButton.innerHTML = '<i class="bi bi-chevron-left"></i>';
+    paginationContainer.appendChild(prevButton);
+
+    // Determine range of page numbers to display (e.g., max 5 buttons)
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (endPage - startPage + 1 < Math.min(5, totalPages)) {
+        if (startPage === 1) {
+            endPage = Math.min(startPage + 4, totalPages);
+        } else {
+            startPage = Math.max(endPage - 4, 1);
         }
+    }
 
-        fetch(url, {
-                method: method,
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.className = `pagination-btn px-3 py-1 border-l border-gray-700 ${i === currentPage ? 'active' : ''}`;
+        pageButton.textContent = i;
+        pageButton.onclick = (function(page) { // IIFE to capture correct page number
+            return function() {
+                currentPage = page;
+                renderEmployeeCards();
+                updatePagination(); // Re-render pagination to update active state
+            };
+        })(i);
+        paginationContainer.appendChild(pageButton);
+    }
+
+    const nextButton = document.createElement('button');
+    nextButton.className = 'pagination-btn px-3 py-1 border-l border-gray-700 rounded-r-md';
+    nextButton.onclick = () => changePage(1);
+    nextButton.disabled = currentPage === totalPages || totalPages === 0;
+    nextButton.innerHTML = '<i class="bi bi-chevron-right"></i>';
+    paginationContainer.appendChild(nextButton);
+}
+
+
+// Modal functions
+function openAddEmployeeModal() {
+    document.getElementById('addEmployeeModal').classList.add('active');
+}
+
+function closeAddEmployeeModal() {
+    document.getElementById('addEmployeeModal').classList.remove('active');
+    document.getElementById('addEmployeeForm').reset();
+    document.getElementById('addEmployeeForm').removeAttribute('data-employee-id');
+    document.getElementById('addEmployeeForm').removeAttribute('data-internal-id'); 
+    document.querySelector('#addEmployeeModal h3').textContent = 'Add New Employee';
+    document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Add Employee';
+    document.getElementById('password').disabled = false; // Re-enable password field for add mode
+}
+
+function viewEmployeeDetails(employeeId) {
+    console.log("viewEmployeeDetails called with employeeId:", employeeId); 
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (!employee) {
+        console.error("Employee not found in 'employees' array for ID:", employeeId); 
+        return;
+    }
+    console.log("Found employee object:", employee); 
+
+    const joinDateObj = new Date(employee.joinDate);
+    const joinDate = isNaN(joinDateObj.getTime()) ? 'N/A' : joinDateObj.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    document.getElementById('detailAvatar').textContent =
+        employee.firstName.charAt(0) + employee.lastName.charAt(0);
+    document.getElementById('detailName').textContent =
+        `${employee.firstName} ${employee.lastName}`;
+    document.getElementById('detailUsername').textContent = employee.username ? `Username: ${employee.username}` : ''; // Display username
+    document.getElementById('detailJobTitle').textContent =
+        `${employee.jobTitle} | ID: ${employee.id}`; 
+    document.getElementById('detailEmail').textContent = employee.email;
+    document.getElementById('detailPhone').textContent = employee.phone;
+    document.getElementById('detailDepartment').textContent = employee.department;
+    document.getElementById('detailJoinDate').textContent = joinDate;
+    document.getElementById('totalDays').textContent = employee.totalDays;
+    document.getElementById('presentDays').textContent = employee.presentDays;
+    document.getElementById('absentDays').textContent = employee.absentDays;
+
+    document.getElementById('employeeDetailsModal').setAttribute('data-employee-id', employee.id);
+    document.getElementById('employeeDetailsModal').setAttribute('data-internal-id', employee.internalId); 
+    document.getElementById('employeeDetailsModal').classList.add('active');
+}
+
+function closeEmployeeDetailsModal() {
+    document.getElementById('employeeDetailsModal').classList.remove('active');
+}
+
+function editEmployeeDetails() {
+    console.log("editEmployeeDetails function called!");
+
+    const employeeIdString = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
+    const internalIdString = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id');
+
+    const employeeId = parseInt(employeeIdString);
+    const internalId = parseInt(internalIdString);
+
+
+    if (isNaN(employeeId) || isNaN(internalId)) {
+        console.error("Error: Employee ID or Internal ID is not a valid number.");
+        return; 
+    }
+
+    const employee = employees.find(emp => emp.id === employeeId);
+
+    if (!employee) { 
+        console.error("Employee not found in 'employees' array for ID:", employeeId);
+        return; 
+    }
+    console.log("Found employee object for edit:", employee);
+
+
+    document.getElementById('firstName').value = employee.firstName;
+    document.getElementById('lastName').value = employee.lastName;
+    document.getElementById('email').value = employee.email;
+    document.getElementById('department').value = employee.department;
+    // Do NOT pre-fill password for editing for security reasons.
+    // Only allow changing it. The backend should handle empty password as "no change".
+    document.getElementById('password').value = ""; // Clear password field
+    document.getElementById('password').placeholder = "Enter new password (optional)";
+    // document.getElementById('password').disabled = true; // Optionally disable for edit, or allow change
+
+    document.getElementById('roles').value = employee.roles;
+    document.getElementById('position').value = employee.jobTitle; 
+    
+    if (employee.joinDate) {
+        const joinDate = new Date(employee.joinDate);
+        const formattedJoinDate = joinDate.toISOString().split('T')[0];
+        document.getElementById('joinDate').value = formattedJoinDate;
+    } else {
+        document.getElementById('joinDate').value = ''; 
+    }
+
+    document.getElementById('phone').value = employee.phone;
+
+    document.querySelector('#addEmployeeModal h3').textContent = 'Edit Employee';
+    document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Update Employee';
+
+    document.getElementById('addEmployeeForm').setAttribute('data-employee-id', employeeId); 
+    document.getElementById('addEmployeeForm').setAttribute('data-internal-id', internalId);
+
+    closeEmployeeDetailsModal();
+    openAddEmployeeModal();
+}
+
+function deleteEmployee() {
+    const employeeId = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
+    const internalId = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id'); // Use internalId for API calls
+
+    if (!internalId) {
+        alert("Error: Employee's internal ID not found for deletion.");
+        return;
+    }
+
+    // Using SweetAlert2 for confirmation
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you want to delete employee ${employeeId}? This action cannot be undone.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--primary)', // Use your theme color
+        cancelButtonColor: '#d33', // Standard cancel color
+        confirmButtonText: 'Yes, delete it!',
+        background: '#272727', // Dark background for the modal
+        color: '#E0E0E0'       // Light text color for the modal
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log(`Deleting employee with internal ID ${internalId}`);
+
+            fetch(`/admin/employees/api/${internalId}`, { 
+                method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
                     [csrfHeaderName]: csrfToken
-                },
-                body: JSON.stringify(employeeData)
+                }
             })
             .then(response => {
                 if (!response.ok) {
-                    // Check for specific error status codes
-                    if (response.status === 400) {
-                        return response.json().then(err => {
-                            throw new Error(err.message || 'Validation failed. Please check your input.');
-                        });
-                    } else if (response.status === 401 || response.status === 403) {
-                        alert('Authentication failed or not authorized. Please log in again.');
-                        window.location.href = '/login';
-                        throw new Error('Unauthorized'); // Stop further processing
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (response.status === 404) {
+                        throw new Error('Employee not found on the server.');
                     }
+                     // Try to parse error message from backend if available
+                    return response.text().then(text => { // Use text() first, then try json() if it might be JSON
+                        try {
+                            const errorData = JSON.parse(text);
+                            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                        } catch (e) {
+                            throw new Error(text || `HTTP error! status: ${response.status}`); // Fallback to raw text
+                        }
+                    });
                 }
-                return response.json();
+                 // Check if response has content before trying to parse as JSON
+                return response.text().then(text => {
+                    return text ? JSON.parse(text) : {}; // Return empty object if no content
+                });
             })
-            .then(data => {
-                alert(`Employee ${isEditing ? 'updated' : 'added'} successfully!`);
-                closeAddEmployeeModal();
-                fetchEmployees(); // Re-fetch all employees to update the list
+            .then(data => { // data might be empty if DELETE returns 204 No Content
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: `Employee ${employeeId} has been deleted.`,
+                    icon: 'success',
+                    background: '#272727',
+                    color: '#E0E0E0',
+                    confirmButtonColor: 'var(--primary)'
+                });
+                closeEmployeeDetailsModal();
+                fetchEmployees(); // Refresh the list
             })
             .catch(error => {
-                console.error(`Error ${isEditing ? 'updating' : 'adding'} employee:`, error);
-                alert(`Failed to ${isEditing ? 'update' : 'add'} employee: ${error.message || 'An unexpected error occurred.'}`);
-            });
-    });
-
-    function deleteEmployee() {
-        const employeeIdString = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
-        const internalIdString = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id');
-        const employeeName = document.getElementById('detailName').textContent;
-
-        const employeeId = parseInt(employeeIdString);
-        const internalId = parseInt(internalIdString);
-
-        if (isNaN(employeeId) || isNaN(internalId)) {
-            console.error("Error: Employee ID or Internal ID is not a valid number for deletion.");
-            return;
-        }
-
-        if (confirm(`Are you sure you want to delete employee: ${employeeName} (ID: ${employeeId})? This action cannot be undone.`)) {
-            fetch(`/admin/employees/delete/${internalId}`, { // Use internalId for deletion
-                    method: 'DELETE',
-                    headers: {
-                        [csrfHeaderName]: csrfToken
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        if (response.status === 401 || response.status === 403) {
-                            alert('Authentication failed or not authorized. Please log in again.');
-                            window.location.href = '/login';
-                            throw new Error('Unauthorized');
-                        } else {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                    }
-                    alert('Employee deleted successfully!');
-                    closeEmployeeDetailsModal();
-                    fetchEmployees(); // Re-fetch employees to update the list
-                })
-                .catch(error => {
-                    console.error('Error deleting employee:', error);
-                    alert('Failed to delete employee. Please try again.');
+                console.error('Error deleting employee:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: `Failed to delete employee: ${error.message}. Please try again later.`,
+                    icon: 'error',
+                    background: '#272727',
+                    color: '#E0E0E0',
+                    confirmButtonColor: 'var(--primary)'
                 });
+            });
         }
+    });
+}
+
+
+
+// Form submission (Add/Edit)
+document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const isEdit = this.hasAttribute('data-internal-id') && this.getAttribute('data-internal-id') !== 'null' && this.getAttribute('data-internal-id') !== '';
+    const internalId = isEdit ? this.getAttribute('data-internal-id') : null;
+    const existingFrontendId = isEdit ? this.getAttribute('data-employee-id') : null; // This is the original 'id' from the frontend list
+
+    const passwordValue = document.getElementById('password').value;
+
+    const userToSave = {
+        // For EDIT, 'id' is the backend's primary key (internalId)
+        // For ADD, 'id' should be null or undefined for the backend to generate it.
+        id: internalId, 
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        department: document.getElementById('department').value,
+        jobTitle: document.getElementById('position').value,
+        joiningDate: document.getElementById('joinDate').value,
+        phone: document.getElementById('phone').value,
+        username: document.getElementById('email').value.split('@')[0], // Or a dedicated username field if you add one
+        roles: document.getElementById('roles').value,
+        // Only include password if it's a new user or if it's being changed for an existing user
+        ...(isEdit && passwordValue === '' ? {} : { password: passwordValue }), // Send password only if not empty during edit or for new user
+        employeeId: existingFrontendId // This field might be specific to your UserDTO or entity on backend
+                                     // If your backend User entity's primary key is 'id', this might be redundant
+                                     // or used for a separate "employee ID" string.
+                                     // Ensure your backend DTO matches this structure.
+    };
+    
+    // If it's an add operation and you want a specific employeeId string (not the PK), set it here
+    // if (!isEdit) {
+    //    userToSave.employeeId = generateSomeEmployeeId(); // e.g., 'EMP' + Date.now() or from a field
+    // }
+
+
+    let url;
+    let method;
+
+    if (isEdit) {
+        url = `/admin/employees/api/${internalId}`; 
+        method = 'PUT';
+    } else {
+        url = '/admin/employees/api'; 
+        method = 'POST';
     }
-</script>
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            [csrfHeaderName]: csrfToken
+        },
+        body: JSON.stringify(userToSave)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => { // Assuming error response is JSON
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                if (errorData && errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData && typeof errorData === 'string') {
+                    errorMessage = errorData;
+                }
+                // Check for specific validation errors if your backend sends them
+                if (errorData && errorData.errors) {
+                    errorMessage += ": " + errorData.errors.map(err => err.defaultMessage || err.field).join(", ");
+                }
+                throw new Error(errorMessage);
+            });
+        }
+        return response.json();
+    })
+    .then(returnedUser => {
+        // SweetAlert2 for success
+        Swal.fire({
+            title: 'Success!',
+            text: `Employee ${returnedUser.firstName} ${returnedUser.lastName} ${isEdit ? 'updated' : 'added'} successfully!`,
+            icon: 'success',
+            background: '#272727',
+            color: '#E0E0E0',
+            confirmButtonColor: 'var(--primary)'
+        });
+        closeAddEmployeeModal(); // This also resets the form
+        fetchEmployees(); // Refresh data
+    })
+    .catch(error => {
+        console.error(`Error ${isEdit ? 'updating' : 'adding'} employee:`, error);
+         Swal.fire({
+            title: 'Error!',
+            text: `Failed to ${isEdit ? 'update' : 'add'} employee: ${error.message}. Please check inputs and try again.`,
+            icon: 'error',
+            background: '#272727',
+            color: '#E0E0E0',
+            confirmButtonColor: 'var(--primary)'
+        });
+    });
+});
+
+
+// Close modals when clicking outside
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) { // Only close if the overlay itself is clicked, not content
+            if (this.id === 'addEmployeeModal') {
+                closeAddEmployeeModal();
+            } else if (this.id === 'employeeDetailsModal') {
+                closeEmployeeDetailsModal();
+            } else {
+                 this.classList.remove('active');
+            }
+        }
+    });
+});
+
+// Prevent modal content from closing when clicking inside
+document.querySelectorAll('.modal-content').forEach(content => {
+    content.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+
+// This function `suggestUsers` and its related variables (searchInput, searchResultsList, suggestionTimeout, currentFocus)
+// are for the *commented-out* search bar (`id="searchUser"`).
+// The main employee search is handled by `id="employeeSearch"` and the `searchEmployees` function.
+// If you intend to use the `id="searchUser"` input, uncomment it in the HTML and ensure this function is correctly wired.
+let searchInput = document.getElementById('searchUser'); // This will be null if the element is commented out
+let searchResultsList = document.getElementById('searchResults'); // This will be null
+let suggestionTimeout;
+let currentFocus = -1;
+
+function suggestUsers(searchText) { // This function is currently wired to #employeeSearch's onkeyup in original code.
+                                    // However, the event listener on #employeeSearch uses searchEmployees.
+                                    // This suggests a potential mix-up or an intended separate functionality.
+                                    // For now, this function will operate on #searchUser and #searchResults if they exist.
+    if (!searchInput || !searchResultsList) { // Guard against null elements if they are commented out
+        console.log("suggestUsers: searchUser input or searchResults list not found. Ensure they are in the HTML and not commented out if this functionality is desired.");
+        return;
+    }
+
+    clearTimeout(suggestionTimeout);
+    if (searchText.trim() === "") {
+        searchResultsList.style.display = 'none';
+        searchResultsList.innerHTML = ''; 
+        currentFocus = -1; 
+        return;
+    }
+
+    suggestionTimeout = setTimeout(() => {
+        $.ajax({
+            url: '/admin/users/suggestions', // This endpoint needs to exist on your backend
+            type: 'GET',
+            data: { query: searchText },
+            beforeSend: (xhr) => {
+                xhr.setRequestHeader(csrfHeaderName, csrfToken); // Corrected variable name
+            },
+            success: (data) => {
+                searchResultsList.innerHTML = '';
+                currentFocus = -1; 
+
+                if (data && data.length > 0) {
+                    searchResultsList.style.display = 'block';
+                    data.slice(0, 5).forEach(user => { 
+                        const listItem = document.createElement('li');
+                        listItem.textContent = user; // Assuming 'user' is a string here (e.g., username or full name)
+                        listItem.classList.add('px-4', 'py-2', 'cursor-pointer', 'hover:bg-orange-600', 'hover:text-white', 'rounded-md'); 
+                        listItem.onclick = () => {
+                            searchInput.value = user; // Set the value of #searchUser
+                            searchResultsList.style.display = 'none';
+                            // Potentially trigger a filter or action based on this selection
+                        };
+                        searchResultsList.appendChild(listItem);
+                    });
+                } else {
+                    searchResultsList.innerHTML = '<li class="px-4 py-2 text-gray-400">No matching employees found</li>';
+                    searchResultsList.style.display = 'block'; 
+                }
+            },
+            error: (error) => {
+                console.error('Error fetching user suggestions:', error);
+                searchResultsList.innerHTML = '<li class="px-4 py-2 text-red-400">Error fetching suggestions</li>';
+                searchResultsList.style.display = 'block';
+            }
+        });
+    }, 300); 
+}
+
+// Keyboard navigation for the #searchUser suggestions (if it's used)
+if (searchInput) { // Add event listener only if searchInput exists
+    searchInput.addEventListener("keydown", function(e) {
+        let x = document.getElementById("searchResults"); // Target #searchResults
+        if (x) x = x.getElementsByTagName("li");
+        if (!x || x.length === 0) return; // No suggestions to navigate
+
+        if (e.keyCode == 40) { // Down arrow
+            currentFocus++;
+            addActive(x);
+            e.preventDefault(); 
+        } else if (e.keyCode == 38) { // Up arrow
+            currentFocus--;
+            addActive(x);
+            e.preventDefault(); 
+        } else if (e.keyCode == 13) { // Enter key
+            e.preventDefault();
+            if (currentFocus > -1) {
+                if (x) x[currentFocus].click();
+            } else {
+                searchResultsList.style.display = 'none';
+            }
+        }
+    });
+}
+
+function addActive(x) {
+    if (!x) return false;
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    x[currentFocus].classList.add("active-suggestion"); // Use a specific class for active suggestion
+}
+
+function removeActive(x) {
+    for (var i = 0; i < x.length; i++) {
+        x[i].classList.remove("active-suggestion");
+    }
+}
+
+// The confirmLogout function was already defined earlier with SweetAlert2,
+// this one is a simpler version. Ensure only one is active or reconcile them.
+// function confirmLogout() {
+//     if (confirm("Are you sure you want to logout?")) {
+//         // Create a form and submit for POST logout as Spring Security expects
+//         const form = document.createElement('form');
+//         form.method = 'POST';
+//         form.action = '/logout'; // Make sure this path is correct
+
+//         // Add CSRF token
+//         const csrfInput = document.createElement('input');
+//         csrfInput.type = 'hidden';
+//         csrfInput.name = csrfHeaderName; // Or directly "_csrf"
+//         csrfInput.value = csrfToken;
+//         form.appendChild(csrfInput);
+
+//         document.body.appendChild(form);
+//         form.submit();
+//     }
+// }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> </body>
+</html>
