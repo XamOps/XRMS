@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,7 +5,7 @@
     <title>Employees - Xammer HRMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
           integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -16,445 +15,139 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         :root {
-            --primary: #FF8F00; /* Updated to #FF8F00 for orange accents */
-            --primary-dark: #E68A00; /* Slightly darker orange for hover/active states */
-            --dark: #000000; /* Darker background for overall theme */
-            --darker: #1413138f; /* Even darker for some elements like sidebar/cards */
-            --light: #E0E0E0; /* Light text color for readability */
-            --lighter: #F5F5F5;
-            --gray: #161616; /* A medium dark gray for card backgrounds, inputs */
-            --light-gray: #424242; /* A lighter gray for borders, secondary text */
-            --text-primary: #E0E0E0; /* Primary text color */
-            --text-secondary: #B0B0B0; /* Secondary text color */
+            --primary: #FF8F00;
+            --primary-dark: #F57C00;
+            --dark-bg: #121212;
+            --content-bg: #1E1E1E;
+            --border-color: #303030;
+            --text-primary: #E0E0E0;
+            --text-secondary: #BDBDBD;
+            --text-muted: #9E9E9E;
+            --white-text: #FFFFFF;
+            --danger-text: #f44336;
+            --danger-bg: rgba(244, 67, 54, 0.15);
+            --success-text: #4caf50;
+            --success-bg: rgba(76, 175, 80, 0.15);
+            --warning-text: #ffc107;
+            --warning-bg: rgba(255, 193, 7, 0.15);
         }
-* {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #121212;
-            color: #E0E0E0;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
             display: flex;
-            overflow: hidden; /* Prevent scrolling of the main page */
-            height: 100vh;
+            height: 100vh; /* Full screen */
+            overflow: hidden; /* Full screen */
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .sidebar-toggle-button {
             position: fixed;
-            top: 1.0rem;
-            left: 1rem;
-            background: none;
-            border: none;
-            color: #FF8F00;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 1001; /* Ensure it's above the sidebar */
+            top: 1.25rem;
+            left: 1.25rem;
+            background: none; border: none; color: var(--primary);
+            font-size: 1.5rem; cursor: pointer; z-index: 1060;
         }
-
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none; /* Hidden by default */
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar {
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1045; display: none; transition: opacity 0.3s ease; }
+.sidebar {
             width: 260px;
-            background-color: #1E1E1E;
+            background-color: var(--content-bg);
             padding: 2rem 1.5rem;
             position: fixed;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border-right: 1px solid #303030;
+            border-right: 1px solid var(--border-color);
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            left: -260px; /* Initially hidden */
+            z-index: 1048; /* CHANGED FROM 1040 */
+            left: -260px;
             transition: left 0.3s ease;
-        }
+        }        .sidebar.open { left: 0; }
+        .sidebar img { max-width: 150px; height: auto; margin-bottom: 2.5rem; display: block; margin-left: auto; margin-right: auto; }
+        .nav-links { margin-top: 1rem; }
+        .nav-links a { display: flex; align-items: center; padding: 0.8rem 1.2rem; color: var(--text-secondary); text-decoration: none; border-radius: 8px; margin-bottom: 0.6rem; font-weight: 500; transition: all 0.3s ease; background-color: var(--content-bg); }
+        .nav-links a i { margin-right: 0.75rem; font-size: 1.1rem; color: var(--text-muted); }
+        .nav-links a:hover, .nav-links a.active { background-color: #2C2C2C; color: var(--primary); box-shadow: 3px 3px 10px rgba(255, 143, 0, 0.25); transform: translateX(4px); }
+        .nav-links a.active i { color: var(--primary); }
+        .logout { background: linear-gradient(to right, var(--primary), var(--primary-dark)); padding: 0.8rem 1.5rem; border-radius: 8px; text-align: center; font-weight: bold; color: var(--white-text); cursor: pointer; transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+        .logout:hover { background: linear-gradient(to right, var(--primary-dark), var(--primary)); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); transform: scale(1.02); }
 
-        .sidebar.open {
-            left: 0;
-        }
+        .page-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5rem; width: 100%; margin-bottom: 1.5rem; }
+        .page-header-flank { flex: 1; display: flex; }
+        .page-header-flank-left { justify-content: flex-start; }
+        .page-header-flank-right { justify-content: flex-end; }
+        .page-header-main-title { display: flex; align-items: center; gap: 0.75rem; }
+        .page-header-main-title .page-header-icon { font-size: 1.8rem; color: var(--primary); }
+        .page-header-main-title h1 { font-size: 1.6rem; color: var(--white-text); margin: 0; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: -0.5px; line-height: 1.2; }
+        .page-header-right-content { color: var(--text-muted); font-size: 0.9rem; text-align: right; }
 
-        .sidebar img {
-            max-width: 150px;
-            height: auto;
-            margin-bottom: 2.5rem;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+        .main-content-wrapper { padding: 0 2.5rem 2.5rem 2.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white-text) !important; transition: all 0.2s ease; font-weight: 600; letter-spacing: 0.5px; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255, 143, 0, 0.4); }
+        .search-results { max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) var(--content-bg); list-style: none; padding: 0; margin: 0; background-color: var(--content-bg); border: 1px solid var(--border-color); border-top: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); border-radius: 0 0 8px 8px; }
+        .search-results::-webkit-scrollbar { width: 6px; }
+        .search-results::-webkit-scrollbar-track { background: var(--content-bg); }
+        .search-results::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 3px; }
+        .search-results li { padding: 0.75rem 1rem; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s ease, color 0.2s ease; }
+        .search-results li:hover, .search-results li.active-suggestion { background-color: var(--primary); color: var(--white-text); }
+        .filter-container { background-color: var(--content-bg); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); }
+        .search-input, .form-input, select.search-input, select.form-input { background-color: var(--dark-bg); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem 1rem; border-radius: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .search-input:focus, .form-input:focus, select.search-input:focus, select.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.3); outline: none; }
+        select.search-input, select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239E9E9E' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em; padding-right: 2.5rem; }
+        .title-text { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: 0.5px; color: var(--primary); text-shadow: 0 0 8px rgba(255, 143, 0, 0.5); }
+        .action-btn { transition: all 0.2s ease; color: var(--text-muted); border: 1px solid var(--border-color); background-color: transparent; }
+        .action-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 10px rgba(255, 143, 0, 0.2); color: var(--primary); border-color: var(--primary); }
+        .action-btn.edit:hover { color: var(--primary); border-color: var(--primary); }
+        .action-btn.delete:hover { color: var(--danger-text); border-color: var(--danger-text); }
 
-        .nav-links {
-            margin-top: 1rem;
-        }
+        .employee-card { background: var(--content-bg); border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); }
+        .employee-card:hover { transform: translateY(-4px); box-shadow: 0 8px 18px rgba(255, 143, 0, 0.2), inset 0 0 6px rgba(0,0,0,0.15); border-color: var(--primary); }
+        .employee-avatar { border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white-text); display: flex; align-items: center; justify-content: center; font-weight: 600; border: 3px solid var(--primary); }
+        .employee-card .employee-avatar { width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 1rem auto; }
+        #detailAvatar.employee-avatar { width: 96px; height: 96px; font-size: 2.5rem; }
+        .pagination-btn { background-color: var(--content-bg); color: var(--text-primary); transition: all 0.2s ease; border: 1px solid var(--border-color); }
+        .pagination-btn:hover { background-color: var(--primary); color: var(--white-text); border-color: var(--primary); }
+        .pagination-btn.active { background-color: var(--primary); color: var(--white-text); border-color: var(--primary); box-shadow: 0 0 8px rgba(255, 143, 0, 0.3); }
+        .status-active { background-color: var(--success-bg); color: var(--success-text); }
+        .status-inactive { background-color: var(--danger-bg); color: var(--danger-text); }
+        .status-pending { background-color: var(--warning-bg); color: var(--warning-text); }
 
-        .nav-links a {
-            display: flex;
-            align-items: center;
-            padding: 0.8rem 1.2rem;
-            color: #BDBDBD;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 0.6rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            background-color: #1E1E1E; /* Added background color for consistency */
-        }
-
-        .nav-links a i {
-            margin-right: 0.75rem;
-            font-size: 1.1rem;
-            color: #9E9E9E;
-        }
-
-        .nav-links a:hover {
-            background-color: #2C2C2C;
-            color: #FF8F00;
-            box-shadow: 3px 3px 10px rgba(255, 143, 0, 0.25);
-            transform: translateX(4px);
-        }
-
-        .logout {
-            background: linear-gradient(to right, #FF8F00, #F57C00);
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        .logout:hover {
-            background: linear-gradient(to right, #F57C00, #FF8F00);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-            transform: scale(1.02);
-        }
-
-        .main {
-            margin-left: 0; /* Initially no margin */
-            padding: 2.5rem;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center content horizontally */
-            transition: margin-left 0.3s ease;
-        }
-
-        .main.sidebar-open {
-            margin-left: 260px;
-        }
-
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            transition: all 0.2s ease;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            border: none; /* Ensure no default button borders */
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(255, 143, 0, 0.4); /* Enhanced shadow */
-        }
-        .search-results {
-            max-height: 300px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) var(--gray);
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            background-color: var(--gray); /* Background for search results */
-            border: 1px solid var(--light-gray);
-            border-top: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-        .search-results::-webkit-scrollbar {
-            width: 6px;
-        }
-        .search-results::-webkit-scrollbar-track {
-            background: var(--gray);
-        }
-        .search-results::-webkit-scrollbar-thumb {
-            background-color: var(--primary);
-            border-radius: 3px;
-        }
-        .search-results li {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            color: var(--text-primary);
-        }
-        .search-results li:hover, .search-results li.active-suggestion {
-            background-color: var(--primary);
-            color: white;
-        }
-        .table-container {
-            background: linear-gradient(145deg, var(--gray), var(--darker)); /* Adjusted for consistency */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border-radius: 12px; /* Consistent border-radius */
-        }
-        .table-header {
-            background: linear-gradient(180deg, #3A3A3A, #2B2B2B); /* Darker header for tables */
-        }
-        .table-row:hover {
-            background-color: rgba(255, 143, 0, 0.08) !important; /* Slightly more visible hover */
-        }
-        .badge-success {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: #4caf50;
-        }
-        .badge-warning {
-            background-color: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-        }
-        .badge-danger {
-            background-color: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-        }
-        .badge-info {
-            background-color: rgba(0, 0, 0, 0.938);
-            color: #2196f3;
-        }
-        .search-input, .form-input { /* Combined for consistency */
-            background-color: var(--gray);
-            border: 1px solid var(--light-gray);
-            color: var(--text-primary);
-            padding: 0.75rem 1rem; /* Consistent padding */
-            border-radius: 0.5rem; /* Consistent border-radius */
-        }
-        .search-input:focus, .form-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.3); /* More noticeable focus ring */
-            outline: none;
-        }
-        .title-text {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 10px rgba(255, 143, 0, 0.7); /* Stronger glow for titles */
-        }
-        .action-btn {
-            transition: all 0.2s ease;
-        }
-        .action-btn:hover {
-            transform: translateY(-2px) scale(1.05); /* Slight lift and scale */
-            box-shadow: 0 4px 10px rgba(255, 143, 0, 0.2);
-        }
-        /* .sidebar-toggle {
-            position: fixed;
-            left: 20px;
-            top: 20px;
-            z-index: 40;
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid var(--gray);
-            color: var(--primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .sidebar-toggle:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1) rotate(5deg); /* Added a subtle rotation */
-        /* }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6); Darker overlay */
-            /* z-index: 40;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .sidebar-open .overlay {
-            opacity: 1;
-            pointer-events: auto;
-        }  */
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border: 2px solid var(--primary); /* Added a border */
-        }
-        .employee-card {
-            background: linear-gradient(145deg, var(--gray), var(--darker)); /* Darker, more textured background */
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Slightly larger shadow */
-            border: 1px solid rgba(255, 143, 0, 0.1); /* Subtle orange border */
-        }
-        .employee-card:hover {
-            transform: translateY(-6px); /* More pronounced lift */
-            box-shadow: 0 12px 28px rgba(255, 143, 0, 0.3); /* Larger, more orange shadow */
-            border-color: var(--primary); /* Solid orange border on hover */
-        }
-        .employee-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 2rem;
-            margin: 0 auto;
-            border: 3px solid var(--primary); /* Prominent orange border */
-        }
-        .pagination-btn {
-            background-color: var(--gray);
-            color: var(--text-primary);
-            transition: all 0.2s ease;
-            border: 1px solid var(--light-gray);
-        }
-        .pagination-btn:hover {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        .pagination-btn.active {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        .status-active {
-            background-color: rgba(76, 175, 80, 0.15); /* Slightly more opaque */
-            color: #4caf50;
-        }
-        .status-inactive {
-            background-color: rgba(244, 67, 54, 0.15);
-            color: #f44336;
-        }
-        .status-pending {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.973); /* Even darker overlay for modals */
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
-            background: linear-gradient(145deg, var(--gray), var(--darker)); /* Consistent modal background */
-            border-radius: 12px;
-            width: 90%;
-            max-width: 650px; /* Slightly wider modal */
-            transform: translateY(30px); /* More pronounced initial translateY */
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother transition */
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); /* Larger shadow */
-            border: 1px solid var(--light-gray);
-        }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-        .attendance-present {
-            background-color: rgba(76, 175, 80, 0.15);
-            color: #4caf50;
-            border: 1px solid rgba(76, 175, 80, 0.3); /* Subtle border for attendance cards */
-        }
-        .attendance-absent {
-            background-color: rgba(244, 67, 54, 0.15);
-            color: #f44336;
-            border: 1px solid rgba(244, 67, 54, 0.3);
-        }
-        /* Additional styling for better typography and spacing */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-primary);
-        }
-        p, span, label {
-            color: var(--text-secondary);
-        }
-        .text-orange-400 { /* Replaced specific Tailwind color with primary variable where appropriate */
-             color: var(--primary);
-        }
-        .bg-gray-900 { /* Replaced specific Tailwind background with darker variable */
-            background-color: var(--darker);
-        }
-        .bg-gray-800 { /* Replaced specific Tailwind background with gray variable */
-            background-color: var(--gray);
-        }
-        .border-gray-800 { /* Replaced specific Tailwind border with gray variable */
-            border-color: var(--gray);
-        }
-        .border-gray-700 {
-            border-color: var(--light-gray);
-        }
-                .header-welcome h1 {
-            font-size: 1.8rem;
-            color: #FFFFFF;
-            margin: 0; /* Remove default margins */
-            font-weight: 700;
-            letter-spacing: -1px;
-            line-height: 1;
-        }
-             .header-right {
-            position: fixed;
-            top: 3rem;
-            right: 1rem;
-            color: #9E9E9E;
-            font-size: 0.9rem;
-        }
-
-
-
-        
-        .header {
-            margin-top: 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: center; /* Center the welcome section */
-            align-items: center; /* Align items vertically in the header */
-            position: relative; /* For absolute positioning of time */
-            width: 100%; /* Ensure header takes full width */
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 1050; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--content-bg); border-radius: 12px; width: 90%; display: flex; flex-direction: column; transform: translateY(20px) scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); opacity: 0; }
+        #employeeDetailsModal .modal-content { max-width: 900px; }
+        #addEmployeeModal .modal-content { max-width: 650px; }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
+        .modal-content > .p-6 { max-height: 80vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) var(--dark-bg); }
+        .modal-content > .p-6::-webkit-scrollbar { width: 8px; }
+        .modal-content > .p-6::-webkit-scrollbar-track { background: var(--dark-bg); border-radius: 4px;}
+        .modal-content > .p-6::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 4px; }
+        .attendance-present { background-color: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-text); }
+        .attendance-absent { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-text); }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; color: var(--text-primary); }
+        p, span, label { color: var(--text-secondary); }
+        label { color: var(--text-muted); }
+        .modal-content .text-white, .employee-card .text-white { color: var(--text-primary) !important; }
+        .modal-content .text-gray-400, .employee-card .text-gray-400 { color: var(--text-secondary) !important; }
+        .modal-content .text-orange-400, .employee-card .text-orange-400{ color: var(--primary) !important; }
+        .text-orange-400 { color: var(--primary) !important; }
+        .focus\:ring-orange-500:focus { --tw-ring-opacity: 1; --tw-ring-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.3) !important; }
+        .hover\:bg-orange-500:hover { background-color: var(--primary) !important; }
+        .hover\:bg-orange-600:hover { background-color: var(--primary-dark) !important; }
+        .border-orange-500 { border-color: var(--primary) !important; }
+        .bg-gray-800 { background-color: var(--dark-bg) !important; }
+        .bg-gray-1000 { background-color: var(--content-bg) !important; }
+        .text-gray-400 { color: var(--text-secondary) !important; }
+        .text-gray-500 { color: var(--text-muted) !important; }
+        .border-gray-700 { border-color: var(--border-color) !important; }
+        .border-gray-800 { border-color: var(--content-bg) !important; }
+        .hover\:bg-gray-700:hover { background-color: #2c2c2c !important; }
     </style>
 </head>
+<body>
 <button class="sidebar-toggle-button" onclick="toggleSidebar()">
     <i class="fa-solid fa-bars"></i>
 </button>
@@ -463,1022 +156,463 @@
     <div>
         <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
         <div class="nav-links">
-            <a href="/admin/dashboard" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-            <a href="/admin/employees"><i class="fa-solid fa-users"></i> Employees</a>
+            <a href="/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="/admin/employees" class="active"><i class="fa-solid fa-users"></i> Employees</a>
             <a href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-             <a href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Team Requests</a>
-
-            </div>
+            <a href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Team Requests</a>
+        </div>
     </div>
     <div class="logout" onclick="confirmLogout()">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
     </div>
 </div>
 
-        <div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 sidebar-open:ml-64">
-
-    
-        <div class="header">
-            <div class="header-welcome">
-                <h1 th:text="${'EMPLOYEE MANAGEMENT ' + ' 👋'}">EMPLOYEE MANGEMENT 👋</h1>
+<div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 ease-in-out">
+    <div class="page-header">
+        <div class="page-header-flank page-header-flank-left">
             </div>
-            </div>
-
-        <div class="flex-1 overflow-y-auto p-6">
-            <div class="bg-gray-1000 rounded-xl p-6 mb-6 shadow-lg">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="md:col-span-2">
-                        <label for="employeeSearch" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SEARCH EMPLOYEES</label>
-                        <div class="relative">
-                            <input type="text" id="employeeSearch" placeholder="Search by name, username, email or ID..."
-                                   class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="bi bi-search text-gray-500"></i>
-                            </div>
-                        </div>
-                        <ul id="employeeSearchResults" class="search-results absolute z-10 mt-1 w-full bg-gray-800 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto border border-gray-700"></ul>
-                    </div>
-
-                                        <div>
-                        <label for="filterDepartment" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">DEPARTMENT</label>
-                        <select id="filterDepartment" class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option value="">All Departments</option>
-                            <option value="DevOps">DevOps</option>
-                            <option value="Business">Business</option>
-                            <option value="Marketing">Marketing</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-end">
-                        <button onclick="filterEmployees()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide">
-                            <i class="bi bi-funnel-fill mr-2"></i>
-                            FILTER
-                        </button>
-                        <button onclick="openAddEmployeeModal()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide ml-2">
-                            <i class="bi bi-plus-circle mr-2"></i>
-                            ADD
-                        </button>
-                    </div>
+        <div class="page-header-main-title">
+            <i class="fas fa-users-cog page-header-icon"></i>
+            <h1 th:text="${'Employee Management'}">Employee Management</h1>
+        </div>
+        <div class="page-header-flank page-header-flank-right">
+            <div class="page-header-right-content">
                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6" id="employeeCardsContainer">
-                </div>
-
-            <div class="flex justify-center mt-6">
-                <nav class="inline-flex rounded-md shadow">
-                    <button class="pagination-btn px-3 py-1 rounded-l-md" onclick="changePage(-1)">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <button class="pagination-btn px-3 py-1 border-l border-gray-700 active">1</button>
-                    <button class="pagination-btn px-3 py-1 border-l border-gray-700">2</button>
-                    <button class="pagination-btn px-3 py-1 border-l border-gray-700">3</button>
-                    <button class="pagination-btn px-3 py-1 border-l border-gray-700 rounded-r-md" onclick="changePage(1)">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
-                </nav>
-            </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="addEmployeeModal">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-orange-400">Add New Employee</h3>
-                    <button onclick="closeAddEmployeeModal()" class="text-gray-400 hover:text-white">
-                        <i class="bi bi-x-lg"></i>
+    <div class="main-content-wrapper flex-1 overflow-y-auto">
+        <div class="filter-container mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div class="md:col-span-2">
+                    <label for="employeeSearch" class="block text-sm font-medium mb-1 tracking-wide">SEARCH EMPLOYEES</label>
+                    <div class="relative">
+                        <input type="text" id="employeeSearch" placeholder="Search by name, username, email or ID..."
+                               class="search-input w-full">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="bi bi-search"></i>
+                        </div>
+                    </div>
+                    <ul id="employeeSearchResults" class="search-results absolute z-20 mt-1 w-full hidden"></ul>
+                </div>
+                <div>
+                    <label for="filterDepartment" class="block text-sm font-medium mb-1 tracking-wide">DEPARTMENT</label>
+                    <select id="filterDepartment" class="search-input w-full">
+                        <option value="">All Departments</option>
+                        <option value="DevOps">DevOps</option>
+                        <option value="Business">Business</option>
+                        <option value="Marketing">Marketing</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="filterEmployees()" class="btn-primary w-full py-3 px-4 flex items-center justify-center font-medium tracking-wide">
+                        <i class="bi bi-funnel-fill mr-2"></i> FILTER
                     </button>
-                </div>
-
-                <form id="addEmployeeForm" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="firstName" class="block text-sm font-medium text-gray-400 mb-1">First Name</label>
-                            <input type="text" id="firstName" class="form-input w-full px-4 py-2 rounded-lg">
-                        </div>
-                        <div>
-                            <label for="lastName" class="block text-sm font-medium text-gray-400 mb-1">Last Name</label>
-                            <input type="text" id="lastName" class="form-input w-full px-4 py-2 rounded-lg">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                        <input type="email" id="email" class="form-input w-full px-4 py-2 rounded-lg">
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="department" class="block text-sm font-medium text-gray-400 mb-1">Department</label>
-                            <select id="department" class="form-input w-full px-4 py-2 rounded-lg">
-                                <option value="">Select Department</option>
-                                <option value="DevOps">DevOps</option>
-                                <option value="Business">Business</option>
-                                <option value="Marketing">Marketing</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="position" class="block text-sm font-medium text-gray-400 mb-1">Job Title</label>
-                            <input type="text" id="position" class="form-input w-full px-4 py-2 rounded-lg">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="joinDate" class="block text-sm font-medium text-gray-400 mb-1">Join Date</label>
-                            <input type="date" id="joinDate" class="form-input w-full px-4 py-2 rounded-lg">
-                        </div>
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-400 mb-1">Phone</label>
-                            <input type="tel" id="phone" class="form-input w-full px-4 py-2 rounded-lg">
-                        </div>
-                    </div>
-                                <div class="mb-4">
-                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                <input type="password" id="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter password" autocomplete="new-password">
-                </div>
-
-                        <div>
-                            <label for="roles" class="block text-sm font-medium text-gray-400 mb-1">Role</label>
-                            <select id="roles" class="form-input w-full px-4 py-2 rounded-lg">
-                                <option value="">Select Role</option>
-                                <option value="ROLE_USER">USER</option>
-                                <option value="ROLE_USER_MANAGER">MANAGER</option>
-                                <option value="ROLE_ADMIN">ADMIN</option>
-                            </select>
-                        </div>
-
-                
-
-                    <div class="pt-4 flex justify-end space-x-3">
-                        <button type="button" onclick="closeAddEmployeeModal()" class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg">
-                            Add Employee
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="employeeDetailsModal">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-orange-400">Employee Details</h3>
-                    <button onclick="closeEmployeeDetailsModal()" class="text-gray-400 hover:text-white">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-
-                <div class="flex flex-col md:flex-row gap-6 mb-6">
-                    <div class="flex flex-col items-center">
-                        <div class="employee-avatar w-24 h-24 mb-4" id="detailAvatar">JD</div>
-                        <span class="text-xs px-2 py-1 rounded-full status-active mb-2" id="detailStatus">Active</span>
-                        <div class="flex space-x-2">
-                            <button class="action-btn bg-transparent hover:bg-orange-500 text-orange-400 hover:text-white py-1 px-3 border border-orange-500 rounded text-sm" onclick="editEmployeeDetails()">
-                                <i class="bi bi-pencil-square mr-1"></i> Edit
-                            </button>
-                            <button class="action-btn bg-transparent hover:bg-red-500 text-red-400 hover:text-white py-1 px-3 border border-red-500 rounded text-sm" onclick="deleteEmployee()">
-                                <i class="bi bi-trash mr-1"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex-1">
-                        <h4 class="text-lg font-semibold text-white mb-2" id="detailName">John Doe</h4>
-                        <p class="text-gray-400 text-sm mb-1" id="detailUsername"></p> <p class="text-gray-400 text-sm mb-4" id="detailJobTitle">Senior Developer | EMP001</p>
-
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-gray-400 text-sm mb-1">Email</p>
-                                <p class="text-white" id="detailEmail">john.doe@xammer.com</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-sm mb-1">Phone</p>
-                                <p class="text-white" id="detailPhone">+1 (555) 123-4567</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-sm mb-1">Department</p>
-                                <p class="text-white" id="detailDepartment">Development</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-sm mb-1">Join Date</p>
-                                <p class="text-white" id="detailJoinDate">May 12, 2020</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-800 pt-4">
-                    <h5 class="text-md font-semibold text-orange-400 mb-3">Attendance Summary</h5>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                        <div class="bg-gray-800 p-3 rounded-lg">
-                            <p class="text-gray-400 text-sm mb-1">Total Days</p>
-                            <p class="text-white text-xl font-semibold" id="totalDays">245</p>
-                        </div>
-                        <div class="bg-gray-800 p-3 rounded-lg attendance-present">
-                            <p class="text-gray-400 text-sm mb-1">Present</p>
-                            <p class="text-white text-xl font-semibold" id="presentDays">230</p>
-                        </div>
-                        <div class="bg-gray-800 p-3 rounded-lg attendance-absent">
-                            <p class="text-gray-400 text-sm mb-1">Absent</p>
-                            <p class="text-white text-xl font-semibold" id="absentDays">15</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4 flex justify-end">
-                    <button onclick="closeEmployeeDetailsModal()" class="btn-primary px-4 py-2 rounded-lg">
-                        Close
+                    <button onclick="openAddEmployeeModal()" class="btn-primary w-full py-3 px-4 flex items-center justify-center font-medium tracking-wide">
+                        <i class="bi bi-plus-circle mr-2"></i> ADD
                     </button>
                 </div>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6" id="employeeCardsContainer">
+        </div>
+
+        <div class="flex justify-center mt-8 mb-4">
+            <nav class="inline-flex rounded-md shadow-lg">
+            </nav>
+        </div>
     </div>
-    <script>
-        // Get CSRF token from meta tags
-// Current page for pagination
-// Get CSRF token from meta tags
-// Get CSRF token from meta tags
-const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+</div>
+
+<div class="modal-overlay" id="addEmployeeModal">
+    <div class="modal-content">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold title-text">Add New Employee</h3>
+                <button onclick="closeAddEmployeeModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            <form id="addEmployeeForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label for="firstName" class="block text-sm font-medium mb-1">First Name</label><input type="text" id="firstName" class="form-input w-full"></div>
+                    <div><label for="lastName" class="block text-sm font-medium mb-1">Last Name</label><input type="text" id="lastName" class="form-input w-full"></div>
+                </div>
+                <div><label for="email" class="block text-sm font-medium mb-1">Email</label><input type="email" id="email" class="form-input w-full"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label for="department" class="block text-sm font-medium mb-1">Department</label><select id="department" class="form-input w-full"><option value="">Select Department</option><option value="DevOps">DevOps</option><option value="Business">Business</option><option value="Marketing">Marketing</option></select></div>
+                    <div><label for="position" class="block text-sm font-medium mb-1">Job Title</label><input type="text" id="position" class="form-input w-full"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label for="joinDate" class="block text-sm font-medium mb-1">Join Date</label><input type="date" id="joinDate" class="form-input w-full"></div>
+                    <div><label for="phone" class="block text-sm font-medium mb-1">Phone</label><input type="tel" id="phone" class="form-input w-full"></div>
+                </div>
+                <div><label for="password" class="block text-sm font-medium text-gray-400 mb-1">Password</label><input type="password" id="password" name="password" class="form-input w-full" placeholder="Enter password" autocomplete="new-password"></div>
+                <div><label for="roles" class="block text-sm font-medium mb-1">Role</label><select id="roles" class="form-input w-full"><option value="">Select Role</option><option value="ROLE_USER">USER</option><option value="ROLE_USER_MANAGER">MANAGER</option><option value="ROLE_ADMIN">ADMIN</option></select></div>
+                <div class="pt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddEmployeeModal()" class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition-colors">Cancel</button>
+                    <button type="submit" class="btn-primary px-6 py-2">Add Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="employeeDetailsModal">
+    <div class="modal-content">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold title-text">Employee Details</h3>
+                <button onclick="closeEmployeeDetailsModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            <div class="flex flex-col md:flex-row gap-6 mb-6">
+                <div class="flex flex-col items-center md:items-start md:w-1/3">
+                    <div id="detailAvatar" class="employee-avatar mb-4">JD</div>
+                    <span class="text-xs px-2 py-1 rounded-full status-active mb-3" id="detailStatus">Active</span>
+                    <div class="flex space-x-2">
+                        <button class="action-btn edit py-1 px-3 rounded text-sm flex items-center" onclick="editEmployeeDetails()"><i class="bi bi-pencil-square mr-1"></i> Edit</button>
+                        <button class="action-btn delete py-1 px-3 rounded text-sm flex items-center" onclick="deleteEmployee()"><i class="bi bi-trash mr-1"></i> Delete</button>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-2xl font-semibold text-white mb-1" id="detailName">John Doe</h4> <p class="text-gray-400 text-sm mb-1" id="detailUsername"></p>
+                    <p class="text-gray-400 text-sm mb-4" id="detailJobTitle"></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div> <p class="text-xs text-gray-500 mb-0.5">Email</p> <p class="text-white text-sm" id="detailEmail"></p> </div>
+                        <div> <p class="text-xs text-gray-500 mb-0.5">Phone</p> <p class="text-white text-sm" id="detailPhone"></p> </div>
+                        <div> <p class="text-xs text-gray-500 mb-0.5">Department</p> <p class="text-white text-sm" id="detailDepartment"></p> </div>
+                        <div> <p class="text-xs text-gray-500 mb-0.5">Join Date</p> <p class="text-white text-sm" id="detailJoinDate"></p> </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-6">
+                <h5 class="text-md font-semibold text-orange-400 mb-4">Attendance Summary</h5>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-800 p-4 rounded-lg text-center"> <p class="text-gray-400 text-sm mb-1">Total Days</p> <p class="text-white text-2xl font-semibold" id="totalDays"></p> </div>
+                    <div class="p-4 rounded-lg attendance-present text-center"> <p class="text-sm mb-1 opacity-80">Present</p> <p class="text-white text-2xl font-semibold" id="presentDays"></p> </div>
+                    <div class="p-4 rounded-lg attendance-absent text-center"> <p class="text-sm mb-1 opacity-80">Absent</p> <p class="text-white text-2xl font-semibold" id="absentDays"></p> </div>
+                </div>
+            </div>
+            <div class="pt-8 flex justify-end">
+                <button onclick="closeEmployeeDetailsModal()" class="btn-primary px-6 py-2">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.querySelector('.sidebar-overlay');
-    const mainContent = document.querySelector('.main'); // This was '.main', but the actual main content div is different.
-                                                       // Corrected to select the dynamically adjusting main content area.
-    const actualMainContent = document.querySelector('.flex-1.flex.flex-col.overflow-hidden');
+    const actualMainContent = document.querySelector('.flex-1.flex.flex-col.ml-0');
 
+    let currentPage = 1;
+    let totalPages = 1;
+    let employees = [];
+    let filteredEmployees = [];
 
-// Current page for pagination
-let currentPage = 1;
-let totalPages = 1;
-let employees = []; // This will hold all fetched employees
-let filteredEmployees = []; // This will hold employees after search/filter
-
-// Initialize the page
-document.addEventListener('DOMContentLoaded', function() {
-    fetchEmployees();
-    // Correctly target the main content area that shifts
-    const mainAreaToShift = document.querySelector('.flex-1.flex.flex-col.overflow-hidden.h-full');
-    if (!mainAreaToShift.classList.contains('sidebar-open:ml-64')) {
-         // This class is for Tailwind, if we need manual style:
-         // mainAreaToShift.style.marginLeft = '0';
+    function updateCurrentTime() {
+        const now = new Date();
+        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+        const dateString = now.toLocaleDateString('en-US', dateOptions);
+        const timeString = now.toLocaleTimeString('en-US', timeOptions);
+        const dateTimeElement = document.querySelector('.page-header-right-content');
+        if (dateTimeElement) {
+            dateTimeElement.textContent = `${dateString} • ${timeString}`;
+        }
     }
-});
 
-    function toggleSidebar() {
-        const mainAreaToShift = document.querySelector('.flex-1.flex.flex-col.overflow-hidden.h-full');
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchEmployees();
+        updateCurrentTime(); 
+        setInterval(updateCurrentTime, 60000); 
+
+        if (sidebar.classList.contains('open')) {
+            actualMainContent.classList.add('ml-64');
+            actualMainContent.classList.remove('ml-0');
+        } else {
+            actualMainContent.classList.remove('ml-64');
+            actualMainContent.classList.add('ml-0');
+        }
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const currentPath = window.location.pathname;
+        navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === currentPath);
+        });
+    });
+
+    function toggleSidebar() { 
         sidebar.classList.toggle('open');
         sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-        // Toggle Tailwind class for margin, or manually adjust margin
-        if (sidebar.classList.contains('open')) {
-            mainAreaToShift.classList.add('ml-64'); // Assuming ml-64 is desired margin when open
-            mainAreaToShift.classList.remove('ml-0');
-        } else {
-            mainAreaToShift.classList.remove('ml-64');
-            mainAreaToShift.classList.add('ml-0');
-        }
+        actualMainContent.classList.toggle('ml-64', sidebar.classList.contains('open'));
+        actualMainContent.classList.toggle('ml-0', !sidebar.classList.contains('open'));
     }
-
-    function closeSidebar() {
-        const mainAreaToShift = document.querySelector('.flex-1.flex.flex-col.overflow-hidden.h-full');
+    function closeSidebar() { 
         sidebar.classList.remove('open');
         sidebarOverlay.style.display = 'none';
-        mainAreaToShift.classList.remove('ml-64');
-        mainAreaToShift.classList.add('ml-0');
+        actualMainContent.classList.remove('ml-64');
+        actualMainContent.classList.add('ml-0');
     }
-
-function confirmLogout() {
-    // Default confirm dialog
-    // if (confirm("Are you sure you want to logout?")) {
-    //     // Create a form dynamically
-    //     const form = document.createElement('form');
-    //     form.method = 'POST';
-    //     form.action = '/logout'; // Thymeleaf will resolve this
-
-    //     // Add CSRF token
-    //     const csrfInput = document.createElement('input');
-    //     csrfInput.type = 'hidden';
-    //     csrfInput.name = csrfHeaderName; // Use the header name for the input name as well, or specific name like _csrf
-    //     csrfInput.value = csrfToken;
-    //     form.appendChild(csrfInput);
-
-    //     document.body.appendChild(form);
-    //     form.submit();
-    // }
-     // SweetAlert2 logout confirmation
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You will be logged out.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'var(--primary)',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, logout!',
-        background: '#272727', // Dark background for the modal
-        color: '#E0E0E0'       // Light text color
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/logout'; // Thymeleaf should resolve this
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            // Ensure the name matches what Spring Security expects, typically "_csrf"
-            csrfInput.name = '_csrf'; // Or use csrfHeaderName if configured that way for form posts
-            csrfInput.value = csrfToken;
-            form.appendChild(csrfInput);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
-}
-
-
-// --- Fetch Employees from Backend (using findAll) ---
-function fetchEmployees() {
-    console.log("Fetching employees from backend using /admin/employees/api...");
-
-    // Using fetch API to call your existing findAll() method
-    fetch('/admin/employees/api', { // Assuming your backend has an endpoint like this for findAll()
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeaderName]: csrfToken // Include CSRF if your backend requires it for GET (usually not needed)
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                alert('Authentication failed or not authorized. Please log in again.');
-                window.location.href = '/login';
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        }
-        return response.json();
-    })
-.then(data => {
-    employees = data.map(user => {
-        const displayId = user.id; 
-
-        return {
-            id: displayId, 
-            internalId: user.id, 
-            username: user.username, // Make sure username is available
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            department: user.department,
-            jobTitle: user.jobTitle,
-            phone: user.phone,
-            joinDate: user.joiningDate, 
-            presentDays: user.presentDays || 0,
-            absentDays: user.absentDays || 0,
-            totalDays: (user.presentDays || 0) + (user.absentDays || 0),
-            roles: user.roles,
-            password: user.password // Assuming password might be needed for edit, though typically not sent back
-        };
-    });
-
-    console.log("Employees array after fetching and mapping (check IDs and usernames):", employees); 
-
-    filteredEmployees = [...employees];
-    renderEmployeeCards();
-    updatePagination();
-})
-    .catch(error => {
-        console.error('Error fetching employees:', error);
-        alert('Failed to load employee data. Please try again later.');
-    });
-}
-
-// Render employee cards
-function renderEmployeeCards() {
-    const container = document.getElementById('employeeCardsContainer');
-    container.innerHTML = '';
-
-    const itemsPerPage = 8;
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const employeesToRender = filteredEmployees.slice(startIndex, endIndex);
-
-    if (employeesToRender.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-500 text-lg py-10">No employees found matching your criteria.</p>';
-        return;
-    }
-
-    employeesToRender.forEach(employee => {
-        const card = document.createElement('div');
-        card.className = 'employee-card p-6 cursor-pointer';
-        card.onclick = () => {
-            console.log("Card Clicked. Viewing details for employee.id:", employee.id); 
-            viewEmployeeDetails(employee.id);
-        };
-
-        const initials = employee.firstName.charAt(0) + employee.lastName.charAt(0);
-        const joinDateObj = new Date(employee.joinDate);
-        const joinDate = isNaN(joinDateObj.getTime()) ? 'N/A' : joinDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-
-        card.innerHTML = `
-            <div class="employee-avatar mb-4">${initials}</div>
-            <h3 class="text-xl font-semibold text-white text-center mb-1">${employee.firstName} ${employee.lastName}</h3>
-            <p class="text-gray-400 text-sm text-center mb-0">${employee.username || ''}</p> <p class="text-gray-400 text-sm text-center mb-2">${employee.jobTitle}</p>
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-sm text-gray-400">ID: ${employee.id}</span>
-                <span class="text-xs px-2 py-1 rounded-full status-active">Active</span>
-            </div>
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-400">${employee.department}</span>
-                <span class="text-orange-400">Joined: ${joinDate}</span>
-            </div>
-            <div class="mt-3 flex justify-between text-xs">
-                <span class="px-2 py-1 rounded attendance-present">Present: ${employee.presentDays}</span>
-                <span class="px-2 py-1 rounded attendance-absent">Absent: ${employee.absentDays}</span>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-// Employee search functionality (dynamic suggestions)
-document.getElementById('employeeSearch').addEventListener('input', function(e) {
-    const searchText = e.target.value.trim().toLowerCase();
-    if (searchText.length > 1) { // Start searching after 1 character
-        searchEmployees(searchText);
-    } else {
-        document.getElementById('employeeSearchResults').style.display = 'none';
-        // If search box is cleared, revert to showing employees based on current department filter
-        filterEmployees(); 
-    }
-});
-
-function searchEmployees(query) {
-    const results = employees.filter(emp =>
-        emp.firstName.toLowerCase().includes(query) ||
-        emp.lastName.toLowerCase().includes(query) ||
-        (emp.username && emp.username.toLowerCase().includes(query)) || // Search by username
-        emp.email.toLowerCase().includes(query) ||
-        emp.id.toString().toLowerCase().includes(query) 
-    );
-
-    const resultsList = document.getElementById('employeeSearchResults');
-    resultsList.innerHTML = '';
-
-    if (results.length > 0) {
-        results.forEach(employee => {
-            const li = document.createElement('li');
-            li.textContent = `${employee.firstName} ${employee.lastName} (${employee.username || employee.id})`; // Show username or ID
-            li.className = 'px-4 py-2 cursor-pointer hover:bg-orange-600 hover:text-white rounded-md';
-            li.onclick = function() {
-                document.getElementById('employeeSearch').value = `${employee.firstName} ${employee.lastName}`;
-                resultsList.style.display = 'none';
-                console.log("Search Result Clicked. Viewing details for employee.id:", employee.id); 
-                viewEmployeeDetails(employee.id); 
-            };
-            resultsList.appendChild(li);
-        });
-        resultsList.style.display = 'block';
-    } else {
-        const li = document.createElement('li');
-        li.textContent = 'No matching employees found';
-        li.className = 'px-4 py-2 text-gray-400';
-        resultsList.appendChild(li);
-        resultsList.style.display = 'block';
-    }
-}
-
-// Filter button functionality
-function filterEmployees() {
-    const searchText = document.getElementById('employeeSearch').value.toLowerCase();
-    const department = document.getElementById('filterDepartment').value;
-
-    filteredEmployees = employees.filter(employee => {
-        const nameMatch = `${employee.firstName} ${employee.lastName}`.toLowerCase().includes(searchText) ||
-                             (employee.username && employee.username.toLowerCase().includes(searchText)) || // Filter by username
-                             employee.email.toLowerCase().includes(searchText) ||
-                             employee.id.toString().toLowerCase().includes(searchText); 
-        const departmentMatch = department === '' || employee.department === department;
-
-        return nameMatch && departmentMatch;
-    });
-
-    currentPage = 1;
-    renderEmployeeCards();
-    updatePagination();
-    document.getElementById('employeeSearchResults').style.display = 'none'; // Hide suggestions after filtering
-}
-
-
-// Pagination functions
-function changePage(direction) {
-    if (direction === -1 && currentPage > 1) {
-        currentPage--;
-    } else if (direction === 1 && currentPage < totalPages) {
-        currentPage++;
-    }
-
-    renderEmployeeCards();
-    updatePagination();
-}
-
-function updatePagination() {
-    const itemsPerPage = 8;
-    totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
-    if (totalPages < 1) totalPages = 1; // Ensure at least one page even if no results
-
-    const paginationContainer = document.querySelector('.inline-flex.rounded-md.shadow');
-    paginationContainer.innerHTML = ''; // Clear existing buttons
-
-    const prevButton = document.createElement('button');
-    prevButton.className = 'pagination-btn px-3 py-1 rounded-l-md';
-    prevButton.onclick = () => changePage(-1);
-    prevButton.disabled = currentPage === 1;
-    prevButton.innerHTML = '<i class="bi bi-chevron-left"></i>';
-    paginationContainer.appendChild(prevButton);
-
-    // Determine range of page numbers to display (e.g., max 5 buttons)
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-
-    if (endPage - startPage + 1 < Math.min(5, totalPages)) {
-        if (startPage === 1) {
-            endPage = Math.min(startPage + 4, totalPages);
-        } else {
-            startPage = Math.max(endPage - 4, 1);
-        }
-    }
-
-
-    for (let i = startPage; i <= endPage; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.className = `pagination-btn px-3 py-1 border-l border-gray-700 ${i === currentPage ? 'active' : ''}`;
-        pageButton.textContent = i;
-        pageButton.onclick = (function(page) { // IIFE to capture correct page number
-            return function() {
-                currentPage = page;
-                renderEmployeeCards();
-                updatePagination(); // Re-render pagination to update active state
-            };
-        })(i);
-        paginationContainer.appendChild(pageButton);
-    }
-
-    const nextButton = document.createElement('button');
-    nextButton.className = 'pagination-btn px-3 py-1 border-l border-gray-700 rounded-r-md';
-    nextButton.onclick = () => changePage(1);
-    nextButton.disabled = currentPage === totalPages || totalPages === 0;
-    nextButton.innerHTML = '<i class="bi bi-chevron-right"></i>';
-    paginationContainer.appendChild(nextButton);
-}
-
-
-// Modal functions
-function openAddEmployeeModal() {
-    document.getElementById('addEmployeeModal').classList.add('active');
-}
-
-function closeAddEmployeeModal() {
-    document.getElementById('addEmployeeModal').classList.remove('active');
-    document.getElementById('addEmployeeForm').reset();
-    document.getElementById('addEmployeeForm').removeAttribute('data-employee-id');
-    document.getElementById('addEmployeeForm').removeAttribute('data-internal-id'); 
-    document.querySelector('#addEmployeeModal h3').textContent = 'Add New Employee';
-    document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Add Employee';
-    document.getElementById('password').disabled = false; // Re-enable password field for add mode
-}
-
-function viewEmployeeDetails(employeeId) {
-    console.log("viewEmployeeDetails called with employeeId:", employeeId); 
-    const employee = employees.find(emp => emp.id === employeeId);
-    if (!employee) {
-        console.error("Employee not found in 'employees' array for ID:", employeeId); 
-        return;
-    }
-    console.log("Found employee object:", employee); 
-
-    const joinDateObj = new Date(employee.joinDate);
-    const joinDate = isNaN(joinDateObj.getTime()) ? 'N/A' : joinDateObj.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    document.getElementById('detailAvatar').textContent =
-        employee.firstName.charAt(0) + employee.lastName.charAt(0);
-    document.getElementById('detailName').textContent =
-        `${employee.firstName} ${employee.lastName}`;
-    document.getElementById('detailUsername').textContent = employee.username ? `Username: ${employee.username}` : ''; // Display username
-    document.getElementById('detailJobTitle').textContent =
-        `${employee.jobTitle} | ID: ${employee.id}`; 
-    document.getElementById('detailEmail').textContent = employee.email;
-    document.getElementById('detailPhone').textContent = employee.phone;
-    document.getElementById('detailDepartment').textContent = employee.department;
-    document.getElementById('detailJoinDate').textContent = joinDate;
-    document.getElementById('totalDays').textContent = employee.totalDays;
-    document.getElementById('presentDays').textContent = employee.presentDays;
-    document.getElementById('absentDays').textContent = employee.absentDays;
-
-    document.getElementById('employeeDetailsModal').setAttribute('data-employee-id', employee.id);
-    document.getElementById('employeeDetailsModal').setAttribute('data-internal-id', employee.internalId); 
-    document.getElementById('employeeDetailsModal').classList.add('active');
-}
-
-function closeEmployeeDetailsModal() {
-    document.getElementById('employeeDetailsModal').classList.remove('active');
-}
-
-function editEmployeeDetails() {
-    console.log("editEmployeeDetails function called!");
-
-    const employeeIdString = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
-    const internalIdString = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id');
-
-    const employeeId = parseInt(employeeIdString);
-    const internalId = parseInt(internalIdString);
-
-
-    if (isNaN(employeeId) || isNaN(internalId)) {
-        console.error("Error: Employee ID or Internal ID is not a valid number.");
-        return; 
-    }
-
-    const employee = employees.find(emp => emp.id === employeeId);
-
-    if (!employee) { 
-        console.error("Employee not found in 'employees' array for ID:", employeeId);
-        return; 
-    }
-    console.log("Found employee object for edit:", employee);
-
-
-    document.getElementById('firstName').value = employee.firstName;
-    document.getElementById('lastName').value = employee.lastName;
-    document.getElementById('email').value = employee.email;
-    document.getElementById('department').value = employee.department;
-    // Do NOT pre-fill password for editing for security reasons.
-    // Only allow changing it. The backend should handle empty password as "no change".
-    document.getElementById('password').value = ""; // Clear password field
-    document.getElementById('password').placeholder = "Enter new password (optional)";
-    // document.getElementById('password').disabled = true; // Optionally disable for edit, or allow change
-
-    document.getElementById('roles').value = employee.roles;
-    document.getElementById('position').value = employee.jobTitle; 
-    
-    if (employee.joinDate) {
-        const joinDate = new Date(employee.joinDate);
-        const formattedJoinDate = joinDate.toISOString().split('T')[0];
-        document.getElementById('joinDate').value = formattedJoinDate;
-    } else {
-        document.getElementById('joinDate').value = ''; 
-    }
-
-    document.getElementById('phone').value = employee.phone;
-
-    document.querySelector('#addEmployeeModal h3').textContent = 'Edit Employee';
-    document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Update Employee';
-
-    document.getElementById('addEmployeeForm').setAttribute('data-employee-id', employeeId); 
-    document.getElementById('addEmployeeForm').setAttribute('data-internal-id', internalId);
-
-    closeEmployeeDetailsModal();
-    openAddEmployeeModal();
-}
-
-function deleteEmployee() {
-    const employeeId = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
-    const internalId = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id'); // Use internalId for API calls
-
-    if (!internalId) {
-        alert("Error: Employee's internal ID not found for deletion.");
-        return;
-    }
-
-    // Using SweetAlert2 for confirmation
-    Swal.fire({
-        title: 'Are you sure?',
-        text: `Do you want to delete employee ${employeeId}? This action cannot be undone.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'var(--primary)', // Use your theme color
-        cancelButtonColor: '#d33', // Standard cancel color
-        confirmButtonText: 'Yes, delete it!',
-        background: '#272727', // Dark background for the modal
-        color: '#E0E0E0'       // Light text color for the modal
-    }).then((result) => {
-        if (result.isConfirmed) {
-            console.log(`Deleting employee with internal ID ${internalId}`);
-
-            fetch(`/admin/employees/api/${internalId}`, { 
-                method: 'DELETE',
-                headers: {
-                    [csrfHeaderName]: csrfToken
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Employee not found on the server.');
-                    }
-                     // Try to parse error message from backend if available
-                    return response.text().then(text => { // Use text() first, then try json() if it might be JSON
-                        try {
-                            const errorData = JSON.parse(text);
-                            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                        } catch (e) {
-                            throw new Error(text || `HTTP error! status: ${response.status}`); // Fallback to raw text
-                        }
-                    });
-                }
-                 // Check if response has content before trying to parse as JSON
-                return response.text().then(text => {
-                    return text ? JSON.parse(text) : {}; // Return empty object if no content
-                });
-            })
-            .then(data => { // data might be empty if DELETE returns 204 No Content
-                Swal.fire({
-                    title: 'Deleted!',
-                    text: `Employee ${employeeId} has been deleted.`,
-                    icon: 'success',
-                    background: '#272727',
-                    color: '#E0E0E0',
-                    confirmButtonColor: 'var(--primary)'
-                });
-                closeEmployeeDetailsModal();
-                fetchEmployees(); // Refresh the list
-            })
-            .catch(error => {
-                console.error('Error deleting employee:', error);
-                Swal.fire({
-                    title: 'Error!',
-                    text: `Failed to delete employee: ${error.message}. Please try again later.`,
-                    icon: 'error',
-                    background: '#272727',
-                    color: '#E0E0E0',
-                    confirmButtonColor: 'var(--primary)'
-                });
-            });
-        }
-    });
-}
-
-
-
-// Form submission (Add/Edit)
-document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const isEdit = this.hasAttribute('data-internal-id') && this.getAttribute('data-internal-id') !== 'null' && this.getAttribute('data-internal-id') !== '';
-    const internalId = isEdit ? this.getAttribute('data-internal-id') : null;
-    const existingFrontendId = isEdit ? this.getAttribute('data-employee-id') : null; // This is the original 'id' from the frontend list
-
-    const passwordValue = document.getElementById('password').value;
-
-    const userToSave = {
-        // For EDIT, 'id' is the backend's primary key (internalId)
-        // For ADD, 'id' should be null or undefined for the backend to generate it.
-        id: internalId, 
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
-        department: document.getElementById('department').value,
-        jobTitle: document.getElementById('position').value,
-        joiningDate: document.getElementById('joinDate').value,
-        phone: document.getElementById('phone').value,
-        username: document.getElementById('email').value.split('@')[0], // Or a dedicated username field if you add one
-        roles: document.getElementById('roles').value,
-        // Only include password if it's a new user or if it's being changed for an existing user
-        ...(isEdit && passwordValue === '' ? {} : { password: passwordValue }), // Send password only if not empty during edit or for new user
-        employeeId: existingFrontendId // This field might be specific to your UserDTO or entity on backend
-                                     // If your backend User entity's primary key is 'id', this might be redundant
-                                     // or used for a separate "employee ID" string.
-                                     // Ensure your backend DTO matches this structure.
-    };
-    
-    // If it's an add operation and you want a specific employeeId string (not the PK), set it here
-    // if (!isEdit) {
-    //    userToSave.employeeId = generateSomeEmployeeId(); // e.g., 'EMP' + Date.now() or from a field
-    // }
-
-
-    let url;
-    let method;
-
-    if (isEdit) {
-        url = `/admin/employees/api/${internalId}`; 
-        method = 'PUT';
-    } else {
-        url = '/admin/employees/api'; 
-        method = 'POST';
-    }
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeaderName]: csrfToken
-        },
-        body: JSON.stringify(userToSave)
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => { // Assuming error response is JSON
-                let errorMessage = `HTTP error! status: ${response.status}`;
-                if (errorData && errorData.message) {
-                    errorMessage = errorData.message;
-                } else if (errorData && typeof errorData === 'string') {
-                    errorMessage = errorData;
-                }
-                // Check for specific validation errors if your backend sends them
-                if (errorData && errorData.errors) {
-                    errorMessage += ": " + errorData.errors.map(err => err.defaultMessage || err.field).join(", ");
-                }
-                throw new Error(errorMessage);
-            });
-        }
-        return response.json();
-    })
-    .then(returnedUser => {
-        // SweetAlert2 for success
+    function confirmLogout() { 
         Swal.fire({
-            title: 'Success!',
-            text: `Employee ${returnedUser.firstName} ${returnedUser.lastName} ${isEdit ? 'updated' : 'added'} successfully!`,
-            icon: 'success',
-            background: '#272727',
-            color: '#E0E0E0',
-            confirmButtonColor: 'var(--primary)'
-        });
-        closeAddEmployeeModal(); // This also resets the form
-        fetchEmployees(); // Refresh data
-    })
-    .catch(error => {
-        console.error(`Error ${isEdit ? 'updating' : 'adding'} employee:`, error);
-         Swal.fire({
-            title: 'Error!',
-            text: `Failed to ${isEdit ? 'update' : 'add'} employee: ${error.message}. Please check inputs and try again.`,
-            icon: 'error',
-            background: '#272727',
-            color: '#E0E0E0',
-            confirmButtonColor: 'var(--primary)'
-        });
-    });
-});
-
-
-// Close modals when clicking outside
-document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) { // Only close if the overlay itself is clicked, not content
-            if (this.id === 'addEmployeeModal') {
-                closeAddEmployeeModal();
-            } else if (this.id === 'employeeDetailsModal') {
-                closeEmployeeDetailsModal();
-            } else {
-                 this.classList.remove('active');
+            title: 'Are you sure?', text: "You will be logged out.", icon: 'warning', showCancelButton: true,
+            confirmButtonColor: 'var(--primary)', cancelButtonColor: '#757575', confirmButtonText: 'Yes, logout!',
+            background: 'var(--content-bg)', color: 'var(--text-primary)', customClass: { popup: 'rounded-xl' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST'; form.action = '/logout';
+                const csrfInput = Object.assign(document.createElement('input'), { type: 'hidden', name: '_csrf', value: csrfToken });
+                form.appendChild(csrfInput); document.body.appendChild(form); form.submit();
             }
+        });
+    }
+    function fetchEmployees() { 
+        fetch('/admin/employees/api', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', [csrfHeaderName]: csrfToken }
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    Swal.fire({ title: 'Error!', text: 'Authentication failed or not authorized. Please log in again.', icon: 'error', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'})
+                        .then(() => window.location.href = '/login');
+                } else { throw new Error(`HTTP error! status: ${response.status}`); }
+            }
+            return response.json();
+        })
+        .then(data => {
+            employees = data.map(user => ({ ...user, internalId: user.id, presentDays: user.presentDays || 0, absentDays: user.absentDays || 0, totalDays: (user.presentDays || 0) + (user.absentDays || 0) }));
+            filteredEmployees = [...employees];
+            renderEmployeeCards();
+            updatePagination();
+        })
+        .catch(error => {
+            console.error('Error fetching employees:', error);
+            Swal.fire({ title: 'Error!', text: 'Failed to load employee data.', icon: 'error', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'});
+        });
+    }
+    function renderEmployeeCards() { 
+        const container = document.getElementById('employeeCardsContainer');
+        container.innerHTML = '';
+        const itemsPerPage = 8;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const employeesToRender = filteredEmployees.slice(startIndex, startIndex + itemsPerPage);
+
+        if (employeesToRender.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 text-lg py-10 col-span-full">No employees found.</p>';
+            updatePagination(); return;
         }
-    });
-});
-
-// Prevent modal content from closing when clicking inside
-document.querySelectorAll('.modal-content').forEach(content => {
-    content.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-});
-
-// This function `suggestUsers` and its related variables (searchInput, searchResultsList, suggestionTimeout, currentFocus)
-// are for the *commented-out* search bar (`id="searchUser"`).
-// The main employee search is handled by `id="employeeSearch"` and the `searchEmployees` function.
-// If you intend to use the `id="searchUser"` input, uncomment it in the HTML and ensure this function is correctly wired.
-let searchInput = document.getElementById('searchUser'); // This will be null if the element is commented out
-let searchResultsList = document.getElementById('searchResults'); // This will be null
-let suggestionTimeout;
-let currentFocus = -1;
-
-function suggestUsers(searchText) { // This function is currently wired to #employeeSearch's onkeyup in original code.
-                                    // However, the event listener on #employeeSearch uses searchEmployees.
-                                    // This suggests a potential mix-up or an intended separate functionality.
-                                    // For now, this function will operate on #searchUser and #searchResults if they exist.
-    if (!searchInput || !searchResultsList) { // Guard against null elements if they are commented out
-        console.log("suggestUsers: searchUser input or searchResults list not found. Ensure they are in the HTML and not commented out if this functionality is desired.");
-        return;
+        employeesToRender.forEach(employee => {
+            const card = document.createElement('div');
+            card.className = 'employee-card p-5 cursor-pointer flex flex-col'; 
+            card.onclick = () => viewEmployeeDetails(employee.id);
+            const initials = (employee.firstName ? employee.firstName.charAt(0) : '') + (employee.lastName ? employee.lastName.charAt(0) : '');
+            const joinDate = employee.joinDate ? new Date(employee.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+            card.innerHTML = `
+                <div class="employee-avatar mb-4">${initials}</div>
+                <h3 class="text-xl font-semibold text-white text-center mb-1">${employee.firstName} ${employee.lastName}</h3>
+                <p class="text-gray-400 text-sm text-center mb-0.5">${employee.username || 'N/A'}</p>
+                <p class="text-gray-400 text-sm text-center mb-3">${employee.jobTitle}</p>
+                <div class="flex justify-between items-center text-sm mb-3">
+                    <span class="text-gray-400">ID: ${employee.id}</span>
+                    <span class="text-xs px-2 py-1 rounded-full status-active">Active</span>
+                </div>
+                <div class="flex justify-between text-sm mb-auto">
+                    <span class="text-gray-400">${employee.department}</span>
+                    <span class="text-orange-400">Joined: ${joinDate}</span>
+                </div>
+                <div class="mt-4 flex justify-between text-xs">
+                    <span class="px-2 py-1 rounded attendance-present">Present: ${employee.presentDays}</span>
+                    <span class="px-2 py-1 rounded attendance-absent">Absent: ${employee.absentDays}</span>
+                </div>`;
+            container.appendChild(card);
+        });
     }
-
-    clearTimeout(suggestionTimeout);
-    if (searchText.trim() === "") {
-        searchResultsList.style.display = 'none';
-        searchResultsList.innerHTML = ''; 
-        currentFocus = -1; 
-        return;
+    document.getElementById('employeeSearch').addEventListener('input', function(e) { 
+        const searchText = e.target.value.trim().toLowerCase();
+        const resultsList = document.getElementById('employeeSearchResults');
+        if (searchText.length > 0) { searchEmployees(searchText); }
+        else { resultsList.style.display = 'none'; resultsList.innerHTML = ''; filterEmployees(); }
+    });
+    function searchEmployees(query) { 
+        const results = employees.filter(emp =>
+            `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(query) ||
+            (emp.username && emp.username.toLowerCase().includes(query)) ||
+            emp.email.toLowerCase().includes(query) ||
+            emp.id.toString().toLowerCase().includes(query)
+        ).slice(0, 5);
+        const resultsList = document.getElementById('employeeSearchResults');
+        resultsList.innerHTML = '';
+        if (results.length > 0) {
+            results.forEach(employee => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="text-white">${employee.firstName} ${employee.lastName}</span> <span class="text-xs text-gray-400">(${employee.username || employee.id})</span>`;
+                li.onclick = () => {
+                    document.getElementById('employeeSearch').value = `${employee.firstName} ${employee.lastName}`;
+                    resultsList.style.display = 'none'; viewEmployeeDetails(employee.id);
+                };
+                resultsList.appendChild(li);
+            });
+            resultsList.style.display = 'block';
+        } else {
+            resultsList.innerHTML = '<li>No matching employees found</li>';
+            resultsList.style.display = 'block';
+        }
     }
+    function filterEmployees() { 
+        const searchText = document.getElementById('employeeSearch').value.toLowerCase();
+        const department = document.getElementById('filterDepartment').value;
+        filteredEmployees = employees.filter(emp =>
+            (searchText === '' || `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(searchText) || (emp.username && emp.username.toLowerCase().includes(searchText)) || emp.email.toLowerCase().includes(searchText) || emp.id.toString().toLowerCase().includes(searchText)) &&
+            (department === '' || emp.department === department)
+        );
+        currentPage = 1; renderEmployeeCards(); updatePagination();
+        document.getElementById('employeeSearchResults').style.display = 'none';
+    }
+    function changePage(direction) { 
+        const newPage = currentPage + direction;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage; renderEmployeeCards(); updatePagination();
+        }
+    }
+    function updatePagination() { 
+        totalPages = Math.ceil(filteredEmployees.length / 8);
+        if (totalPages === 0) totalPages = 1;
+        const container = document.querySelector('.inline-flex.rounded-md.shadow-lg');
+        container.innerHTML = '';
+        const prevBtn = Object.assign(document.createElement('button'), { className: 'pagination-btn px-3 py-2 rounded-l-md text-sm', onclick: () => changePage(-1), disabled: currentPage === 1, innerHTML: '<i class="bi bi-chevron-left"></i>' });
+        container.appendChild(prevBtn);
+        let startPage = Math.max(1, currentPage - 2), endPage = Math.min(totalPages, currentPage + 2);
+        if (totalPages <= 5) { startPage = 1; endPage = totalPages; }
+        else if (currentPage <= 3) { startPage = 1; endPage = 5; }
+        else if (currentPage >= totalPages - 2) { startPage = totalPages - 4; endPage = totalPages; }
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = Object.assign(document.createElement('button'), { className: `pagination-btn px-4 py-2 border-l text-sm ${i === currentPage ? 'active' : ''}`, textContent: i });
+            pageBtn.onclick = () => { currentPage = i; renderEmployeeCards(); updatePagination(); };
+            container.appendChild(pageBtn);
+        }
+        const nextBtn = Object.assign(document.createElement('button'), { className: 'pagination-btn px-3 py-2 border-l rounded-r-md text-sm', onclick: () => changePage(1), disabled: currentPage === totalPages || filteredEmployees.length === 0, innerHTML: '<i class="bi bi-chevron-right"></i>' });
+        container.appendChild(nextBtn);
+    }
+    function openModal(modalId) { 
+        document.getElementById(modalId).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(modalId) { 
+        document.getElementById(modalId).classList.remove('active');
+        document.body.style.overflow = ''; 
+    }
+    function openAddEmployeeModal() { 
+        openModal('addEmployeeModal');
+        document.getElementById('password').placeholder = "Enter password";
+        document.getElementById('password').disabled = false;
+    }
+    function closeAddEmployeeModal() { 
+        closeModal('addEmployeeModal');
+        const form = document.getElementById('addEmployeeForm');
+        form.reset(); form.removeAttribute('data-employee-id'); form.removeAttribute('data-internal-id');
+        document.querySelector('#addEmployeeModal h3').textContent = 'Add New Employee';
+        form.querySelector('button[type="submit"]').textContent = 'Add Employee';
+    }
+    function viewEmployeeDetails(employeeId) {
+        const emp = employees.find(e => e.id === employeeId); if (!emp) return;
+        openModal('employeeDetailsModal');
+        
+        // Explicitly set the full name
+        document.getElementById('detailName').textContent = `${emp.firstName} ${emp.lastName}`;
+        
+        document.getElementById('detailAvatar').textContent = (emp.firstName ? emp.firstName.charAt(0) : '') + (emp.lastName ? emp.lastName.charAt(0) : '');
+        
+        // Populate other fields. Note: detailName is handled above and can be skipped by the generic loop or the loop will overwrite if 'name' property exists.
+        // For safety, it's better to be explicit for fields that don't directly map or need formatting.
+        document.getElementById('detailUsername').textContent = emp.username ? `Username: ${emp.username}` : 'No Username';
+        document.getElementById('detailJobTitle').textContent = `${emp.jobTitle || 'N/A'} | ID: ${emp.id}`;
+        document.getElementById('detailEmail').textContent = emp.email || 'N/A';
+        document.getElementById('detailPhone').textContent = emp.phone || 'N/A';
+        document.getElementById('detailDepartment').textContent = emp.department || 'N/A';
+        document.getElementById('detailJoinDate').textContent = emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+        document.getElementById('totalDays').textContent = emp.totalDays;
+        document.getElementById('presentDays').textContent = emp.presentDays;
+        document.getElementById('absentDays').textContent = emp.absentDays;
+        
+        document.getElementById('employeeDetailsModal').setAttribute('data-employee-id', emp.id);
+        document.getElementById('employeeDetailsModal').setAttribute('data-internal-id', emp.internalId);
+    }
+    function closeEmployeeDetailsModal() { closeModal('employeeDetailsModal'); }
+    function editEmployeeDetails() { 
+        const internalId = parseInt(document.getElementById('employeeDetailsModal').getAttribute('data-internal-id'));
+        const emp = employees.find(e => e.internalId === internalId); if (!emp) return;
+        closeEmployeeDetailsModal(); openAddEmployeeModal(); 
+        document.querySelector('#addEmployeeModal h3').textContent = 'Edit Employee';
+        document.querySelector('#addEmployeeForm button[type="submit"]').textContent = 'Update Employee';
+        document.getElementById('addEmployeeForm').setAttribute('data-employee-id', emp.id);
+        document.getElementById('addEmployeeForm').setAttribute('data-internal-id', emp.internalId);
+        Object.keys(emp).forEach(key => {
+            let targetId = key;
+            if (key === 'jobTitle') targetId = 'position'; // Map jobTitle to position input ID
+            // Add other mappings if necessary, e.g. for roles if the property name differs from input ID
 
-    suggestionTimeout = setTimeout(() => {
-        $.ajax({
-            url: '/admin/users/suggestions', // This endpoint needs to exist on your backend
-            type: 'GET',
-            data: { query: searchText },
-            beforeSend: (xhr) => {
-                xhr.setRequestHeader(csrfHeaderName, csrfToken); // Corrected variable name
-            },
-            success: (data) => {
-                searchResultsList.innerHTML = '';
-                currentFocus = -1; 
-
-                if (data && data.length > 0) {
-                    searchResultsList.style.display = 'block';
-                    data.slice(0, 5).forEach(user => { 
-                        const listItem = document.createElement('li');
-                        listItem.textContent = user; // Assuming 'user' is a string here (e.g., username or full name)
-                        listItem.classList.add('px-4', 'py-2', 'cursor-pointer', 'hover:bg-orange-600', 'hover:text-white', 'rounded-md'); 
-                        listItem.onclick = () => {
-                            searchInput.value = user; // Set the value of #searchUser
-                            searchResultsList.style.display = 'none';
-                            // Potentially trigger a filter or action based on this selection
-                        };
-                        searchResultsList.appendChild(listItem);
-                    });
-                } else {
-                    searchResultsList.innerHTML = '<li class="px-4 py-2 text-gray-400">No matching employees found</li>';
-                    searchResultsList.style.display = 'block'; 
+            const input = document.getElementById(targetId);
+            if (input) {
+                if (key === 'joinDate') {
+                    input.value = emp[key] ? new Date(emp[key]).toISOString().split('T')[0] : '';
+                } else if (input.tagName === 'SELECT') {
+                     input.value = emp[key]; // Directly set value for select
                 }
-            },
-            error: (error) => {
-                console.error('Error fetching user suggestions:', error);
-                searchResultsList.innerHTML = '<li class="px-4 py-2 text-red-400">Error fetching suggestions</li>';
-                searchResultsList.style.display = 'block';
+                else {
+                    input.value = emp[key] === null || emp[key] === undefined ? '' : emp[key];
+                }
             }
         });
-    }, 300); 
-}
-
-// Keyboard navigation for the #searchUser suggestions (if it's used)
-if (searchInput) { // Add event listener only if searchInput exists
-    searchInput.addEventListener("keydown", function(e) {
-        let x = document.getElementById("searchResults"); // Target #searchResults
-        if (x) x = x.getElementsByTagName("li");
-        if (!x || x.length === 0) return; // No suggestions to navigate
-
-        if (e.keyCode == 40) { // Down arrow
-            currentFocus++;
-            addActive(x);
-            e.preventDefault(); 
-        } else if (e.keyCode == 38) { // Up arrow
-            currentFocus--;
-            addActive(x);
-            e.preventDefault(); 
-        } else if (e.keyCode == 13) { // Enter key
-            e.preventDefault();
-            if (currentFocus > -1) {
-                if (x) x[currentFocus].click();
-            } else {
-                searchResultsList.style.display = 'none';
-            }
-        }
-    });
-}
-
-function addActive(x) {
-    if (!x) return false;
-    removeActive(x);
-    if (currentFocus >= x.length) currentFocus = 0;
-    if (currentFocus < 0) currentFocus = (x.length - 1);
-    x[currentFocus].classList.add("active-suggestion"); // Use a specific class for active suggestion
-}
-
-function removeActive(x) {
-    for (var i = 0; i < x.length; i++) {
-        x[i].classList.remove("active-suggestion");
+        document.getElementById('password').value = ""; 
+        document.getElementById('password').placeholder = "New password (optional)";
     }
-}
-
-// The confirmLogout function was already defined earlier with SweetAlert2,
-// this one is a simpler version. Ensure only one is active or reconcile them.
-// function confirmLogout() {
-//     if (confirm("Are you sure you want to logout?")) {
-//         // Create a form and submit for POST logout as Spring Security expects
-//         const form = document.createElement('form');
-//         form.method = 'POST';
-//         form.action = '/logout'; // Make sure this path is correct
-
-//         // Add CSRF token
-//         const csrfInput = document.createElement('input');
-//         csrfInput.type = 'hidden';
-//         csrfInput.name = csrfHeaderName; // Or directly "_csrf"
-//         csrfInput.value = csrfToken;
-//         form.appendChild(csrfInput);
-
-//         document.body.appendChild(form);
-//         form.submit();
-//     }
-// }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> </body>
+    function deleteEmployee() { 
+        const employeeId = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
+        const internalId = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id');
+        if (!internalId) { Swal.fire({ title: 'Error!', text: "Employee ID missing.", icon: 'error', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'}); return; }
+        Swal.fire({
+            title: 'Are you sure?', text: `Delete employee ${employeeId}?`, icon: 'warning', showCancelButton: true,
+            confirmButtonColor: 'var(--primary)', cancelButtonColor: '#757575', confirmButtonText: 'Yes, delete it!',
+            background: 'var(--content-bg)', color: 'var(--text-primary)'
+        }).then(result => {
+            if (result.isConfirmed) {
+                fetch(`/admin/employees/api/${internalId}`, { method: 'DELETE', headers: { [csrfHeaderName]: csrfToken }})
+                .then(res => { if (!res.ok) return res.text().then(text => { throw new Error(text || res.statusText) }); return res.text(); })
+                .then(() => { Swal.fire({ title: 'Deleted!', text: `Employee ${employeeId} deleted.`, icon: 'success', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'}); closeEmployeeDetailsModal(); fetchEmployees(); })
+                .catch(err => Swal.fire({ title: 'Error!', text: `Deletion failed: ${err.message}.`, icon: 'error', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'}));
+            }
+        });
+    }
+    document.getElementById('addEmployeeForm').addEventListener('submit', function(e) { 
+        e.preventDefault();
+        const isEdit = this.hasAttribute('data-internal-id') && this.getAttribute('data-internal-id');
+        const internalId = isEdit ? this.getAttribute('data-internal-id') : null;
+        const passwordValue = document.getElementById('password').value;
+        const userToSave = {
+            id: internalId, firstName: document.getElementById('firstName').value, lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value, username: document.getElementById('email').value.split('@')[0],
+            department: document.getElementById('department').value, jobTitle: document.getElementById('position').value,
+            joiningDate: document.getElementById('joinDate').value, phone: document.getElementById('phone').value,
+            roles: document.getElementById('roles').value,
+            ...( (isEdit && passwordValue === '') ? {} : { password: passwordValue } )
+        };
+        fetch(isEdit ? `/admin/employees/api/${internalId}` : '/admin/employees/api', {
+            method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', [csrfHeaderName]: csrfToken }, body: JSON.stringify(userToSave)
+        })
+        .then(res => { if (!res.ok) return res.json().then(err => { throw new Error((err.errors ? err.errors.map(e => e.defaultMessage).join(', ') : err.message) || res.statusText)}); return res.json(); })
+        .then(user => { Swal.fire({ title: 'Success!', text: `Employee ${user.firstName} ${isEdit ? 'updated' : 'added'}!`, icon: 'success', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'}); closeAddEmployeeModal(); fetchEmployees(); })
+        .catch(err => Swal.fire({ title: 'Error!', text: `Operation failed: ${err.message}`, icon: 'error', background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'}));
+    });
+    document.querySelectorAll('.modal-overlay').forEach(mo => mo.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); }));
+    document.querySelectorAll('.modal-content').forEach(mc => mc.addEventListener('click', e => e.stopPropagation()));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
 </html>
