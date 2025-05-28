@@ -374,7 +374,7 @@
     }
     function fetchEmployees() { 
         fetch('/admin/employees/api', {
-            method: 'PUT',
+            method: 'GET',
             headers: { 'Content-Type': 'application/json', [csrfHeaderName]: csrfToken }
         })
         .then(response => {
