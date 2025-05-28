@@ -12,6 +12,6 @@ public interface EmailService {
                     LocalDate endDate);
             void sendLeaveRequestCancellationNotificationToApprover(String email, String string, LocalDate startDate,
                     LocalDate endDate);
-
+    void sendWelcomeEmail(String to, String firstName, String username, String password, String loginUrl);
 
 }

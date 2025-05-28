@@ -25,6 +25,8 @@ package com.XAMMER.HRMS.service;
 // public class UserService {
 import java.util.Set;
 
+import com.XAMMER.HRMS.dto.UserDTO;
+
 //     private final UserRepository userRepository;
 //     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -61,6 +63,8 @@ import java.util.Set;
 // 
 
 import com.XAMMER.HRMS.model.User;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +86,14 @@ public interface UserService {
       List<String> findUsernamesContaining(String query);
       Optional<User> getUserById(Long id);
       List<User> findAllEmployees();
+      User addUser(User user);
+      List<User> searchAndFilterUsers(String query, String department);
+      User updateUser(Long id, User user);
+      void deleteUser(Long id);
+          List<UserDTO> findAllUsersDTO(); // New method
+          List<String> findUsernamesByQuery(String query);
 
-      
+              //  void sendWelcomeEmail(String to, String firstName, String username, String password) ;
+
 
 }

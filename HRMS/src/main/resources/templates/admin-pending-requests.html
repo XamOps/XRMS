@@ -1,50 +1,185 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin - Pending Leave Requests</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>XRMS | Admin - Pending Leave Requests</title>
     <link rel="icon" type="image/x-icon" href="/images/x2.png">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter&family=Poppins:wght@500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter&family=Poppins:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(to bottom, #121212, #181818);
-            color: #f5f5f5;
-            padding: 20px;
-            transition: background 0.3s ease;
+        /* General Body and Container Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            display: flex;
+            overflow: hidden; /* Prevent scrolling of the main page */
+            height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar-toggle-button {
+            position: fixed;
+            top: 2.5rem;
+            left: 1rem;
+            background: none;
+            border: none;
+            color: #FF8F00;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001; /* Ensure it's above the sidebar */
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #1E1E1E;
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid #303030;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            left: -260px; /* Initially hidden */
+            transition: left 0.3s ease;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar img {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 2.5rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-links {
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            color: #BDBDBD;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-color: #1E1E1E; /* Added background color for consistency */
+        }
+
+        .nav-links a i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            color: #9E9E9E;
+        }
+
+        .nav-links a:hover {
+            background-color: #2C2C2C;
+            color: #FF8F00;
+            box-shadow: 3px 3px 10px rgba(255, 143, 0, 0.25);
+            transform: translateX(4px);
+        }
+
+        .logout {
+            background: linear-gradient(to right, #FF8F00, #F57C00);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .logout:hover {
+            background: linear-gradient(to right, #F57C00, #FF8F00);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transform: scale(1.02);
+        }
+
+        /* Main Content Area */
+        .main {
+            flex-grow: 1; /* Allows main content to take remaining space */
+            margin-left: 0; /* No initial margin when sidebar is closed */
+            padding: 20px; /* Reduced padding for the main content to fit the table */
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center items horizontally */
+            width: 100%; /* Ensure main content spans available width */
+        }
+
+        .main.sidebar-open {
+            margin-left: 260px; /* Adjust margin when sidebar is open */
+        }
+
+        /* Header Styling */
         h2 {
             color: #ffffff;
             margin-bottom: 20px;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             letter-spacing: 0.5px;
+            text-align: center; /* Center the main heading */
+            width: 100%; /* Ensure heading takes full width */
         }
 
+        /* Table Styling */
         table {
-            width: 100%;
+            width: 90%; /* Adjust width to make it fit better, or keep 100% if preferred */
             border-collapse: collapse;
             margin-top: 20px;
             background: linear-gradient(to bottom, #1e1e1e, #252525);
             border-radius: 6px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-left: auto; /* Center the table */
+            margin-right: auto; /* Center the table */
         }
 
         th, td {
             padding: 14px 12px;
             border-bottom: 1px solid #2c2c2c;
-            text-align: left;
+            text-align: center; /* Center table content */
         }
 
         th {
             background-color: #2a2a2a;
-            color: #ffcc80;
+            color: #ffcc80; /* Lighter orange for headers */
             text-transform: uppercase;
             font-weight: 500;
         }
@@ -70,8 +205,8 @@
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #90caf9;
-            box-shadow: 0 0 5px rgba(144, 202, 249, 0.5);
+            border-color: #FF8F00; /* Orange focus */
+            box-shadow: 0 0 5px rgba(255, 143, 0, 0.5);
         }
 
         button {
@@ -100,11 +235,11 @@
         }
 
         .btn-approve {
-            background-color: #4caf50;
+            background-color: #ff8c00; /* Orange approve button */
         }
 
         .btn-approve:hover {
-            background-color: #45a049;
+            background-color: #e67e00;
         }
 
         .btn-reject {
@@ -117,7 +252,7 @@
 
         #viewMoreBtn {
             margin-top: 15px;
-            background-color: #388e3c;
+            background-color: #ff8c00; /* Orange view more button */
             padding: 10px 20px;
             border: none;
             color: white;
@@ -125,12 +260,12 @@
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease;
             display: block;
-            margin-bottom: 10px;
+            margin: 15px auto 10px auto; /* Center the view more button */
             box-shadow: 2px 2px 5px #0e0e0e, -2px -2px 5px #222222;
         }
 
         #viewMoreBtn:hover {
-            background-color: #2e7d32;
+            background-color: #e67e00;
             transform: translateY(-2px);
         }
 
@@ -138,15 +273,16 @@
             box-shadow: inset 2px 2px 5px #0e0e0e, inset -2px -2px 5px #222222;
         }
 
+        /* General Links */
         a {
-            color: #90caf9;
+            color: #ffa726; /* Orange for general links */
             text-decoration: none;
             transition: color 0.2s ease-in-out;
         }
 
         a:hover {
             text-decoration: underline;
-            color: #c7e5ff;
+            color: #ffcc80;
         }
 
         .hidden-row {
@@ -169,7 +305,7 @@
 
         .loader {
             border: 5px solid #f3f3f3; /* Light grey */
-            border-top: 5px solid #3498db; /* Blue */
+            border-top: 5px solid #ffa726; /* Orange loader */
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -197,19 +333,49 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #555;
+            background: #ff8c00; /* Orange scrollbar thumb */
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #777;
+            background: #e67e00;
+        }
+
+        .centered-message {
+            text-align: center;
+            margin-top: 20px;
+            width: 100%; /* Ensure it centers within the main content area */
         }
     </style>
 </head>
 <body>
+
+<button class="sidebar-toggle-button" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar">
+    <div>
+        <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
+        <div class="nav-links">
+            <a href="" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="/admin/employees"><i class="fa-solid fa-users"></i> Employees</a>
+            <a href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+             <a href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Team Requests</a>
+
+            <!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a> -->
+            <!-- <a href="#"><i class="fa-solid fa-cog"></i> Settings</a> -->
+        </div>
+    </div>
+    <div class="logout" onclick="confirmLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </div>
+</div>
+
+<div class="main">
     <h2>Pending Leave Requests</h2>
 
-    <div th:if="${#lists.isEmpty(pendingRequests)}">
+    <div th:if="${#lists.isEmpty(pendingRequests)}" class="centered-message">
         No pending leave requests.
     </div>
 
@@ -252,34 +418,86 @@
     <div th:if="${#lists.size(pendingRequests) > 1}">
         <button id="viewMoreBtn" type="button">View More</button>
     </div>
+</div>
 
-    <p><a href="/logout">Logout</a></p>
+<div class="loader-container" id="loaderContainer">
+    <div class="loader"></div>
+</div>
 
-    <div class="loader-container" id="loaderContainer">
-        <div class="loader"></div>
-    </div>
+<script th:inline="javascript">
+    const csrfToken = [[${_csrf?.token}]]; // Using safe navigation for _csrf
+    const csrfHeaderName = [[${_csrf?.headerName}]]; // Using safe navigation for _csrf
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const viewMoreBtn = document.getElementById("viewMoreBtn");
-            if (viewMoreBtn) {
-                viewMoreBtn.addEventListener("click", function () {
-                    document.querySelectorAll(".hidden-row").forEach(row => {
-                        row.style.display = "table-row";
-                    });
-                    viewMoreBtn.style.display = "none";
-                });
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
+    const mainContent = document.querySelector('.main');
+    const bodyElement = document.body; // Reference to the body
+
+
+   function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+        mainContent.classList.toggle('sidebar-open');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.style.display = 'none';
+        mainContent.classList.remove('sidebar-open');
+    }
+    // Set active class on the current navigation link
+    document.addEventListener('DOMContentLoaded', function () {
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const currentPath = window.location.pathname;
+
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath || (currentPath.startsWith('/admin/requests/pending') && link.getAttribute('href') === '/admin/requests/pending')) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active'); // Ensure only one active link
             }
         });
 
-        function disableButtonsAndShowLoader(form) {
-            const buttons = form.querySelectorAll('button[type="submit"]');
-            buttons.forEach(button => {
-                button.disabled = true;
-                button.textContent = 'Processing...'; // Optional: Change button text
+        const viewMoreBtn = document.getElementById("viewMoreBtn");
+        if (viewMoreBtn) {
+            viewMoreBtn.addEventListener("click", function () {
+                document.querySelectorAll(".hidden-row").forEach(row => {
+                    row.style.display = "table-row";
+                });
+                viewMoreBtn.style.display = "none";
             });
-            document.getElementById('loaderContainer').style.display = 'flex';
         }
-    </script>
+    });
+
+    function disableButtonsAndShowLoader(form) {
+        const buttons = form.querySelectorAll('button[type="submit"]');
+        buttons.forEach(button => {
+            button.disabled = true;
+            button.textContent = 'Processing...'; // Optional: Change button text
+        });
+        document.getElementById('loaderContainer').style.display = 'flex';
+    }
+
+    function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            // Programmatically create a form to send a POST request for logout with CSRF
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/logout'; // Your Spring Security logout URL
+
+            // Add CSRF token
+            if (csrfToken && csrfHeaderName) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = csrfHeaderName;
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
 </body>
 </html>

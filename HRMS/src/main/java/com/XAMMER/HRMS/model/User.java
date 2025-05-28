@@ -1,8 +1,10 @@
 package com.XAMMER.HRMS.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList; // Import ArrayList
 import java.util.Collection;
 import java.util.List;
+import jakarta.persistence.CascadeType; // Import CascadeType
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,7 +33,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Entity
 @Table(name = "user")
-public class User implements UserDetails { // Implement UserDetails
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,7 +41,6 @@ public class User implements UserDetails { // Implement UserDetails
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
     private String password;
 
     private String firstName;
@@ -47,37 +48,39 @@ public class User implements UserDetails { // Implement UserDetails
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private Roles roles; // Using your Roles enum
+    private Roles roles;
 
-    private String team; // e.g., "DevOps", "Business"
+    private String team;
 
     @ManyToOne
     @JoinColumn(name = "manager_id")
-    private User manager; // Self-referencing foreign key for the manager
+    private User manager;
 
-    private int totalLeaves = 20; // Default annual quota
+    private int totalLeaves = 20;
     private int leavesTaken = 0;
 
     private LocalDate birthDate;
 
-    // New fields from the reference image
     private String employeeId;
     private String phone;
     private String address;
     private LocalDate joiningDate;
     private String department;
     private String jobTitle;
-    private String gender; // Consider using an Enum for this
-    private String maritalStatus; // Consider using an Enum for this
+    private String gender;
+    private String maritalStatus;
+    private String profilePictureUrl;
 
-    @OneToMany(mappedBy = "user")
-    private List<Attendance> attendances; // Keep this if you've implemented attendance
+    // *** CRITICAL CHANGES HERE ***
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendances = new ArrayList<>(); // Initialize the list to avoid NullPointerException
 
-    @OneToMany(mappedBy = "user")
-    private List<LeaveRequest> leaveRequests; // Assuming you have a LeaveRequest entity
+    // *** CRITICAL CHANGES HERE ***
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LeaveRequest> leaveRequests = new ArrayList<>(); // Initialize the list to avoid NullPointerException
 
-    @OneToMany(mappedBy = "manager")
-    private List<User> subordinates; // To easily find direct reports of a manager
+    @OneToMany(mappedBy = "manager") // No cascade on delete for subordinates, as they are not "owned" and should not be deleted with the manager.
+    private List<User> subordinates = new ArrayList<>(); // Initialize the list
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -85,24 +88,16 @@ public class User implements UserDetails { // Implement UserDetails
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true; // You can implement logic based on your requirements
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true; // You can implement logic based on your requirements
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true; // You can implement logic based on your requirements
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true; // You can implement logic based on your requirements
-    }
+    public boolean isEnabled() { return true; }
 
     @Override
     public boolean equals(Object o) {
@@ -116,8 +111,4 @@ public class User implements UserDetails { // Implement UserDetails
     public int hashCode() {
         return Objects.hash(id);
     }
-        private String profilePictureUrl; // Add this field
-
-
-    // Lombok's @Data will still generate other methods
 }

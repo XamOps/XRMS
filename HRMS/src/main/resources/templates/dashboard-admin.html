@@ -1,544 +1,559 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin - Xammer HRMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>XRMS | Admin Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="/images/x2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <style>
-        :root {
-            --primary: #ff6d00;
-            --primary-dark: #e65100;
-            --dark: #121212;
-            --darker: #0a0a0a;
-            --light: #e0e0e0;
-            --lighter: #f5f5f5;
-            --gray: #333333;
-            --light-gray: #424242;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark);
-            color: var(--light);
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            background: linear-gradient(180deg, #1a1a1a, #121212);
-            border-right: 1px solid var(--gray);
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
-            transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 50;
-        }
-
-        .sidebar-open .sidebar {
-            transform: translateX(0);
-        }
-
-        .sidebar-header {
-            border-bottom: 1px solid var(--gray);
-            padding-bottom: 1.5rem;
-        }
-
-        .sidebar-logo {
-            filter: drop-shadow(0 0 5px rgba(255, 109, 0, 0.5));
-        }
-
-        .nav-item {
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
-        .nav-item:hover {
-            background-color: rgba(255, 109, 0, 0.1);
-            border-left-color: var(--primary);
-        }
-
-        .nav-icon {
-            color: var(--primary);
-            font-size: 1.1rem;
-            width: 24px;
-            display: inline-flex;
-            justify-content: center;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            transition: all 0.2s ease;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 109, 0, 0.3);
-        }
-
-        .search-results {
-            max-height: 300px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) var(--gray);
-            list-style: none; /* Remove bullet points */
-            padding: 0; /* Remove default padding */
-            margin: 0; /* Remove default margin */
-        }
-
-        .search-results::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .search-results::-webkit-scrollbar-track {
-            background: var(--gray);
-        }
-
-        .search-results::-webkit-scrollbar-thumb {
-            background-color: var(--primary);
-            border-radius: 3px;
-        }
-
-        /* Style for active suggestion in search results */
-        .search-results li.active-suggestion {
-            background-color: var(--primary) !important;
-            color: white !important;
-        }
-        
-        .table-container {
-            background: linear-gradient(145deg, #1a1a1a, #121212);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .table-header {
-            background: linear-gradient(180deg, #252525, #1a1a1a);
-        }
-
-        .table-row:hover {
-            background-color: rgba(255, 109, 0, 0.05) !important;
-        }
-
-        .badge-success {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: #4caf50;
-        }
-
-        .badge-warning {
-            background-color: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-        }
-
-        .badge-danger {
-            background-color: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-        }
-
-        .date-picker {
-            background-color: var(--gray);
-            border: 1px solid var(--light-gray);
-        }
-
-        .date-picker:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(255, 109, 0, 0.2);
-        }
-
-        .search-input {
-            background-color: var(--gray);
-            border: 1px solid var(--light-gray);
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(255, 109, 0, 0.2);
-        }
-
-        .title-text {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 8px rgba(255, 109, 0, 0.5);
-        }
-
-        .action-btn {
-            transition: all 0.2s ease;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .sidebar-toggle {
-            position: fixed;
-            left: 20px;
-            top: 20px;
-            z-index: 40;
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid var(--gray);
-            color: var(--primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow: hidden; /* Prevent scrolling of the main page */
+            height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar-toggle-button {
+            position: fixed;
+            top: 2.5rem;
+            left: 1rem;
+            background: none;
+            border: none;
+            color: #FF8F00;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            z-index: 1001; /* Ensure it's above the sidebar */
         }
 
-        .sidebar-toggle:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .overlay {
+        .sidebar-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 40;
-            opacity: 0;
-            pointer-events: none;
+            z-index: 1000;
+            display: none; /* Hidden by default */
             transition: opacity 0.3s ease;
         }
 
-        .sidebar-open .overlay {
-            opacity: 1;
-            pointer-events: auto;
+        .sidebar {
+            width: 260px;
+            background-color: #1E1E1E;
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid #303030;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            left: -260px; /* Initially hidden */
+            transition: left 0.3s ease;
         }
 
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar img {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 2.5rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-links {
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            color: #BDBDBD;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-color: #1E1E1E; /* Added background color for consistency */
+        }
+
+        .nav-links a i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            color: #9E9E9E;
+        }
+
+        .nav-links a:hover {
+            background-color: #2C2C2C;
+            color: #FF8F00;
+            box-shadow: 3px 3px 10px rgba(255, 143, 0, 0.25);
+            transform: translateX(4px);
+        }
+
+        .logout {
+            background: linear-gradient(to right, #FF8F00, #F57C00);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
             color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .logout:hover {
+            background: linear-gradient(to right, #F57C00, #FF8F00);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transform: scale(1.02);
+        }
+
+        .main {
+            margin-left: 0; /* Initially no margin */
+            padding: 2.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            transition: margin-left 0.3s ease;
+        }
+
+        .main.sidebar-open {
+            margin-left: 260px;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center; /* Center the welcome section */
+            align-items: center; /* Align items vertically in the header */
+            position: relative; /* For absolute positioning of time */
+            width: 100%; /* Ensure header takes full width */
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            font-size: 2.2rem;
+            color: #FF8F00;
+        }
+
+        .header-welcome h1 {
+            font-size: 1.8rem;
+            color: #FFFFFF;
+            margin: 0; /* Remove default margins */
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .header-right {
+            position: fixed;
+            top: 3rem;
+            right: 1rem;
+            color: #9E9E9E;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-widgets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .dashboard-bottom-widgets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .card {
+            background: #1E1E1E;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border: 1px solid #303030;
+            display: flex;
+            flex-direction: column; 
+            min-height: 200px;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 18px rgba(255, 143, 0, 0.2), inset 0 0 6px rgba(0, 0, 0, 0.15);
+            border-color: #444444;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #303030;
+            padding-bottom: 0.75rem;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: #FF8F00;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: #BDBDBD;
+            margin-bottom: 1rem;
+        }
+
+        .profile-picture-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 1rem;
+            border: 2px solid #FF8F00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile-picture {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .employee-info {
+            flex-grow: 1;
+        }
+
+        .employee-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-bottom: 0.2rem;
+        }
+
+        .employee-designation {
+            font-size: 0.9rem;
+            color: #A0A0A0;
+        }
+
+        .employee-details {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #BDBDBD;
+        }
+
+        .employee-details p {
+            margin-bottom: 0.4rem;
+        }
+
+        .employee-details p strong {
+            color: #FFFFFF;
+            font-weight: 500;
+        }
+
+      
+        .upcoming-birthdays-list, .upcoming-holidays-list {
+            overflow-y: auto;
+            max-height: 180px;
+            padding-right: 0.5rem;
+            padding-top: 0.5rem;
+        }
+
+        .upcoming-events h3 {
+            color: #FFFFFF;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-bottom: 1px solid #303030;
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .upcoming-events h3 i {
+            font-size: 1rem;
+        }
+
+        .birthday-item, .holiday-item {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid #2C2C2C;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .birthday-item:last-child, .holiday-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .birthday-name {
+            color: #FF8F00;
+            font-weight: bold;
+        }
+
+        .holiday-name {
+            color: #FF8F00;
+            font-weight: bold;
+        }
+
+        .birthday-date, .holiday-date {
+            color: #BDBDBD;
+            font-size: 0.75rem;
+        }
+
+        .request-count {
+            background-color: #FF8F00;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: auto;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-widgets,
+            .dashboard-bottom-widgets {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-widgets,
+            .dashboard-bottom-widgets {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body class="relative">
-    <div class="sidebar-toggle" onclick="toggleSidebar()">
-        <i class="bi bi-list text-xl"></i>
-    </div>
+<body>
+<button class="sidebar-toggle-button" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar">
+    <div>
+        <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
+        <div class="nav-links">
+            <a href="" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="/admin/employees"><i class="fa-solid fa-users"></i> Employees</a>
+            <a href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+             <a href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Team Requests</a>
 
-    <div class="overlay" onclick="toggleSidebar()"></div>
-
-    <div class="sidebar w-64 h-full fixed flex flex-col">
-        <div class="sidebar-header px-6 py-6">
-            <div class="flex justify-center mb-6">
-                <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
-            </div>
-            <div class="text-center">
-                <h4 class="text-xl font-semibold text-orange-400 tracking-wide">ADMIN PORTAL</h4>
-            </div>
-        </div>
-
-        <div class="flex-1 px-4 py-2 overflow-y-auto">
-            <ul class="space-y-1">
-                <li>
-                    <a href="/admin/dashboard" class="nav-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-orange-400">
-                        <i class="bi bi-speedometer2 nav-icon mr-3"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/employees" class="nav-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-orange-400">
-                        <i class="bi bi-people-fill nav-icon mr-3"></i>
-                        <span>Employees</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/attendance" class="nav-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-orange-400">
-                        <i class="bi bi-calendar-check nav-icon mr-3"></i>
-                        <span>Attendance</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/requests/pending" class="nav-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-orange-400">
-                        <i class="bi bi-arrow-right-square-fill nav-icon mr-3"></i>
-                        <span>Team Requests</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/settings" class="nav-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-orange-400">
-                        <i class="bi bi-gear-fill nav-icon mr-3"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="px-4 py-6">
-            <form action="/logout" method="post" onsubmit="return confirmLogout();">
-                <button type="submit" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium">
-                    <i class="bi bi-box-arrow-left mr-2"></i>
-                    Logout
-                </button>
-            </form>
+            <!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a> -->
+            <!-- <a href="#"><i class="fa-solid fa-cog"></i> Settings</a> -->
         </div>
     </div>
+    <div class="logout" onclick="confirmLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </div>
+</div>
 
-    <div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 sidebar-open:ml-64">
-        <div class="bg-gray-900 border-b border-gray-800 py-4 px-6 flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-orange-400 title-text">ATTENDANCE MANAGEMENT</h1>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-400 font-medium">Welcome, Admin</span>
-                <div class="user-avatar">A</div>
+<div class="main">
+    <div class="header">
+        <div class="header-left">
+            <i class="fa-solid fa-user-shield header-icon"></i>
+            <div class="header-welcome">
+                <h1 th:text="${'Admin Dashboard, ' + username + ' 👋'}">Admin Dashboard, admin 👋</h1>
             </div>
         </div>
+        <div class="header-right" th:text="${#temporals.format(todayDate, 'EEEE, MMMM dd ''•'' hh:mm a')}">Saturday, May 17 • 01:40 PM</div>
+    </div>
 
-        <div class="flex-1 overflow-y-auto p-6">
-            <div class="bg-gray-900 rounded-xl p-6 mb-6 shadow-lg">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="searchUser" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SEARCH EMPLOYEES</label>
-                        <div class="relative">
-                            <input type="text" id="searchUser" placeholder="Type to search employees..."
-                                   class="search-input w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                   onkeyup="suggestUsers(this.value)">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="bi bi-search text-gray-500"></i>
-                            </div>
-                        </div>
-                        <ul id="searchResults" class="search-results absolute z-10 mt-1 w-full bg-gray-800 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto border border-gray-700"></ul>
-                    </div>
-
-                    <div>
-                        <label for="filterDate" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SELECT DATE</label>
-                        <div class="relative">
-                            <input type="date" id="filterDate" class="date-picker w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="bi bi-calendar3 text-gray-500"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-end">
-                        <button onclick="filterAttendance()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide">
-                            <i class="bi bi-funnel-fill mr-2"></i>
-                            VIEW ATTENDANCE
-                        </button>
-                    </div>
+    <div class="dashboard-widgets">
+        <!-- User Profile Card -->
+        <div class="card" onclick="window.location.href='/employees/profile'">
+            <div class="card-header">
+                <div class="profile-picture-container">
+                    <img th:if="${employee != null and employee.profilePictureUrl != null}"
+                         th:src="${employee.profilePictureUrl}" alt="Profile Picture" class="profile-picture">
+                    <i th:unless="${employee != null and employee.profilePictureUrl != null}"
+                       class="fa-solid fa-user-circle fa-2x" style="color: #9E9E9E;"></i>
+                </div>
+                <div class="employee-info">
+                    <h2 class="employee-name" th:text="${ username }">Admin User</h2>
+                    <p class="employee-designation"
+                       th:text="${employee != null ? employee.jobTitle : 'Administrator'}">Administrator</p>
                 </div>
             </div>
+            <div class="employee-details">
+                <p><strong>Member Since:</strong> <span
+                        th:text="${joiningDateFormatted != null ? joiningDateFormatted : 'N/A'}">N/A</span>
+                </p>
+            </div>
+        </div>
 
-            <div class="table-container rounded-xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead class="table-header">
-                            <tr>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-orange-400 uppercase tracking-wider">EMPLOYEE</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-orange-400 uppercase tracking-wider">CHECK-IN</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-orange-400 uppercase tracking-wider">CHECK-OUT</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-orange-400 uppercase tracking-wider">STATUS</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-orange-400 uppercase tracking-wider">ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-gray-900 divide-y divide-gray-800" id="attendanceTableBody">
-                            <tr th:each="attendance : ${attendances}" class="table-row">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">
-                                            <span th:text="${#strings.substring(attendance.username, 0, 1).toUpperCase()}"></span>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-white" th:text="${attendance.username}">user</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-white" th:text="${attendance.checkInTime != null ? #temporals.format(attendance.checkInTime, 'hh:mm a') : '-'}">-</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-white" th:text="${attendance.checkOutTime != null ? #temporals.format(attendance.checkOutTime, 'hh:mm a') : '-'}">-</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                            th:classappend="${attendance.duration != null} ? 'badge-success' : 'badge-danger'"
-                                            th:text="${attendance.duration != null ? attendance.duration : 'Absent'}">Status</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <form th:action="@{'/admin/attendance/reset/checkout/' + ${attendance.username} + '?resetDate=' + ${#temporals.format(attendance.attendanceDate, 'yyyy-MM-dd')}}"
-                                          method="post" class="inline">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <button type="submit" class="action-btn bg-transparent hover:bg-orange-500 text-orange-400 hover:text-white py-1 px-3 border border-orange-500 rounded mr-2">
-                                            <i class="bi bi-clock-history mr-1"></i> Reset Checkout
-                                        </button>
-                                    </form>
-                                    <form th:action="@{'/admin/attendance/reset/checkin/' + ${attendance.username} + '?resetDate=' + ${#temporals.format(attendance.attendanceDate, 'yyyy-MM-dd')}}"
-                                          method="post" class="inline">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <button type="submit" class="action-btn bg-transparent hover:bg-red-500 text-red-400 hover:text-white py-1 px-3 border border-red-500 rounded">
-                                            <i class="bi bi-x-circle mr-1"></i> Reset Today
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(attendances)}">
-                                <td colspan="5" class="text-center py-8 text-gray-500">No attendance records found for the selected criteria.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Employees Management Card -->
+        <div class="card" onclick="window.location.href='/admin/employees'">
+            <i class="fas fa-users card-icon"></i>
+            <h3 class="card-title">Employees</h3>
+            <p class="card-description">Manage all employee records, add new employees, and update existing information.</p>
+            <div style="margin-top: auto; text-align: right;">
+                <span style="color: #FF8F00; font-weight: 500;">View All →</span>
+            </div>
+        </div>
+
+        <!-- Attendance Management Card -->
+        <div class="card" onclick="window.location.href='/admin/attendance'">
+            <i class="fas fa-calendar-check card-icon"></i>
+            <h3 class="card-title">Attendance</h3>
+            <p class="card-description">View and manage employee attendance records, generate reports, and track time.</p>
+            <div style="margin-top: auto; text-align: right;">
+                <span style="color: #FF8F00; font-weight: 500;">View All →</span>
             </div>
         </div>
     </div>
 
-    <script>
-        // Get CSRF token from meta tags
-        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    <div class="dashboard-bottom-widgets">
+        <!-- Team Requests Card -->
+        <div class="card" onclick="window.location.href='/admin/requests/pending'">
+            <i class="fas fa-inbox card-icon"></i>
+            <h3 class="card-title">Team Requests</h3>
+            <p class="card-description">Review and approve pending requests from your team members.</p>
+            <div class="holiday-item">
+                <i class="fas fa-clock holiday-icon"></i>
+                <div class="holiday-details">
+                    <div class="holiday-name">Pending Requests</div>
+                </div>
+                <div class="request-count" th:text="${pendingRequestsCount != null ? pendingRequestsCount : '5'}">5</div>
+            </div>
+            <div style="margin-top: auto; text-align: right;">
+                <span style="color: #FF8F00; font-weight: 500;">View All →</span>
+            </div>
+        </div>
 
-        const searchResultsList = document.getElementById('searchResults');
-        const searchInput = document.getElementById('searchUser');
-        let suggestionTimeout = null;
-        let currentFocus = -1; // Added for keyboard navigation
+        <div class="card upcoming-birthdays">
+            <h3><i class="fa-solid fa-birthday-cake" style="color: #FF8F00;"></i> Upcoming Birthdays</h3>
+            <div class="upcoming-birthdays-list">
+                <div th:each="birthday : ${upcomingBirthdays}" class="birthday-item">
+                    <div>
+                        <span class="birthday-name" th:text="${birthday.firstName + ' ' + birthday.lastName}">John
+                            Doe</span>
+                    </div>
+                    <span class="birthday-date" th:text="${#temporals.format(birthday.birthDate, 'MMMM dd')}">May
+                        10</span>
+                </div>
+                <p th:if="${upcomingBirthdays == null or upcomingBirthdays.isEmpty()}">No upcoming birthdays.</p>
+            </div>
+        </div>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            setDefaultDate(); // Only set default date on load
-        });
 
-        function toggleSidebar() {
-            document.body.classList.toggle('sidebar-open');
-        }
+        <div class="card upcoming-holidays">
+            <h3><i class="fa-solid fa-calendar-alt" style="color: #FF8F00;"></i> Upcoming Holidays</h3>
+            <div class="upcoming-holidays-list">
+                <div th:each="holiday : ${upcomingHolidays}" class="holiday-item">
+                    <div>
+                        <span class="holiday-name" th:text="${holiday.name}">Republic Day</span>
+                    </div>
+                    <span class="holiday-date" th:text="${#temporals.format(holiday.date, 'MMMM dd')}">January
+                        26</span>
+                </div>
+                <p th:if="${upcomingHolidays == null or upcomingHolidays.isEmpty()}">No upcoming holidays.</p>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
 
-        function setDefaultDate() {
-            const today = new Date();
-            const formattedDate = today.toISOString().split('T')[0];
-            document.getElementById('filterDate').value = formattedDate;
-        }
+<script th:inline="javascript">
+    const csrfToken = [[${_csrf.token}]];
+    const csrfHeaderName = [[${_csrf.headerName}]];
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
+    const mainContent = document.querySelector('.main');
+    const sidebarToggleButton = document.querySelector('.sidebar-toggle-button');
 
-        function suggestUsers(searchText) {
-            clearTimeout(suggestionTimeout);
-            if (searchText.trim() === "") {
-                searchResultsList.style.display = 'none';
-                searchResultsList.innerHTML = ''; // Clear suggestions
-                currentFocus = -1; // Reset focus
-                return;
-            }
+    function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+        mainContent.classList.toggle('sidebar-open');
+    }
 
-            suggestionTimeout = setTimeout(() => {
-                $.ajax({
-                    url: '/admin/users/suggestions',
-                    type: 'GET',
-                    data: { query: searchText },
-                    beforeSend: (xhr) => {
-                        xhr.setRequestHeader(csrfHeader, csrfToken);
-                    },
-                    success: (data) => {
-                        searchResultsList.innerHTML = '';
-                        currentFocus = -1; // Reset focus when new suggestions arrive
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.style.display = 'none';
+        mainContent.classList.remove('sidebar-open');
+    }
 
-                        if (data && data.length > 0) {
-                            searchResultsList.style.display = 'block';
-                            data.slice(0, 5).forEach(user => { // Limit to 5 suggestions
-                                const listItem = document.createElement('li');
-                                listItem.textContent = user;
-                                listItem.classList.add('px-4', 'py-2', 'cursor-pointer', 'hover:bg-orange-600', 'hover:text-white', 'rounded-md'); // Tailwind classes for styling
-                                listItem.onclick = () => {
-                                    document.getElementById('searchUser').value = user;
-                                    searchResultsList.style.display = 'none';
-                                    // Removed: No longer trigger filterAttendance() here
-                                };
-                                searchResultsList.appendChild(listItem);
-                            });
-                        } else {
-                            searchResultsList.innerHTML = '<li class="px-4 py-2 text-gray-400">No matching employees found</li>';
-                            searchResultsList.style.display = 'block'; // Still show the "no results" message
-                        }
-                    },
-                    error: (error) => {
-                        console.error('Error fetching user suggestions:', error);
-                        searchResultsList.innerHTML = '<li class="px-4 py-2 text-red-400">Error fetching suggestions</li>';
-                        searchResultsList.style.display = 'block';
-                    }
-                });
-            }, 300); // Debounce time
-        }
+    // Set active class on the current navigation link
+    document.addEventListener('DOMContentLoaded', function () {
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const currentPath = window.location.pathname;
 
-        // Keyboard navigation for search suggestions
-        searchInput.addEventListener("keydown", function(e) {
-            let x = document.getElementById("searchResults");
-            if (x) x = x.getElementsByTagName("li");
-            if (e.keyCode == 40) { // Down arrow
-                currentFocus++;
-                addActive(x);
-                e.preventDefault(); // Prevent cursor from moving in input
-            } else if (e.keyCode == 38) { // Up arrow
-                currentFocus--;
-                addActive(x);
-                e.preventDefault(); // Prevent cursor from moving in input
-            } else if (e.keyCode == 13) { // Enter key
-                e.preventDefault();
-                if (currentFocus > -1) {
-                    /* If there is an active item, simulate a click on it*/
-                    if (x) x[currentFocus].click();
-                } else {
-                    // If no suggestion is highlighted, just hide suggestions.
-                    // No longer trigger filterAttendance() here.
-                    searchResultsList.style.display = 'none';
-                }
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath || (currentPath.startsWith('/admin/dashboard') && link.getAttribute('href') === '#')) {
+                link.classList.add('active');
             }
         });
+    });
 
-        function addActive(x) {
-            /*a function to classify an item as "active":*/
-            if (!x) return false;
-            /*start by removing the "active" class on all items:*/
-            removeActive(x);
-            if (currentFocus >= x.length) currentFocus = 0;
-            if (currentFocus < 0) currentFocus = (x.length - 1);
-            /*add class "active-suggestion":*/
-            x[currentFocus].classList.add("active-suggestion");
-            // Scroll to the active item if it's out of view
-            x[currentFocus].scrollIntoView({ block: "nearest", inline: "nearest" });
+    function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            window.location.href = "/logout";
         }
-
-        function removeActive(x) {
-            /*a function to remove the "active" class from all autocomplete items:*/
-            for (let i = 0; i < x.length; i++) {
-                x[i].classList.remove("active-suggestion");
-            }
-        }
-
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('#searchUser') && !event.target.closest('#searchResults')) {
-                searchResultsList.classList.add('hidden');
-                searchResultsList.innerHTML = ''; // Clear content when hidden
-                currentFocus = -1; // Reset focus
-            }
-        });
-        
-        function filterAttendance() {
-            const date = document.getElementById('filterDate').value;
-            const searchUser = document.getElementById('searchUser').value;
-
-            let url = `/admin/dashboard?date=${encodeURIComponent(date)}`;
-            if (searchUser) {
-                url += `&user=${encodeURIComponent(searchUser)}`;
-            }
-            window.location.href = url;
-        }
-
-        function confirmLogout() {
-            return confirm("Are you sure you want to logout?");
-        }
-    </script>
+    }
+    
+    // Update the current time every minute
+  function updateCurrentTime() {
+    const now = new Date();
+    const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+    const dateString = now.toLocaleDateString('en-US', dateOptions);
+    const timeString = now.toLocaleTimeString('en-US', timeOptions);
+    document.querySelector('.header-right').textContent = `${dateString} • ${timeString}`;
+}
+    
+    // Update time immediately and then every minute
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 60000);
+</script>
 </body>
 </html>

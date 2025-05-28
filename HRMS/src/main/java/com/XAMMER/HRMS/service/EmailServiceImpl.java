@@ -16,6 +16,33 @@ public class EmailServiceImpl implements EmailService {
 
     private String fromAddress = "xrms@xammer.in"; // Replace with your email
 
+     @Override
+    // **** IMPORTANT: Change the method signature to include loginUrl ****
+   public void sendWelcomeEmail(String to, String firstName, String username, String password, String loginUrl) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setFrom(fromAddress);
+        message.setSubject("Welcome to XAMMER HRMS");
+
+        // *** UPDATED: Added a placeholder for password and included it in String.format ***
+        String emailContent = String.format(
+            "Dear %s,\n\n" +
+            "Your account has been created successfully.\n\n" +
+            "Username: %s\n" +
+            "Password: %s\n\n" + // <-- NEW LINE FOR PASSWORD
+            "Please login at: %s\n\n" +
+            "Best regards,\n" +
+            "XAMMER HRMS Team",
+            firstName,  // Corresponds to the first %s (Dear %s)
+            username,   // Corresponds to the second %s (Username: %s)
+            password,   // <-- NEW ARGUMENT for the third %s (Password: %s)
+            loginUrl    // Corresponds to the fourth %s (Please login at: %s)
+        );
+
+        message.setText(emailContent);
+        mailSender.send(message);
+    }
+
     @Override
     public void sendLeaveRequestNotification(String to, String requesterName, LocalDate startDate, LocalDate endDate, String reason) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -94,4 +121,6 @@ public class EmailServiceImpl implements EmailService {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'sendLeaveRequestNotification'");
     }
+
+  
 }

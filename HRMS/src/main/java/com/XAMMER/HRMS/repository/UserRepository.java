@@ -22,6 +22,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByManagerId(Long managerId);
         List<User> findByUsernameContainingIgnoreCase(String query);
+        List<User> findByFirstNameContainingIgnoreCaseAndDepartmentContainingIgnoreCase(String query,
+                String department);
+        List<User> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                String query, String query2, String query3);
+        List<User> findByDepartmentContainingIgnoreCase(String department);
+        Optional<User> findByEmail(String email);
+        List<User> findByManager(User userToDelete);
    
     
 }

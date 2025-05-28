@@ -4,10 +4,12 @@ import com.XAMMER.HRMS.dto.AttendanceResetRequest;
 import com.XAMMER.HRMS.dto.ApiResponse;
 import com.XAMMER.HRMS.dto.AttendanceDTO;
 import com.XAMMER.HRMS.model.Attendance;
+import com.XAMMER.HRMS.model.Holiday;
 import com.XAMMER.HRMS.model.LeaveRequest;
 import com.XAMMER.HRMS.model.User;
 import com.XAMMER.HRMS.service.AdminService;
 import com.XAMMER.HRMS.service.AttendanceService;
+import com.XAMMER.HRMS.service.HolidayService;
 import com.XAMMER.HRMS.service.LeaveRequestService;
 import com.XAMMER.HRMS.service.UserService;
 
@@ -26,7 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter; // Keep this import, it's used elsewhere
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,9 @@ public class AdminController {
 
     @Autowired
     private LeaveRequestService leaveRequestService;
+        @Autowired
+    private HolidayService holidayService;
+
 
     // Admin dashboard (initial load or default view)
     @GetMapping("/dashboard")
@@ -57,12 +62,18 @@ public class AdminController {
         userService.findByUsername(principal.getName())
                 .ifPresent(admin -> model.addAttribute("username", admin.getUsername()));
 
-        model.addAttribute("todayDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM dd • hh:mm a")));
+        // *** THIS IS THE CORRECTED LINE ***
+        model.addAttribute("todayDate", LocalDateTime.now()); // Pass the LocalDateTime object directly
 
         model.addAttribute("dashboardMetrics", adminService.getDashboardMetrics());
         model.addAttribute("recentActivity", adminService.getRecentActivity());
 
         // Handle date and user filtering for attendance
+                  List<User> upcomingBirthdays = userService.getUpcomingBirthdays();
+            model.addAttribute("upcomingBirthdays", upcomingBirthdays);
+
+            List<Holiday> upcomingHolidays = holidayService.getUpcomingHolidays();
+            model.addAttribute("upcomingHolidays", upcomingHolidays);
         LocalDate selectedDate = (dateStr != null) ? LocalDate.parse(dateStr) : LocalDate.now();
         List<Attendance> filteredAttendance = attendanceService.getDailyAttendance(selectedDate);
         if (username != null && !username.isBlank()) {
@@ -83,7 +94,39 @@ public class AdminController {
         return "dashboard-admin";
     }
 
-        @GetMapping("/users/suggestions")
+       @GetMapping("/attendance")
+    public String showAttendancePage(@RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+                                     @RequestParam(value = "user", required = false) String username,
+                                     Model model) {
+
+        // Set default date to today if not provided
+        LocalDate selectedDate = (date != null) ? date : LocalDate.now();
+
+        // Fetch attendance data for the selected date
+        List<Attendance> filteredAttendance = attendanceService.getDailyAttendance(selectedDate);
+
+        // Filter by username if provided
+        if (username != null && !username.isBlank()) {
+            filteredAttendance = filteredAttendance.stream()
+                    .filter(a -> a.getUser() != null && username.equalsIgnoreCase(a.getUser().getUsername()))
+                    .collect(Collectors.toList());
+        }
+
+        // Convert to DTOs for the view
+        List<AttendanceDTO> attendanceDTOs = filteredAttendance.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        model.addAttribute("attendances", attendanceDTOs);
+        model.addAttribute("selectedDate", selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)); // Pass as string for HTML date input
+        model.addAttribute("selectedUser", username); // Pass the selected user back to input
+
+        return "admin-attendance"; // This will load src/main/resources/templates/admin/admin-attendance.html
+    }
+
+    // ... rest of your AdminController code ...
+
+    @GetMapping("/users/suggestions")
     @ResponseBody
     public ResponseEntity<List<String>> getUserSuggestions(@RequestParam("query") String query) {
         List<String> suggestions = userService.findUsernamesContaining(query);
@@ -94,8 +137,8 @@ public class AdminController {
     // Handler for resetting checkout time
     @PostMapping("/attendance/reset/checkout/{username}")
     public String resetCheckout(@PathVariable String username,
-                                @RequestParam("resetDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate resetDate,
-                                RedirectAttributes redirectAttributes) {
+                                 @RequestParam("resetDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate resetDate,
+                                 RedirectAttributes redirectAttributes) {
         logger.info("Admin requested to reset checkout for user: {} on date: {}", username, resetDate);
         boolean success = attendanceService.resetCheckoutTimeForDate(username, resetDate);
         if (success) {
@@ -103,7 +146,7 @@ public class AdminController {
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to reset checkout time for " + username + " on " + resetDate);
         }
-        return "redirect:/admin/dashboard";
+        return "redirect:/admin/attendance";
     }
 
     // Handler for resetting the entire day's attendance
@@ -116,7 +159,7 @@ public class AdminController {
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to reset today's attendance for " + username);
         }
-        return "redirect:/admin/dashboard";
+        return "redirect:/admin/attendance";
     }
 
     // View pending leave requests for admin approval

@@ -2,225 +2,552 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Manager Dashboard</title>
-        <link rel="icon" type="image/x-icon" href="/images/x2.png">
-
+    <link rel="icon" type="image/x-icon" href="/images/x2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --primary: #FF8F00;
+            --primary-dark: #F57C00;
+            --bg-dark: #121212;
+            --bg-card: #1E1E1E;
+            --bg-sidebar: #1A1A1A;
+            --text-primary: #E0E0E0;
+            --text-secondary: #9E9E9E;
+            --border-color: #2C2C2C;
+        }
+        
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #121212;
-            color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sidebar-container.open {
+            transform: translateX(0);
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .sidebar-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .sidebar-header {
             padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
         }
-
-        h1, h2 {
-            color: #ffffff;
-            margin-bottom: 20px;
+        
+        .sidebar-logo {
+            max-width: 180px;
+            height: auto;
         }
-
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin: 5px 10px;
+            border-radius: 6px;
+        }
+        
+        .nav-item i {
+            margin-right: 12px;
+            color: var(--text-secondary);
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 143, 0, 0.1);
+            color: var(--primary);
+        }
+        
+        .nav-item:hover i, .nav-item.active i {
+            color: var(--primary);
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn i {
+            margin-right: 8px;
+            color: white;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 143, 0, 0.3);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.shifted {
+            margin-left: 260px;
+        }
+        
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 900;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Dashboard Content Styles */
+        .page-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .page-title {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 18px;
+            font-weight: 400;
+            margin: 10px 0 0;
+        }
+        
+        /* Alert Styles */
         .alert {
             padding: 12px 16px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border-radius: 6px;
-            font-weight: bold;
+            font-weight: 500;
         }
-
+        
         .alert-success {
-            background-color: #2e7d32;
+            background-color: rgba(46, 125, 50, 0.2);
             color: #c8e6c9;
+            border-left: 4px solid #2e7d32;
         }
-
+        
         .alert-danger {
-            background-color: #c62828;
+            background-color: rgba(198, 40, 40, 0.2);
             color: #ffcdd2;
+            border-left: 4px solid #c62828;
         }
-
-        table {
+        
+        /* Table Styles */
+        .requests-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #1e1e1e;
-            border-radius: 6px;
+            background-color: var(--bg-card);
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-
-        th, td {
-            padding: 14px 12px;
-            border-bottom: 1px solid #2c2c2c;
-        }
-
-        th {
-            background-color: #2a2a2a;
-            color: #ffcc80;
+        
+        .requests-table th {
+            background-color: #242424;
+            color: var(--primary);
+            font-weight: 600;
+            padding: 16px;
             text-align: left;
+            border-bottom: 2px solid var(--border-color);
         }
-
-        td {
-            color: #eeeeee;
+        
+        .requests-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
-
-        form {
-            display: inline-block;
+        
+        .requests-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .requests-table tr:hover {
+            background-color: rgba(255, 143, 0, 0.05);
+        }
+        
+        /* Form Styles */
+        .action-form {
+            display: inline-flex;
+            align-items: center;
             margin-right: 10px;
         }
-
-        input[type="text"] {
-            padding: 6px;
+        
+        .action-input {
+            padding: 8px 12px;
             border-radius: 4px;
-            border: none;
+            border: 1px solid var(--border-color);
             background-color: #2e2e2e;
-            color: #fff;
+            color: var(--text-primary);
+            margin-right: 8px;
+            min-width: 180px;
         }
-
-        button {
-            padding: 6px 12px;
-            background-color: #1976d2;
+        
+        .action-btn {
+            padding: 8px 16px;
             border: none;
-            color: white;
             border-radius: 4px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
-
-        button:hover {
-            background-color: #1565c0;
-        }
-
-        button:disabled {
-            background-color: #777;
-            cursor: not-allowed;
-        }
-
-        #viewMoreBtn {
-            margin-top: 15px;
+        
+        .approve-btn {
             background-color: #388e3c;
+            color: white;
         }
-
-        #viewMoreBtn:hover {
+        
+        .approve-btn:hover {
             background-color: #2e7d32;
+            transform: translateY(-1px);
         }
-
-        a {
-            color: #90caf9;
-            text-decoration: none;
+        
+        .reject-btn {
+            background-color: var(--primary);
+            color: white;
         }
-
-        a:hover {
-            text-decoration: underline;
+        
+        .reject-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
         }
-
+        
+        .view-more-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .view-more-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 143, 0, 0.3);
+        }
+        
+        /* Hidden Rows */
         .hidden-row {
             display: none;
         }
-
+        
+        /* Loader */
         .loader-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            display: none; /* Hidden by default */
+            z-index: 2000;
+            display: none;
         }
-
+        
         .loader {
-            border: 5px solid #f3f3f3; /* Light grey */
-            border-top: 5px solid #3498db; /* Blue */
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--primary);
             border-radius: 50%;
             width: 50px;
             height: 50px;
-            animation: spin 2s linear infinite;
+            animation: spin 1s linear infinite;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 1024px) {
+            .sidebar-container {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 260px;
+            }
+            
+            .menu-toggle {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .requests-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .action-form {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 10px;
+            }
+            
+            .action-input {
+                margin-bottom: 8px;
+                margin-right: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Welcome, <span th:text="${user.firstName} + ' ' + ${user.lastName}"></span>!</h1>
-
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-
-    <h2>Pending Leave Requests for Approval</h2>
-
-    <div th:if="${#lists.isEmpty(managedRequests)}">
-        No pending leave requests.
+    <!-- Sidebar Navigation -->
+    <div class="sidebar-container" id="sidebar">
+        <div class="sidebar-header">
+            <img src="/images/xammer_logo.png" alt="Xammer HRMS" class="sidebar-logo">
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <i class="fas fa-gauge-high"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/employees/profile" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Employee Profile</span>
+            </a>
+            <a href="/attendance/view" class="nav-item">
+                <i class="fas fa-calendar-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" 
+               href="/manager/dashboard" class="nav-item active">
+                <i class="fas fa-users"></i>
+                <span>Team Requests</span>
+            </a>
+            <a href="/leave/apply" class="nav-item">
+                <i class="fas fa-calendar-check"></i>
+                <span>Leave Requests</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="confirmLogout()">
+                <i class="fas fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </button>
+        </div>
     </div>
-
-    <table th:unless="${#lists.isEmpty(managedRequests)}">
-        <thead>
-            <tr>
-                <th>Employee</th>
-                <th>Leave Type</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Reason</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="request, iterStat : ${managedRequests}"
-                th:classappend="${iterStat.index > 0} ? 'hidden-row' : ''">
-                <td th:text="${request.user.firstName} + ' ' + ${request.user.lastName}"></td>
-                <td th:text="${request.leaveType}"></td>
-                <td th:text="${#temporals.format(request.startDate, 'yyyy-MM-dd')}"></td>
-                <td th:text="${#temporals.format(request.endDate, 'yyyy-MM-dd')}"></td>
-                <td th:text="${request.reason}"></td>
-                <td>
-                    <form th:action="@{/manager/requests/approve}" method="post"
-                          onsubmit="disableButtonsAndShowLoader(this)">
-                        <input type="hidden" name="requestId" th:value="${request.id}" />
-                        <button type="submit">Approve</button>
-                    </form>
-                    <form th:action="@{/manager/requests/reject}" method="post"
-                          onsubmit="disableButtonsAndShowLoader(this)">
-                        <input type="hidden" name="requestId" th:value="${request.id}" />
-                        <label for="rejectionReason-${request.id}" style="display: none;"></label>
-                        <input type="text" id="rejectionReason-${request.id}" name="rejectionReason"
-                               placeholder="Rejection reason" required />
-                        <button type="submit">Reject</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div th:if="${#lists.size(managedRequests) > 1}">
-        <button id="viewMoreBtn" type="button">View More</button>
-    </div>
-
-    <p><a href="/logout">Logout</a></p>
-
-    <div class="loader-container" id="loaderContainer">
-        <div class="loader"></div>
-    </div>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Main Content -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <main class="main-content" id="mainContent">
+        <div class="page-header">
+            <h1 class="page-title">Welcome, <span th:text="${user.firstName} + ' ' + ${user.lastName}"></span>!</h1>
+            <h2 class="page-subtitle">Pending Leave Requests for Approval</h2>
+        </div>
+        
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <div th:if="${#lists.isEmpty(managedRequests)}" class="text-center py-8">
+            <i class="fas fa-inbox text-4xl text-gray-500 mb-4"></i>
+            <p class="text-gray-400">No pending leave requests at this time.</p>
+        </div>
+        
+        <div th:unless="${#lists.isEmpty(managedRequests)}">
+            <table class="requests-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="request, iterStat : ${managedRequests}" th:classappend="${iterStat.index > 0} ? 'hidden-row' : ''">
+                        <td th:text="${request.user.firstName} + ' ' + ${request.user.lastName}"></td>
+                        <td th:text="${request.leaveType}"></td>
+                        <td th:text="${#temporals.format(request.startDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${#temporals.format(request.endDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${request.reason}"></td>
+                        <td>
+                            <form class="action-form" th:action="@{/manager/requests/approve}" method="post" onsubmit="disableButtonsAndShowLoader(this)">
+                                <input type="hidden" name="requestId" th:value="${request.id}" />
+                                <button type="submit" class="action-btn approve-btn">
+                                    <i class="fas fa-check-circle mr-1"></i> Approve
+                                </button>
+                            </form>
+                            <form class="action-form" th:action="@{/manager/requests/reject}" method="post" onsubmit="disableButtonsAndShowLoader(this)">
+                                <input type="hidden" name="requestId" th:value="${request.id}" />
+                                <input type="text" name="rejectionReason" class="action-input" placeholder="Rejection reason" required />
+                                <button type="submit" class="action-btn reject-btn">
+                                    <i class="fas fa-times-circle mr-1"></i> Reject
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div th:if="${#lists.size(managedRequests) > 1}" class="text-center">
+                <button id="viewMoreBtn" class="view-more-btn">
+                    <i class="fas fa-chevron-down mr-2"></i> View More Requests
+                </button>
+            </div>
+        </div>
+        
+        <div class="loader-container" id="loaderContainer">
+            <div class="loader"></div>
+        </div>
+    </main>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const mainContent = document.getElementById('mainContent');
+        
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+            mainContent.classList.toggle('shifted');
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+            mainContent.classList.remove('shifted');
+        }
+        
+        menuToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        
+        // View more requests functionality
+        document.addEventListener("DOMContentLoaded", function() {
             const viewMoreBtn = document.getElementById("viewMoreBtn");
             if (viewMoreBtn) {
-                viewMoreBtn.addEventListener("click", function () {
+                viewMoreBtn.addEventListener("click", function() {
                     document.querySelectorAll(".hidden-row").forEach(row => {
                         row.style.display = "table-row";
                     });
                     viewMoreBtn.style.display = "none";
                 });
             }
+            
+            // Check screen size and adjust sidebar accordingly
+            function checkScreenSize() {
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.add('open');
+                    mainContent.classList.add('shifted');
+                } else {
+                    sidebar.classList.remove('open');
+                    mainContent.classList.remove('shifted');
+                }
+            }
+            
+            window.addEventListener('resize', checkScreenSize);
+            checkScreenSize();
         });
-
+        
         function disableButtonsAndShowLoader(form) {
             const buttons = form.querySelectorAll('button[type="submit"]');
             buttons.forEach(button => {
                 button.disabled = true;
-                button.textContent = 'Processing...'; // Optional: Change button text
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Processing...';
             });
             document.getElementById('loaderContainer').style.display = 'flex';
+        }
+        
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
         }
     </script>
 </body>

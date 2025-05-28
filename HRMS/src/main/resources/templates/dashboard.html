@@ -64,6 +64,7 @@
             z-index: 1000;
             left: -260px; /* Initially hidden */
             transition: left 0.3s ease;
+            
         }
 
         .sidebar.open {
@@ -424,13 +425,13 @@
     <div>
         <img src="/images/xammer_logo.png" alt="Xammer HRMS Logo">
         <div class="nav-links">
-            <a href="#" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="/dashboard" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
             <a href="/employees/profile"><i class="fa-solid fa-users"></i> Employee Profile</a>
             <a href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
             <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a>
             <a href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
-            <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a>
-            <a href="#"><i class="fa-solid fa-cog"></i> Settings</a>
+            <!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a>
+            <a href="#"><i class="fa-solid fa-cog"></i> Settings</a> -->
         </div>
     </div>
     <div class="logout" onclick="confirmLogout()">
