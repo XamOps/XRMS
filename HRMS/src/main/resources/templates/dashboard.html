@@ -466,11 +466,13 @@
                        th:text="${employee != null ? employee.jobTitle : 'Designation'}">Your Designation</p>
                 </div>
             </div>
-            <div class="employee-details">
-                <p><strong>Member Since:</strong> <span
-                        th:text="${joiningDateFormatted != null ? joiningDateFormatted : 'N/A'}">N/A</span>
+   <div class="employee-details">
+                <p><strong>Member Since:</strong>
+                    <span th:if="${employee != null && employee.joiningDate != null}"
+                          th:text="${#temporals.format(employee.joiningDate, 'MMMM dd, yyyy')}">January 01, 2023</span>
+                    <span th:if="${employee == null || employee.joiningDate == null}">N/A</span>
                 </p>
-                </div>
+            </div>
         </div>
 
 <div class="card attendance-card" style="cursor: pointer;">

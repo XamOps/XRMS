@@ -333,13 +333,13 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/employees"><i class="fa-solid fa-users"></i> Employees</a>
  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
- <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Leave Requests </a>
+ <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Leave Request </a>
 
  <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
  <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/employees/profile"><i class="fa-solid fa-user"></i> Employee Profile</a>
- <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i>View Attendance</a>
- <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/leave/apply"><i class="fa-solid fa-person-walking-arrow-right"></i> Apply Leave</a>
- <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa-solid fa-users-cog"></i> Manager Dashboard</a>
+ <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+ <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/leave/apply"><i class="fa-solid fa-person-walking-arrow-right"></i> Leave Request</a>
+ <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa-solid fa-users-cog"></i> Team Requests</a>
 
 </div>
 </div>
@@ -375,10 +375,10 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
         </div>
         <form id="personalDetailsForm">
             <div class="profile-info-grid">
-                <div class="info-item">
+                <!-- <div class="info-item">
                     <span class="info-label">Employee ID</span>
                     <span class="info-value" th:text="${employee != null ? employee.id : 'N/A'}">N/A</span>
-                </div>
+                </div> -->
                 <div class="info-item">
                     <span class="info-label">Date of Birth</span>
                     <span class="info-value display-field" id="displayBirthDate" th:text="${birthDateFormatted != null ? birthDateFormatted : 'N/A'}">N/A</span>
@@ -394,11 +394,11 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
                         <option value="Prefer not to say" th:selected="${employee?.gender == 'Prefer not to say'}">Prefer not to say</option>
                     </select>
                 </div>
-                <div class="info-item">
+                <!-- <div class="info-item">
                     <span class="info-label">Personal Email</span>
                     <span class="info-value display-field" id="displayEmail" th:text="${employee != null ? employee.email : 'N/A'}">N/A</span>
                     <input type="email" class="info-value form-input" id="inputEmail" style="display:none;" th:value="${employee != null ? employee.email : ''}"/>
-                </div>
+                </div> -->
                 <div class="info-item">
                     <span class="info-label">Personal Phone</span>
                     <span class="info-value display-field" id="displayPhone" th:text="${employee != null ? employee.phone : 'N/A'}">N/A</span>
@@ -417,6 +417,19 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <div id="professional" class="tab-content">
         <h2 class="profile-section-title"><i class="fa-solid fa-briefcase"></i> Professional Details</h2>
         <div class="profile-info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">Employee ID</span>
+                    <span class="info-value" th:text="${employee != null ? employee.id : 'N/A'}">N/A</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value display-field" id="displayEmail" th:text="${employee != null ? employee.email : 'N/A'}">N/A</span>
+                    <input type="email" class="info-value form-input" id="inputEmail" style="display:none;" th:value="${employee != null ? employee.email : ''}"/>
+                </div>  
+
+                
             <div class="info-item">
                 <span class="info-label">Designation</span>
                 <span class="info-value" th:text="${employee != null ? employee.jobTitle : 'N/A'}">N/A</span>
