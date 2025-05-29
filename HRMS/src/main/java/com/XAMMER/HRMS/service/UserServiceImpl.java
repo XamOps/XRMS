@@ -1,5 +1,6 @@
 package com.XAMMER.HRMS.service;
 
+import com.XAMMER.HRMS.dto.PersonalDetailsUpdateDTO;
 import com.XAMMER.HRMS.dto.UserDTO;
 import com.XAMMER.HRMS.model.Roles;
 import com.XAMMER.HRMS.model.User;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +26,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     @Autowired
     private EmailService emailService;
-    private final PasswordEncoder passwordEncoder; 
+    private final PasswordEncoder passwordEncoder;
+    private final DateTimeFormatter inputDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE; // Parses "yyyy-MM-dd"
     @Autowired
     public UserServiceImpl(UserRepository userRepository,EmailService emailService , PasswordEncoder passwordencoder) {
         this.userRepository = userRepository;
@@ -33,10 +37,10 @@ public class UserServiceImpl implements UserService {
     }
     
    
-    @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
-    }
+    // @Override
+    // public Optional<User> findById(Long id) {
+    //     return userRepository.findById(id);
+    // }
 
     @Override
     public List<User> findAll() {
@@ -302,6 +306,69 @@ public User addUser(User user) {
                              .collect(Collectors.toList());
         // You might need to add findByUsernameContainingIgnoreCase to your UserRepository
     }
+   @Override
+    public Optional<User> findById(Long id) {
+        if (id == null) {
+            // You can either return Optional.empty() or throw an IllegalArgumentException
+            // JpaRepository's findById itself usually throws IllegalArgumentException if id is null.
+            // So, this explicit check might be redundant depending on desired behavior,
+            // but it's clear.
+            // For consistency with how JpaRepository.findById(null) behaves,
+            // it's often okay to just pass it through:
+            // return userRepository.findById(id);
+            // Or, if you want to return empty for null IDs without an exception from repo:
+            return Optional.empty();
+        }
+        return userRepository.findById(id);
+    }
+
+
+
+ @Override
+@Transactional // Ensures the operation is atomic
+public User updatePersonalDetails(Long id, PersonalDetailsUpdateDTO PersonalDetailsUpdateDTO) { // Parameter name is PersonalDetailsUpdateDTO
+    // Step 1: Find the user.
+    User userToUpdate = findById(id) // Uses your updated findById
+            .orElseThrow(() -> new RuntimeException("User not found with employee ID: " + id + " for update.")); // Message says "employee ID" but 'id' is primary key
+
+    // Step 2: Update fields from the DTO
+    // Update Date of Birth
+    if (PersonalDetailsUpdateDTO.getDateOfBirth() != null) {
+        if (PersonalDetailsUpdateDTO.getDateOfBirth().isEmpty()) {
+            userToUpdate.setBirthDate(null);
+        } else {
+            try {
+                // Assumes inputDateFormatter is defined in this class or accessible
+                userToUpdate.setBirthDate(LocalDate.parse(PersonalDetailsUpdateDTO.getDateOfBirth(), inputDateFormatter));
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Invalid date format for birth date. Expected yyyy-MM-dd.", e);
+            }
+        }
+    }
+
+    // Update Gender
+    if (PersonalDetailsUpdateDTO.getGender() != null) {
+        userToUpdate.setGender(PersonalDetailsUpdateDTO.getGender().isEmpty() ? null : PersonalDetailsUpdateDTO.getGender());
+    }
+
+    // Update Email
+    if (PersonalDetailsUpdateDTO.getEmail() != null) {
+        userToUpdate.setEmail(PersonalDetailsUpdateDTO.getEmail());
+    }
+
+    // Update Phone
+    if (PersonalDetailsUpdateDTO.getPhone() != null) {
+        userToUpdate.setPhone(PersonalDetailsUpdateDTO.getPhone().isEmpty() ? null : PersonalDetailsUpdateDTO.getPhone());
+    }
+
+    // Update Address
+    if (PersonalDetailsUpdateDTO.getAddress() != null) {
+        userToUpdate.setAddress(PersonalDetailsUpdateDTO.getAddress().isEmpty() ? null : PersonalDetailsUpdateDTO.getAddress());
+    }
+
+    // Step 3: Save the updated user
+    return userRepository.save(userToUpdate);
+}
 
         // @Override
         // public void sendWelcomeEmail(String to, String firstName, String username, String password) {

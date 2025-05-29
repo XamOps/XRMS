@@ -70,6 +70,9 @@ public class User implements UserDetails {
     private String gender;
     private String maritalStatus;
     private String profilePictureUrl;
+    private String employmentType;
+    private String workLocation;
+
 
     // *** CRITICAL CHANGES HERE ***
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

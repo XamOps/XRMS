@@ -25,6 +25,7 @@ package com.XAMMER.HRMS.service;
 // public class UserService {
 import java.util.Set;
 
+import com.XAMMER.HRMS.dto.PersonalDetailsUpdateDTO;
 import com.XAMMER.HRMS.dto.UserDTO;
 
 //     private final UserRepository userRepository;
@@ -92,6 +93,7 @@ public interface UserService {
       void deleteUser(Long id);
           List<UserDTO> findAllUsersDTO(); // New method
           List<String> findUsernamesByQuery(String query);
+          User updatePersonalDetails(Long id, PersonalDetailsUpdateDTO detailsUpdateDTO);
 
               //  void sendWelcomeEmail(String to, String firstName, String username, String password) ;
 

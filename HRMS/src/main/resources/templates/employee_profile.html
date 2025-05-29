@@ -108,6 +108,11 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
             box-shadow: 3px 3px 10px rgba(255, 143, 0, 0.25);
             transform: translateX(4px);
         }
+        .nav-links a.active { /* Style for active nav link */
+            background-color: #2C2C2C;
+            color: #FF8F00;
+            font-weight: bold;
+        }
 
         .logout {
             background: linear-gradient(to right, #FF8F00, #F57C00);
@@ -130,6 +135,7 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
         .main-content {
             margin-left: 0; /* Initially no margin */
             padding: 2.5rem;
+            padding-top: 5rem; /* Added padding top to avoid overlap with fixed toggle button */
             flex-grow: 1;
             transition: margin-left 0.3s ease;
         }
@@ -166,7 +172,7 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
             align-items: center;
         }
 
-        .profile-picture-large {
+        .profile-picture-large { /* Assuming you might add an <img> tag here later */
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -200,10 +206,14 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
             cursor: pointer;
             color: #BDBDBD;
             font-weight: 500;
-            border: none;
+            border: none; /* Removed default border */
             background: transparent;
             border-bottom: 2px solid transparent;
             transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            margin-right: 0.5rem; /* Added some spacing between tab buttons */
+        }
+         .profile-tab:last-child {
+            margin-right: 0;
         }
 
         .profile-tab.active {
@@ -211,7 +221,7 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
             border-bottom-color: #FF8F00;
         }
 
-        .profile-tab:hover {
+        .profile-tab:hover:not(.active) { /* Hover effect only for non-active tabs */
             color: #FFFFFF;
             border-bottom-color: #616161;
         }
@@ -254,6 +264,21 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
         .info-value {
             color: #E0E0E0;
         }
+        .info-value.form-input { /* Style for input fields */
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #2a2a2a;
+            color: #E0E0E0;
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+        }
+         textarea.info-value.form-input { /* Specific style for textarea */
+            min-height: 80px;
+            resize: vertical;
+        }
+
 
         .attendance-summary-item {
             background-color: #2C2C2C;
@@ -306,37 +331,16 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <div class="nav-links">
 
  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/employees"><i class="fa-solid fa-users"></i> Employees</a>
-   <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-    <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Leave Requests</a>
+ <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/employees"><i class="fa-solid fa-users"></i> Employees</a>
+ <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/attendance"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+ <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_ADMIN')}" href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Leave Requests </a>
 
+ <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+ <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/employees/profile"><i class="fa-solid fa-user"></i> Employee Profile</a>
+ <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i>View Attendance</a>
+ <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/leave/apply"><i class="fa-solid fa-person-walking-arrow-right"></i> Apply Leave</a>
+ <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa-solid fa-users-cog"></i> Manager Dashboard</a>
 
-
-<!-- 
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/employees/profile"><i class="fa-solid fa-users"></i> Employee</a>
-   <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-    <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
-
-   
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/employees/profile"><i class="fa-solid fa-users"></i> Employee</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a> -->
-
-
-
-            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/employees/profile"><i class="fa-solid fa-user"></i> Employee Profile</a>
-            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i>Attendance</a>
-
-            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Request</a>
-            <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa-solid fa-users-cog"></i> Team Request</a>
-
-
-<!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a>  -->
-<!-- <a href="#"><i class="fa-solid fa-cog"></i> Settings</a> -->
 </div>
 </div>
 <div class="logout" onclick="confirmLogout()">
@@ -349,7 +353,7 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <div class="profile-container">
 <div class="profile-header">
 <div class="profile-picture-large-container">
-<i class="fa-solid fa-user-circle fa-3x" style="color: #9E9E9E;"></i>
+<i class="fa-solid fa-user-circle fa-3x" style="color: #9E9E9E;" th:unless="${employee?.profilePictureUrl}"></i>
 </div>
 <div class="profile-info-header">
 <h1 class="profile-name" th:text="${employee != null ? employee.firstName + ' ' + employee.lastName : 'Employee Name'}">Employee Name</h1>
@@ -358,39 +362,56 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
 </div>
 
     <div class="profile-tabs">
-        <button class="profile-tab active" onclick="openTab('personal')">Personal</button>
-        <button class="profile-tab" onclick="openTab('professional')">Professional</button>
-        <!-- <button class="profile-tab" onclick="openTab('attendance')">Attendance & Leave</button> -->
-    </div>
+        <button class="profile-tab active" onclick="openTab(event, 'personal')">Personal</button>
+        <button class="profile-tab" onclick="openTab(event, 'professional')">Professional</button>
+        </div>
 
     <div id="personal" class="tab-content active">
         <h2 class="profile-section-title"><i class="fa-solid fa-user"></i> Personal Details</h2>
-        <div class="profile-info-grid">
-            <div class="info-item">
-                <span class="info-label">Employee ID</span>
-                <span class="info-value" th:text="${employee != null ? employee.employeeId : 'N/A'}">N/A</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Date of Birth</span>
-                <span class="info-value" th:text="${birthDateFormatted != null ? birthDateFormatted : 'N/A'}">N/A</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Gender</span>
-                <span class="info-value" th:text="${employee != null ? employee.gender : 'N/A'}">N/A</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Personal Email</span>
-                <span class="info-value" th:text="${employee != null ? employee.email : 'N/A'}">N/A</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Personal Phone</span>
-                <span class="info-value" th:text="${employee != null ? employee.phone : 'N/A'}">N/A</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Address</span>
-                <span class="info-value" th:text="${employee != null ? employee.address : 'N/A'}">N/A</span>
-            </div>
+        <div style="margin-bottom: 0.2rem; text-align: right;">
+            <button id="editPersonalBtn" class="profile-tab" onclick="toggleEditPersonalDetails(true)" style="border: 1px solid #FF8F00; padding: 0.5rem 1rem; border-radius: 4px;"><i class="fa-solid fa-pencil" style="margin-top: 0.5rem;"></i>Edit</button>
+            <button id="savePersonalBtn" class="profile-tab" onclick="savePersonalDetails()" style="display:none; border: 1px solid #4CAF50; color: #4CAF50; padding: 0.5rem 1rem; border-radius: 4px;"><i class="fa-solid fa-save" style="margin-right: 0.5rem;"></i>Save Changes</button>
+            <button id="cancelPersonalBtn" class="profile-tab" onclick="toggleEditPersonalDetails(false)" style="display:none; border: 1px solid #f44336; color: #f44336; padding: 0.5rem 1rem; border-radius: 4px;"><i class="fa-solid fa-times" style="margin-right: 0.5rem;"></i>Cancel</button>
         </div>
+        <form id="personalDetailsForm">
+            <div class="profile-info-grid">
+                <div class="info-item">
+                    <span class="info-label">Employee ID</span>
+                    <span class="info-value" th:text="${employee != null ? employee.id : 'N/A'}">N/A</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value display-field" id="displayBirthDate" th:text="${birthDateFormatted != null ? birthDateFormatted : 'N/A'}">N/A</span>
+<input type="date" class="info-value form-input" id="inputBirthDate" style="display:none;" th:value="${employee?.birthDate != null ? #temporals.format(employee.birthDate, 'yyyy-MM-dd') : ''}"/>                </div>
+                <div class="info-item">
+                    <span class="info-label">Gender</span>
+                    <span class="info-value display-field" id="displayGender" th:text="${employee != null ? employee.gender : 'N/A'}">N/A</span>
+                    <select class="info-value form-input" id="inputGender" style="display:none;">
+                        <option value="" th:selected="${employee?.gender == null or employee?.gender == ''}">Select Gender</option>
+                        <option value="Male" th:selected="${employee?.gender == 'Male'}">Male</option>
+                        <option value="Female" th:selected="${employee?.gender == 'Female'}">Female</option>
+                        <option value="Other" th:selected="${employee?.gender == 'Other'}">Other</option>
+                        <option value="Prefer not to say" th:selected="${employee?.gender == 'Prefer not to say'}">Prefer not to say</option>
+                    </select>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Personal Email</span>
+                    <span class="info-value display-field" id="displayEmail" th:text="${employee != null ? employee.email : 'N/A'}">N/A</span>
+                    <input type="email" class="info-value form-input" id="inputEmail" style="display:none;" th:value="${employee != null ? employee.email : ''}"/>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Personal Phone</span>
+                    <span class="info-value display-field" id="displayPhone" th:text="${employee != null ? employee.phone : 'N/A'}">N/A</span>
+                    <input type="tel" class="info-value form-input" id="inputPhone" style="display:none;" th:value="${employee != null ? employee.phone : ''}"/>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Address</span>
+                    <span class="info-value display-field" id="displayAddress" th:text="${employee != null ? employee.address : 'N/A'}" style="white-space: pre-wrap;">N/A</span>
+                    <textarea class="info-value form-input" id="inputAddress" style="display:none;" th:text="${employee != null ? employee.address : ''}"></textarea>
+                </div>
+            </div>
+        </form>
+        <div id="personalDetailsMessage" style="margin-top: 1rem; font-weight: 500;"></div>
     </div>
 
     <div id="professional" class="tab-content">
@@ -414,47 +435,20 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
             </div>
             <div class="info-item">
                 <span class="info-label">Employment Type</span>
-                <span class="info-value">N/A</span>
+                <span class="info-value" th:text="${employee != null ? employee.employmentType : 'N/A'}">N/A</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Work Location</span>
-                <span class="info-value">N/A</span>
+                <span class="info-value" th:text="${employee != null ? employee.workLocation : 'N/A'}">N/A</span>
             </div>
         </div>
     </div>
 
-    <!-- <div id="attendance" class="tab-content">
-        <h2 class="profile-section-title"><i class="fa-solid fa-clock"></i> Attendance & Leave</h2>
-        <div class="attendance-summary-item">
-            <h4>Attendance Summary (Current Month)</h4>
-            <p>Total Working Days: <span th:text="${attendanceSummary != null ? attendanceSummary.totalWorkingDays : 'N/A'}">N/A</span></p>
-            <p>Days Present: <span th:text="${attendanceSummary != null ? attendanceSummary.daysPresent : 'N/A'}">N/A</span></p>
-            <p>Days Absent: <span th:text="${attendanceSummary != null ? attendanceSummary.daysAbsent : 'N/A'}">N/A</span></p>
-            <p>Days on Leave: <span th:text="${attendanceSummary != null ? attendanceSummary.daysOnLeave : 'N/A'}">N/A</span></p>
-        </div>
-
-        <div>
-            <h4>Leave Balance</h4>
-            <ul class="leave-balance-list">
-                <li class="leave-balance-item">
-                    <span class="leave-type">Total Leaves</span>
-                    <span class="leave-balance" th:text="${employee != null ? employee.totalLeaves : 'N/A'}">N/A</span>
-                </li>
-                <li class="leave-balance-item">
-                    <span class="leave-type">Leaves Taken</span>
-                    <span class="leave-balance" th:text="${employee != null ? employee.leavesTaken : 'N/A'}">N/A</span>
-                </li>
-                <li class="leave-balance-item">
-                    <span class="leave-type">Remaining Leaves</span>
-                    <span class="leave-balance" th:text="${employee != null ? employee.totalLeaves - employee.leavesTaken : 'N/A'}">N/A</span>
-                </li>
-            </ul>
-        </div>
-    </div> -->
-</div>
+    </div>
 </div>
 
 <script th:inline="javascript">
+// Sidebar and general tab functionality
 const sidebar = document.querySelector('.sidebar');
 const sidebarOverlay = document.querySelector('.sidebar-overlay');
 const mainContent = document.querySelector('.main-content');
@@ -472,37 +466,276 @@ function closeSidebar() {
     mainContent.classList.remove('sidebar-open');
 }
 
-function openTab(tabId) {
-    const tabs = document.querySelectorAll('.profile-tab');
+function openTab(evt, tabId) {
     const tabContents = document.querySelectorAll('.tab-content');
+    const tabButtons = document.querySelectorAll('.profile-tab');
 
-    tabs.forEach(tab => tab.classList.remove('active'));
     tabContents.forEach(content => content.classList.remove('active'));
+    tabButtons.forEach(button => button.classList.remove('active'));
 
     document.getElementById(tabId).classList.add('active');
-    const activeTabButton = Array.from(tabs).find(tab => tab.textContent.toLowerCase() === tabId);
-    if (activeTabButton) {
-        activeTabButton.classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+
+function confirmLogout() {
+    if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "/logout"; // Ensure this endpoint is correct
     }
 }
 
-// Set active class on the current navigation link
+// Personal Details Edit Functionality
+const personalDisplayFields = document.querySelectorAll('#personal .display-field');
+const personalFormInputs = document.querySelectorAll('#personal .form-input');
+const editPersonalBtn = document.getElementById('editPersonalBtn');
+const savePersonalBtn = document.getElementById('savePersonalBtn');
+const cancelPersonalBtn = document.getElementById('cancelPersonalBtn');
+const personalDetailsMessage = document.getElementById('personalDetailsMessage');
+
+let initialPersonalDetails = {}; // To store initial values for cancel
+
+function toggleEditPersonalDetails(isEditMode) {
+    personalDisplayFields.forEach(el => el.style.display = isEditMode ? 'none' : 'block');
+    personalFormInputs.forEach(el => el.style.display = isEditMode ? 'block' : 'none');
+
+    editPersonalBtn.style.display = isEditMode ? 'none' : 'inline-block';
+    savePersonalBtn.style.display = isEditMode ? 'inline-block' : 'none';
+    cancelPersonalBtn.style.display = isEditMode ? 'inline-block' : 'none';
+    personalDetailsMessage.textContent = '';
+
+    if (isEditMode) {
+        // Store current values from form inputs (which were pre-filled by Thymeleaf)
+        initialPersonalDetails.birthDate = document.getElementById('inputBirthDate').value;
+        initialPersonalDetails.gender = document.getElementById('inputGender').value;
+        initialPersonalDetails.email = document.getElementById('inputEmail').value;
+        initialPersonalDetails.phone = document.getElementById('inputPhone').value;
+        initialPersonalDetails.address = document.getElementById('inputAddress').value;
+    } else {
+        // Restore initial values on cancel
+        document.getElementById('inputBirthDate').value = initialPersonalDetails.birthDate;
+        document.getElementById('displayBirthDate').textContent = formatDateForDisplay(initialPersonalDetails.birthDate);
+
+        document.getElementById('inputGender').value = initialPersonalDetails.gender;
+        document.getElementById('displayGender').textContent = initialPersonalDetails.gender || 'N/A';
+
+        document.getElementById('inputEmail').value = initialPersonalDetails.email;
+        document.getElementById('displayEmail').textContent = initialPersonalDetails.email || 'N/A';
+
+        document.getElementById('inputPhone').value = initialPersonalDetails.phone;
+        document.getElementById('displayPhone').textContent = initialPersonalDetails.phone || 'N/A';
+
+        document.getElementById('inputAddress').value = initialPersonalDetails.address;
+        document.getElementById('displayAddress').textContent = initialPersonalDetails.address || 'N/A';
+    }
+}
+
+async function savePersonalDetails() {
+    personalDetailsMessage.textContent = 'Saving...';
+    personalDetailsMessage.style.color = '#FF8F00'; // Orange for processing
+
+    const id = /*[[${employee?.id}]]*/ null; // Using the Long primary key
+
+    if (!id) {
+        personalDetailsMessage.textContent = 'Error: User record ID not found. Cannot save.'; // Clarified message
+        personalDetailsMessage.style.color = '#f44336'; // Red for error
+        return;
+    }
+
+    // These are the values currently in the form inputs, about to be sent
+    const updatedDetails = {
+        dateOfBirth: document.getElementById('inputBirthDate').value,
+        gender: document.getElementById('inputGender').value,
+        email: document.getElementById('inputEmail').value,
+        phone: document.getElementById('inputPhone').value,
+        address: document.getElementById('inputAddress').value
+    };
+
+    // Basic Frontend Validation
+    if (!updatedDetails.email || !updatedDetails.email.includes('@')) {
+        personalDetailsMessage.textContent = 'Please enter a valid email address.';
+        personalDetailsMessage.style.color = '#f44336';
+        document.getElementById('inputEmail').focus();
+        return;
+    }
+    if (!updatedDetails.dateOfBirth) {
+        personalDetailsMessage.textContent = 'Date of Birth cannot be empty.';
+        personalDetailsMessage.style.color = '#f44336';
+        document.getElementById('inputBirthDate').focus();
+        return;
+    }
+
+    // CSRF Token Handling
+    const csrfToken = /*[[${_csrf?.token}]]*/ null;
+    const csrfHeaderName = /*[[${_csrf?.headerName}]]*/ 'X-CSRF-TOKEN'; 
+
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+
+    if (csrfToken && csrfHeaderName) {
+        headers[csrfHeaderName] = csrfToken;
+    } else {
+        console.warn('CSRF token or header name not found in Thymeleaf model. POST request might be blocked if CSRF is enabled.');
+    }
+
+    try {
+        const response = await fetch(`/employees/profile/update-personal/${id}`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(updatedDetails)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            personalDetailsMessage.textContent = result.message || 'Personal details updated successfully!';
+            personalDetailsMessage.style.color = '#4CAF50';
+
+            // Define variables to hold the final, successfully saved values
+            // Prefer values from server response (result.updatedEmployee) as the source of truth
+            let savedBirthDate = updatedDetails.dateOfBirth; // Default to what was sent
+            let savedGender = updatedDetails.gender;
+            let savedEmail = updatedDetails.email;
+            let savedPhone = updatedDetails.phone;
+            let savedAddress = updatedDetails.address;
+
+            if (result.updatedEmployee) {
+                savedBirthDate = result.updatedEmployee.dateOfBirth ? result.updatedEmployee.dateOfBirth.split('T')[0] : '';
+                savedGender = result.updatedEmployee.gender || '';
+                savedEmail = result.updatedEmployee.email || '';
+                savedPhone = result.updatedEmployee.phone || '';
+                savedAddress = result.updatedEmployee.address || '';
+
+                // Update the actual (now hidden) input form fields with server-confirmed values
+                document.getElementById('inputBirthDate').value = savedBirthDate;
+                document.getElementById('inputGender').value = savedGender;
+                document.getElementById('inputEmail').value = savedEmail;
+                document.getElementById('inputPhone').value = savedPhone;
+                document.getElementById('inputAddress').value = savedAddress;
+            } else {
+                 // If no updatedEmployee in result, assume what was sent (updatedDetails) was accepted as is
+                // and update the hidden input fields with those values.
+                document.getElementById('inputBirthDate').value = savedBirthDate;
+                document.getElementById('inputGender').value = savedGender;
+                document.getElementById('inputEmail').value = savedEmail;
+                document.getElementById('inputPhone').value = savedPhone;
+                document.getElementById('inputAddress').value = savedAddress;
+            }
+
+            // *** CRITICAL FIX: Update initialPersonalDetails with the NEWLY SAVED values ***
+            // This ensures that when toggleEditPersonalDetails(false) runs, it uses the
+            // latest correct data to set both the display spans and the hidden input values.
+            initialPersonalDetails.birthDate = savedBirthDate;
+            initialPersonalDetails.gender = savedGender;
+            initialPersonalDetails.email = savedEmail;
+            initialPersonalDetails.phone = savedPhone;
+            initialPersonalDetails.address = savedAddress;
+            
+            // The lines below that directly update display fields are now technically redundant
+            // because toggleEditPersonalDetails(false) will do this using the updated initialPersonalDetails.
+            // However, keeping them can provide immediate visual feedback before the toggle.
+            // For consistency, it's cleaner to let toggleEditPersonalDetails handle the display update
+            // based on the now-updated initialPersonalDetails.
+            // So, these can be removed or commented out if toggleEditPersonalDetails(false) is robust.
+            /*
+            document.getElementById('displayBirthDate').textContent = formatDateForDisplay(savedBirthDate);
+            document.getElementById('displayGender').textContent = savedGender || 'N/A';
+            document.getElementById('displayEmail').textContent = savedEmail || 'N/A';
+            document.getElementById('displayPhone').textContent = savedPhone || 'N/A';
+            document.getElementById('displayAddress').textContent = savedAddress || 'N/A';
+            */
+            
+            toggleEditPersonalDetails(false); // This will now use the updated initialPersonalDetails
+
+        } else {
+            let errorMsg = 'Failed to update details. Status: ' + response.status;
+            try {
+                const errorResult = await response.json();
+                errorMsg = `Error: ${errorResult.message || 'Failed to update details.'}`;
+            } catch (e) {
+                errorMsg = `Failed to update details. Server responded with: ${response.status} ${response.statusText}`;
+                console.error("Raw error response:", await response.text());
+            }
+            personalDetailsMessage.textContent = errorMsg;
+            personalDetailsMessage.style.color = '#f44336';
+        }
+    } catch (error) {
+        console.error('Error saving personal details:', error);
+        personalDetailsMessage.textContent = 'A network error occurred. Please try again.';
+        personalDetailsMessage.style.color = '#f44336';
+    }
+}
+
+function formatDateForDisplay(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        // Assuming dateString is yyyy-MM-dd
+        const date = new Date(dateString + 'T00:00:00Z'); // Parse as UTC to avoid timezone shifts affecting the date part
+        if (isNaN(date.getTime())) return dateString; // Return original if invalid date
+        // Format to dd MMM, yyyy e.g. 29 May, 2025
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    } catch (e) {
+        console.warn("Could not format date:", dateString, e);
+        return dateString; // Fallback
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Active Nav Link
     const navLinks = document.querySelectorAll('.nav-links a');
     const currentPath = window.location.pathname;
-
     navLinks.forEach(link => {
         if (link.getAttribute('href') === currentPath) {
             link.classList.add('active');
         }
     });
+
+    // Initialize values for Personal Details cancel functionality
+    if (document.getElementById('inputBirthDate')) {
+        initialPersonalDetails.birthDate = document.getElementById('inputBirthDate').value;
+        initialPersonalDetails.gender = document.getElementById('inputGender').value;
+        initialPersonalDetails.email = document.getElementById('inputEmail').value;
+        initialPersonalDetails.phone = document.getElementById('inputPhone').value;
+        initialPersonalDetails.address = document.getElementById('inputAddress').value;
+    }
+
+    // Initial formatting for displayBirthDate
+    const displayBirthDateField = document.getElementById('displayBirthDate');
+    const initialThymeleafBirthDate = /*[[${birthDateFormatted}]]*/ null;
+    if (displayBirthDateField && initialThymeleafBirthDate) {
+         displayBirthDateField.textContent = initialThymeleafBirthDate;
+    } else if (displayBirthDateField && initialPersonalDetails.birthDate) {
+         displayBirthDateField.textContent = formatDateForDisplay(initialPersonalDetails.birthDate);
+    }
+    
+    // Ensure the first tab is active on load (or correct tab)
+    const activeTabButton = document.querySelector('.profile-tabs .profile-tab.active'); // More specific selector
+    if (activeTabButton) {
+        const activeTabName = activeTabButton.textContent.trim().toLowerCase();
+        if(document.getElementById(activeTabName)){
+            document.getElementById(activeTabName).classList.add('active');
+        }
+    } else { // Default to 'personal' if no tab button is marked active
+        const personalTabContent = document.getElementById('personal');
+        if (personalTabContent) personalTabContent.classList.add('active');
+        const personalButton = Array.from(document.querySelectorAll('.profile-tabs .profile-tab')).find(b => b.textContent.trim().toLowerCase() === 'personal');
+        if (personalButton) personalButton.classList.add('active');
+    }
+
+    // *** THIS IS THE CORRECTED PART ***
+    // Only update onclick for actual tab-switching buttons
+    const actualTabSwitchingButtons = document.querySelectorAll('.profile-tabs .profile-tab');
+    actualTabSwitchingButtons.forEach(button => {
+        const tabName = button.textContent.trim().toLowerCase();
+        // Ensure it has an onclick that's meant to be openTab, or just set it if it's a tab button
+        // The original HTML already has onclick="openTab(event, 'personal')", etc.
+        // This rewriting logic might be redundant if HTML is correct,
+        // but if kept, it MUST be specific.
+        // Let's ensure it's only applied to the tab-switching buttons.
+        button.setAttribute('onclick', `openTab(event, '${tabName}')`);
+    });
 });
 
-function confirmLogout() {
-    if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "/logout";
-    }
-}
+
+
 </script>
 </body>
 </html>
