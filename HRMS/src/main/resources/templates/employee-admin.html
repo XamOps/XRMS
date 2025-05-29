@@ -429,7 +429,7 @@
             card.className = 'employee-card p-5 cursor-pointer flex flex-col';
             card.onclick = () => viewEmployeeDetails(employee.internalId); 
             const initials = (employee.firstName ? employee.firstName.charAt(0) : '') + (employee.lastName ? employee.lastName.charAt(0) : '');
-            const joinDate = employee.joinDate ? new Date(employee.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+            const joiningDate = employee.joiningDate ? new Date(employee.joiningDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
 
             card.innerHTML = `
                 <div class="employee-avatar mb-4">${initials.toUpperCase()}</div>
@@ -441,7 +441,7 @@
                     <span class="text-xs px-2 py-1 rounded-full status-active">Active</span> </div>
                 <div class="flex justify-between text-sm mb-auto">
                     <span class="text-gray-400">${employee.department || 'N/A'}</span>
-                    <span class="text-orange-400">Joined: ${joinDate}</span>
+                    <span class="text-orange-400">Joined: ${joiningDate}</span>
                 </div>
                 <div class="mt-4 flex justify-between text-xs">
                     <span class="px-2 py-1 rounded attendance-present">Present: ${employee.presentDays}</span>
@@ -584,27 +584,27 @@
         }
     }
 
-    function openAddEmployeeModal() {
-        const form = document.getElementById('addEmployeeForm');
-        form.reset();
-        form.removeAttribute('data-employee-id');
-        form.removeAttribute('data-internal-id');
-        if (form.originalData) {
-            delete form.originalData;
-        }
 
-        document.getElementById('addEmployeeModalTitle').textContent = 'Add New Employee';
-        document.getElementById('addEmployeeSubmitButton').textContent = 'Add Employee';
-        
-        // Show and configure password field for new employee
-        document.getElementById('passwordFieldContainer').style.display = 'block'; // Or 'grid' or initial display type
-        const passwordInput = document.getElementById('password');
-        passwordInput.placeholder = "Enter password";
-        passwordInput.disabled = false;
-        passwordInput.required = true; // Password is required for new employees
-
-        openModal('addEmployeeModal');
+function openAddEmployeeModal() {
+    const form = document.getElementById('addEmployeeForm');
+    form.reset();
+    form.removeAttribute('data-employee-id'); 
+    form.removeAttribute('data-internal-id');
+    if (form.originalData) {
+        delete form.originalData;
     }
+
+    document.getElementById('addEmployeeModalTitle').textContent = 'Add New Employee';
+    document.getElementById('addEmployeeSubmitButton').textContent = 'Add Employee';
+    
+    document.getElementById('passwordFieldContainer').style.display = 'block'; 
+    const passwordInput = document.getElementById('password');
+    passwordInput.placeholder = "Enter password";
+    passwordInput.disabled = false;
+    passwordInput.required = true; 
+
+    openModal('addEmployeeModal');
+}
 
     function closeAddEmployeeModal() {
         const form = document.getElementById('addEmployeeForm');
@@ -630,7 +630,7 @@
         document.getElementById('detailEmail').textContent = emp.email || 'N/A';
         document.getElementById('detailPhone').textContent = emp.phone || 'N/A';
         document.getElementById('detailDepartment').textContent = emp.department || 'N/A';
-        document.getElementById('detailJoinDate').textContent = emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+        document.getElementById('detailJoinDate').textContent = emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
 
         document.getElementById('totalDays').textContent = emp.totalDays || 0;
         document.getElementById('presentDays').textContent = emp.presentDays || 0;
@@ -645,171 +645,170 @@
         closeModal('employeeDetailsModal');
     }
 
-    function editEmployeeDetails() {
-        const internalId = parseInt(document.getElementById('employeeDetailsModal').getAttribute('data-internal-id'));
-        const emp = allEmployees.find(e => e.internalId === internalId);
-        if (!emp) {
-            Swal.fire('Error', 'Cannot find employee to edit.', 'error');
-            return;
+function editEmployeeDetails() {
+    const internalIdString = document.getElementById('employeeDetailsModal').getAttribute('data-internal-id');
+    if (!internalIdString) { Swal.fire('Error', 'Cannot find employee ID to edit.', 'error'); return; }
+    const internalId = parseInt(internalIdString);
+    const emp = allEmployees.find(e => e.internalId === internalId); 
+    if (!emp) { Swal.fire('Error', 'Cannot find employee data to edit.', 'error'); return; }
+
+    closeEmployeeDetailsModal(); 
+    openAddEmployeeModal(); 
+
+    document.getElementById('addEmployeeModalTitle').textContent = 'Edit Employee';
+    document.getElementById('addEmployeeSubmitButton').textContent = 'Update Employee';
+    const form = document.getElementById('addEmployeeForm');
+    form.setAttribute('data-employee-id', emp.id); 
+    form.setAttribute('data-internal-id', emp.internalId); 
+    
+    document.getElementById('firstName').value = emp.firstName || '';
+    document.getElementById('lastName').value = emp.lastName || '';
+    document.getElementById('email').value = emp.email || '';
+    document.getElementById('department').value = emp.department || '';
+    document.getElementById('position').value = emp.jobTitle || ''; 
+    document.getElementById('joinDate').value =emp.joiningDate, 
+    document.getElementById('phone').value = emp.phone || '';
+    document.getElementById('roles').value = emp.roles || ''; 
+
+    document.getElementById('passwordFieldContainer').style.display = 'none';
+    const passwordInput = document.getElementById('password');
+    passwordInput.required = false; 
+    passwordInput.value = ''; 
+}
+
+
+document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitButton = document.getElementById('addEmployeeSubmitButton');
+    const isEdit = form.hasAttribute('data-internal-id') && form.getAttribute('data-internal-id');
+    const employeeIdForApiUrl = isEdit ? form.getAttribute('data-employee-id') : null; 
+
+    const passwordValue = document.getElementById('password').value;
+    // Here, the value from the "First Name" input field is retrieved
+    const firstNameValue = document.getElementById('firstName').value; 
+    let userToSave = {};
+    let method = 'POST';
+    let apiUrl = '/admin/employees/api';
+
+    // Disable button and show loader (as per previous update)
+    submitButton.disabled = true;
+    Swal.fire({
+        title: isEdit ? 'Updating Employee...' : 'Adding Employee...',
+        text: 'Please wait...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        background: 'var(--content-bg)', 
+        color: 'var(--text-primary)',    
+        didOpen: () => {
+            Swal.showLoading();
         }
-
-        closeEmployeeDetailsModal();
-        // This will call openAddEmployeeModal which resets the form and by default shows password field.
-        // We then immediately customize for "Edit" mode.
-        openAddEmployeeModal(); 
-
-        document.getElementById('addEmployeeModalTitle').textContent = 'Edit Employee';
-        document.getElementById('addEmployeeSubmitButton').textContent = 'Update Employee';
-        const form = document.getElementById('addEmployeeForm');
-        form.setAttribute('data-employee-id', emp.id); 
-        form.setAttribute('data-internal-id', emp.internalId); 
-
-        form.originalData = JSON.parse(JSON.stringify(emp));
-
-        document.getElementById('firstName').value = emp.firstName || '';
-        document.getElementById('lastName').value = emp.lastName || '';
-        document.getElementById('email').value = emp.email || '';
-        document.getElementById('department').value = emp.department || '';
-        document.getElementById('position').value = emp.jobTitle || ''; 
-        document.getElementById('joinDate').value = emp.joinDate ? new Date(emp.joinDate).toISOString().split('T')[0] : '';
-        document.getElementById('phone').value = emp.phone || '';
-        document.getElementById('roles').value = emp.roles || ''; 
-
-        // Hide password section for editing employee details
-        document.getElementById('passwordFieldContainer').style.display = 'none';
-        const passwordInput = document.getElementById('password');
-        passwordInput.required = false; // Not required when editing (and hidden)
-        passwordInput.value = ''; // Clear any stale value
-    }
-
-    document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const isEdit = form.hasAttribute('data-internal-id') && form.getAttribute('data-internal-id');
-        const dbId = isEdit ? form.getAttribute('data-employee-id') : null;
-
-        let payload = {};
-        let method = 'POST'; 
-        let apiUrl = '/admin/employees/api';
-
-        if (isEdit) {
-            method = 'PUT'; 
-            apiUrl = `/admin/employees/api/${dbId}`;
-            const originalData = form.originalData;
-
-            if (!originalData) {
-                Swal.fire('Error', 'Original employee data not found for comparison. Cannot perform partial update.', 'error');
-                return;
-            }
-
-            let changed = false;
-            const fieldsToCompareDefinition = {
-                firstName: {elId: 'firstName', originalKey: 'firstName'},
-                lastName: {elId: 'lastName', originalKey: 'lastName'},
-                email: {elId: 'email', originalKey: 'email'},
-                department: {elId: 'department', originalKey: 'department'},
-                jobTitle: {elId: 'position', originalKey: 'jobTitle'},
-                joinDate: {elId: 'joinDate', originalKey: 'joinDate'},
-                phone: {elId: 'phone', originalKey: 'phone'},
-                roles: {elId: 'roles', originalKey: 'roles'}
-            };
-
-            for (const formKey in fieldsToCompareDefinition) {
-                const fieldDef = fieldsToCompareDefinition[formKey];
-                const formElement = document.getElementById(fieldDef.elId);
-                const formValue = formElement.value;
-                let originalValue = originalData[fieldDef.originalKey];
-
-                if (fieldDef.originalKey === 'joinDate' && originalValue) {
-                    originalValue = new Date(originalValue).toISOString().split('T')[0];
-                } else if (originalValue === null || originalValue === undefined) {
-                    originalValue = ""; 
-                } else {
-                    originalValue = String(originalValue); 
-                }
-
-                if (formValue !== originalValue) {
-                    payload[fieldDef.originalKey] = formValue; 
-                    changed = true;
-                }
-            }
-            
-            if (payload.hasOwnProperty('email')) {
-                payload.username = payload.email.split('@')[0]; 
-            }
-
-            // Password is NOT included in the payload for edits from this form.
-            // Password changes should be handled by a separate, dedicated mechanism if needed.
-
-            if (!changed) {
-                Swal.fire({
-                    title: 'No Changes', 
-                    text: 'No changes were detected to update.', 
-                    icon: 'info', 
-                    background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'
-                });
-                closeAddEmployeeModal();
-                return;
-            }
-        } else { // This is a POST for a new employee
-            const passwordInput = document.getElementById('password');
-            if (passwordInput.value === '') {
-                Swal.fire('Error', 'Password is required for new employees.', 'error');
-                return;
-            }
-            payload = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
-                username: document.getElementById('email').value.split('@')[0],
-                department: document.getElementById('department').value,
-                jobTitle: document.getElementById('position').value, 
-                joinDate: document.getElementById('joinDate').value,
-                phone: document.getElementById('phone').value,
-                roles: document.getElementById('roles').value,
-                password: passwordInput.value 
-            };
-        }
-        
-        const headers = { 'Content-Type': 'application/json' };
-        if (csrfToken && csrfHeaderName) {
-             headers[csrfHeaderName] = csrfToken;
-        }
-
-        fetch(apiUrl, {
-            method: method,
-            headers: headers,
-            body: JSON.stringify(payload) 
-        })
-        .then(res => {
-            if (!res.ok) {
-                return res.json().then(errBody => {
-                    const message = errBody.message || (errBody.errors ? errBody.errors.map(e => e.defaultMessage || e.message).join(', ') : 'Operation failed.');
-                    throw new Error(message || res.statusText);
-                });
-            }
-            return res.json(); 
-        })
-        .then(savedUser => { 
-            Swal.fire({
-                title: 'Success!',
-                text: `Employee ${savedUser.firstName || ''} ${isEdit ? 'updated' : 'added'} successfully!`,
-                icon: 'success',
-                background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'
-            });
-            closeAddEmployeeModal();
-            fetchEmployees(); 
-        })
-        .catch(err => {
-            Swal.fire({
-                title: 'Error!',
-                text: `${isEdit ? 'Update' : 'Submission'} failed: ${err.message}`,
-                icon: 'error',
-                background: 'var(--content-bg)', color: 'var(--text-primary)', confirmButtonColor: 'var(--primary)'
-            });
-        });
     });
 
+    if (isEdit) { // This block is for updating an existing employee
+        method = 'PUT';
+        apiUrl = `/admin/employees/api/${employeeIdForApiUrl}`;
+        userToSave = {
+            id: employeeIdForApiUrl, 
+            firstName: firstNameValue, // First name itself
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            username: firstNameValue, // Username is set to the firstNameValue
+            department: document.getElementById('department').value,
+            jobTitle: document.getElementById('position').value,
+            joiningDate: document.getElementById('joinDate').value || null, 
+            phone: document.getElementById('phone').value,
+            roles: document.getElementById('roles').value,
+            // Password is not typically sent on edit unless it's a change password feature
+        };
+    } else { // This block is for adding a new employee
+        if (!passwordValue.trim()) {
+            Swal.fire({ 
+                title: 'Error!', 
+                text: 'Password is required for new employees.', 
+                icon: 'error', 
+                background: 'var(--content-bg)', 
+                color: 'var(--text-primary)', 
+                confirmButtonColor: 'var(--primary)'
+            });
+            submitButton.disabled = false; 
+            return;
+        }
+        userToSave = {
+            firstName: firstNameValue, // First name itself
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            username: firstNameValue, // Username is set to the firstNameValue
+            department: document.getElementById('department').value,
+            jobTitle: document.getElementById('position').value,
+            joiningDate: document.getElementById('joinDate').value || null,
+            phone: document.getElementById('phone').value,
+            roles: document.getElementById('roles').value,
+            password: passwordValue 
+        };
+    }
+    
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrfToken && csrfHeaderName) { 
+        headers[csrfHeaderName] = csrfToken;
+    }
+
+    console.log(`Sending ${method} request to ${apiUrl} with payload:`, JSON.stringify(userToSave));
+    // console.log(`CSRF Header: ${csrfHeaderName}, Token: ${csrfToken}`); // For debugging
+
+    fetch(apiUrl, {
+        method: method,
+        headers: headers,
+        body: JSON.stringify(userToSave)
+    })
+    .then(response => {
+        // ... (response handling logic) ...
+        if (!response.ok) {
+            return response.text().then(text => { 
+                // ... (error message construction) ...
+                throw new Error(userMessage); 
+            });
+        }
+        const contentType = response.headers.get("content-type");
+        if (response.status === 204) { 
+             return { success: true, isNoContent: true, firstName: userToSave.firstName }; 
+        } 
+        if (contentType && contentType.includes("application/json")) { 
+            return response.json(); 
+        } 
+        return response.text().then(text => {
+             // ... (fallback for non-json success) ...
+             return { firstName: userToSave.firstName, lastName: userToSave.lastName, unexpectedResponse: true }; 
+        });
+    })
+    .then(returnedData => { 
+        const displayName = (returnedData && returnedData.firstName) ? returnedData.firstName : userToSave.firstName;
+        Swal.fire({ 
+            title: 'Success!', 
+            text: `Employee ${displayName} ${isEdit ? 'updated' : 'added'} successfully!`, 
+            icon: 'success', 
+            background: 'var(--content-bg)', 
+            color: 'var(--text-primary)', 
+            confirmButtonColor: 'var(--primary)'
+        }); 
+        closeAddEmployeeModal(); 
+        fetchEmployees(); // Refresh the list which should contain the updated username
+    })
+    .catch(err => { 
+        console.error(`Error during ${isEdit ? 'update' : 'add'} employee:`, err);
+        Swal.fire({ 
+            title: 'Operation Failed!', 
+            text: `${err.message}`, 
+            icon: 'error', 
+            background: 'var(--content-bg)', 
+            color: 'var(--text-primary)', 
+            confirmButtonColor: 'var(--primary)' 
+        });
+    })
+    .finally(() => {
+        submitButton.disabled = false; // Re-enable the submit button
+    });
+});
     function deleteEmployee() {
         const employeeDbId = document.getElementById('employeeDetailsModal').getAttribute('data-employee-id');
         if (!employeeDbId) {
@@ -825,7 +824,7 @@
             if (result.isConfirmed) {
                 const headers = {};
                  if (csrfToken && csrfHeaderName) {
-                     headers[csrfHeaderName] = csrfToken;
+                      headers[csrfHeaderName] = csrfToken;
                  }
                 fetch(`/admin/employees/api/${employeeDbId}`, { method: 'DELETE', headers: headers })
                 .then(res => {

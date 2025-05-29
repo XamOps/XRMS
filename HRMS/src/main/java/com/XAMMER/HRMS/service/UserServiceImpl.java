@@ -232,8 +232,8 @@ public User addUser(User user) {
             existingUser.setPhone(userDetails.getPhone());
             existingUser.setBirthDate(userDetails.getBirthDate()); 
             // Assuming you have this field and want to update
-            // existingUser.setJoiningDate(userDetails.getJoiningDate()); // Uncomment if updatable
-            existingUser.setPassword(userDetails.getPassword()); 
+            existingUser.setJoiningDate(userDetails.getJoiningDate()); // Uncomment if updatable
+            // existingUser.setPassword(userDetails.getPassword()); 
             existingUser.setRoles(userDetails.getRoles()); 
             
 
