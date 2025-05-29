@@ -312,20 +312,27 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
 
 
-
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" href="/employees/profile"><i class="fa-solid fa-users"></i> Employee</a>
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
-
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString() == 'ROLE_USER_MANAGER'}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a>
-
-<a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/employees/profile"><i class="fa-solid fa-users"></i> Employees</a>
+<!-- 
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/employees/profile"><i class="fa-solid fa-users"></i> Employee</a>
    <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
     <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER')}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
 
+   
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/employees/profile"><i class="fa-solid fa-users"></i> Employee</a>
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Requests</a>
+  <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa fa-users"></i> Team Requests</a> -->
 
+
+
+            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/employees/profile"><i class="fa-solid fa-user"></i> Employee Profile</a>
+            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/attendance/view"><i class="fa-solid fa-calendar-check"></i>Attendance</a>
+
+            <a th:if="${employee != null and employee.roles != null and (employee.roles.toString().contains('ROLE_USER') or employee.roles.toString().contains('ROLE_USER_MANAGER'))}" href="/leave/apply"><i class="fa fa-calendar-check"></i> Leave Request</a>
+            <a th:if="${employee != null and employee.roles != null and employee.roles.toString().contains('ROLE_USER_MANAGER')}" href="/manager/dashboard"><i class="fa-solid fa-users-cog"></i> Team Request</a>
 
 
 <!-- <a href="#"><i class="fa-solid fa-chart-bar"></i> Analytics</a>  -->
