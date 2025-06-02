@@ -320,32 +320,45 @@ public long calculateDuration(Attendance attendance) {
         }
     }
 
-    @Override
-    @Transactional
-    public boolean resetCheckoutTimeForDate(String username, LocalDate resetDate) {
-        logger.info("Attempting to reset checkout for user: {} on date {} to 23:59 (ADMIN RESET)", username, resetDate);
-        Optional<User> userOptional = userRepository.findByUsername(username);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            Optional<Attendance> attendanceOptional = attendanceRepository.findByUserAndAttendanceDateAndCheckOutTimeIsNull(user, resetDate);
-            if (attendanceOptional.isPresent()) {
-                Attendance attendance = attendanceOptional.get();
-                LocalDateTime endOfDay = resetDate.atTime(LocalTime.MAX);
-                attendance.setCheckOutTime(endOfDay);
-                // Make sure your Attendance model has a 'checkoutStatus' field
-                // attendance.setCheckoutStatus("ADMIN_RESET");
-                attendanceRepository.save(attendance);
-                logger.info("Checkout reset successfully for user: {} on date {} to {} (ADMIN RESET)", username, resetDate, endOfDay);
-                return true;
-            } else {
-                logger.warn("No attendance record found with NULL checkout for user {} on date {}.", username, resetDate);
-                return false;
-            }
+ // In AttendanceServiceImpl.java
+
+@Override
+@Transactional
+public boolean resetCheckoutTimeForDate(String username, LocalDate resetDate) {
+    logger.info("Attempting to reset checkout for user: {} on date {} (ADMIN RESET)", username, resetDate);
+    Optional<User> userOptional = userRepository.findByUsername(username);
+
+    if (userOptional.isPresent()) {
+        User user = userOptional.get();
+
+        // IMPROVEMENT: Find the latest attendance record for that day,
+        // regardless of whether checkout is null or not.
+        List<Attendance> attendances = attendanceRepository.findByUserAndAttendanceDateOrderByCheckInTimeDesc(user, resetDate);
+
+        if (!attendances.isEmpty()) {
+            // Get the most recent attendance record for that day
+            Attendance attendance = attendances.get(0); 
+            
+            LocalDateTime endOfDay = resetDate.atTime(LocalTime.MAX); // Sets time to 23:59:59.999...
+            attendance.setCheckOutTime(endOfDay);
+            
+            // ✅ THE FIX: Set the status to indicate an admin action.
+            // Ensure your Attendance entity has a 'checkoutStatus' field and a 'setCheckoutStatus' method.
+            attendance.setCheckoutStatus("admin reset");
+            
+            attendanceRepository.save(attendance);
+            logger.info("Checkout reset successfully for user: {} on date {} to {} (ADMIN RESET)", username, resetDate, endOfDay);
+            return true;
+
         } else {
-            logger.error("User not found: {}", username);
+            logger.warn("No attendance record found for user {} on date {}.", username, resetDate);
             return false;
         }
+    } else {
+        logger.error("User not found: {}", username);
+        return false;
     }
+}
 
     @Override
     public void resetCheckoutTime(String username, LocalDate date) {
