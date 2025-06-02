@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Attendance - Xammer HRMS</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>Attendance - Xammer HRMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="icon" type="image/x-icon" href="/images/x2.png">
@@ -17,17 +18,15 @@
         :root {
             --primary: #FF8F00;
             --primary-dark: #F57C00;
-            --dark-bg: #121212;         /* Main page background */
-            --content-bg: #1E1E1E;      /* Sidebar, cards, table container background */
+            --dark-bg: #121212;      /* Main page background */
+            --content-bg: #1E1E1E;    /* Sidebar, cards, table container background */
             --input-bg: var(--dark-bg); /* Background for inputs, slightly darker than content-bg */
             --border-color: #303030;
             --text-primary: #E0E0E0;
             --text-secondary: #BDBDBD;
             --text-muted: #9E9E9E;
             --white-text: #FFFFFF;
-
             --table-header-bg: #252525; /* Darker solid color for table header */
-
             --danger-text: #f44336;
             --danger-bg: rgba(244, 67, 54, 0.15);
             --success-text: #4caf50;
@@ -35,41 +34,37 @@
             --warning-text: #ffc107;
             --warning-bg: rgba(255, 193, 7, 0.15);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* Fixes scrolling issue */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--dark-bg);
             color: var(--text-primary);
             display: flex;
-            overflow: hidden;
-            height: 100vh;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .sidebar-toggle-button {
             position: fixed;
-            top: 1.25rem; /* Aligned with new header padding */
+            top: 1.25rem;
             left: 1.25rem;
             background: none; border: none; color: var(--primary);
-            font-size: 1.5rem; cursor: pointer; z-index: 1060; /* Highest */
+            font-size: 1.5rem; cursor: pointer; z-index: 1060;
         }
-
         .sidebar-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1045; /* Below sidebar when open, above content */
+            z-index: 1045;
             display: none; transition: opacity 0.3s ease;
         }
-
         .sidebar {
             width: 260px; background-color: var(--content-bg);
             padding: 2rem 1.5rem; position: fixed; height: 100%;
             display: flex; flex-direction: column; justify-content: space-between;
             border-right: 1px solid var(--border-color);
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            z-index: 1048; /* Above overlay, below modals */
+            z-index: 1048;
             left: -260px; transition: left 0.3s ease;
         }
         .sidebar.open { left: 0; }
@@ -81,8 +76,7 @@
         .nav-links a.active i { color: var(--primary); }
         .logout { background: linear-gradient(to right, var(--primary), var(--primary-dark)); padding: 0.8rem 1.5rem; border-radius: 8px; text-align: center; font-weight: bold; color: var(--white-text); cursor: pointer; transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
         .logout:hover { background: linear-gradient(to right, var(--primary-dark), var(--primary)); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); transform: scale(1.02); }
-
-        /* Main Page Header (consistent with Employee Management page) */
+        
         .page-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5rem; width: 100%; margin-bottom: 1.5rem; }
         .page-header-flank { flex: 1; display: flex; }
         .page-header-flank-left { justify-content: flex-start; }
@@ -91,14 +85,18 @@
         .page-header-main-title .page-header-icon { font-size: 1.8rem; color: var(--primary); }
         .page-header-main-title h1 { font-size: 1.6rem; color: var(--white-text); margin: 0; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: -0.5px; line-height: 1.2; }
         .page-header-right-content { color: var(--text-muted); font-size: 0.9rem; text-align: right; }
-
-        /* Main content area that holds scrolling content */
-        .main-content-wrapper { padding: 0 2.5rem 2.5rem 2.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-
+        
+        /* Sets the main content area to handle its own scrolling */
+        .main-content-wrapper { 
+            padding: 0 2.5rem 2.5rem 2.5rem; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+        }
+        
         .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white-text) !important; transition: all 0.2s ease; font-weight: 600; letter-spacing: 0.5px; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255, 143, 0, 0.4); }
-
-        /* Filter/Search Area Styling */
         .filter-container { background-color: var(--content-bg); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); }
         .search-input, .date-picker, .form-input, select.search-input, select.form-input { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem 1rem; border-radius: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
         .search-input:focus, .date-picker:focus, .form-input:focus, select.search-input:focus, select.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.3); outline: none; }
@@ -110,37 +108,35 @@
         .search-results li { padding: 0.75rem 1rem; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s ease, color 0.2s ease; }
         .search-results li:hover, .search-results li.active-suggestion { background-color: var(--primary); color: var(--white-text); }
         
-        /* Table Styling */
         .table-container { background-color: var(--content-bg); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border-radius: 12px; border: 1px solid var(--border-color); }
-        .table-header { background-color: var(--table-header-bg); /* Solid color for header */ }
+        .table-header { background-color: var(--table-header-bg); }
         .table-header th { color: var(--primary) !important; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-        .table-row:hover { background-color: rgba(255, 143, 0, 0.08) !important; } /* Primary orange hover */
+        .table-row:hover { background-color: rgba(255, 143, 0, 0.08) !important; }
         tbody tr td { border-bottom: 1px solid var(--border-color); }
         tbody tr:last-child td { border-bottom: none; }
-
         .badge-success { background-color: var(--success-bg); color: var(--success-text); }
         .badge-warning { background-color: var(--warning-bg); color: var(--warning-text); }
         .badge-danger { background-color: var(--danger-bg); color: var(--danger-text); }
-        
         .title-text { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(255, 143, 0, 0.5); color: var(--primary); }
         .action-btn { transition: all 0.2s ease; }
         .action-btn:hover { transform: translateY(-1px); opacity: 0.85; }
-        /* Tailwind specific color overrides */
         .text-orange-400 { color: var(--primary) !important; }
         .focus\:ring-orange-500:focus { --tw-ring-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.3) !important; }
         .hover\:bg-orange-500:hover { background-color: var(--primary) !important; }
         .border-orange-500 { border-color: var(--primary) !important; }
         .text-gray-400 { color: var(--text-secondary) !important; }
         .text-gray-500 { color: var(--text-muted) !important; }
-        .bg-gray-800 { background-color: var(--input-bg) !important; } /* For inputs */
-        .bg-gray-900 { background-color: var(--content-bg) !important; } /* For table body, consistent with cards */
-        .bg-gray-1000 { background-color: var(--content-bg) !important; } /* For filter container */
+        .bg-gray-800 { background-color: var(--input-bg) !important; }
+        .bg-gray-900 { background-color: var(--content-bg) !important; }
+        .bg-gray-1000 { background-color: var(--content-bg) !important; }
         .border-gray-700 { border-color: var(--border-color) !important; }
         .divide-gray-700 > :not([hidden]) ~ :not([hidden]) { border-color: var(--border-color) !important; }
-        .divide-gray-800 > :not([hidden]) ~ :not([hidden]) { border-color: var(--border-color) !important; } /* Darker divider for table body rows */
+        .divide-gray-800 > :not([hidden]) ~ :not([hidden]) { border-color: var(--border-color) !important; }
     </style>
 </head>
-<body class="relative"> <button class="sidebar-toggle-button" onclick="toggleSidebar()">
+<body class="relative">
+
+<button class="sidebar-toggle-button" onclick="toggleSidebar()">
     <i class="fa-solid fa-bars"></i>
 </button>
 <div class="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -161,20 +157,19 @@
 
 <div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 ease-in-out">
     <div class="page-header">
-        <div class="page-header-flank page-header-flank-left">
-            </div>
+        <div class="page-header-flank page-header-flank-left"></div>
         <div class="page-header-main-title">
             <i class="fas fa-calendar-alt page-header-icon"></i> <h1 th:text="${'Attendance Management'}">Attendance Management</h1>
         </div>
         <div class="page-header-flank page-header-flank-right">
-            <div class="page-header-right-content">
-                </div>
+            <div class="page-header-right-content"></div>
         </div>
     </div>
 
     <div class="main-content-wrapper flex-1 overflow-y-auto">
         <div class="filter-container rounded-xl p-6 mb-6 shadow-lg">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end"> <div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div>
                     <label for="searchUser" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SEARCH EMPLOYEE</label>
                     <div class="relative">
                         <input type="text" id="searchUser" placeholder="Type to search employees..."
@@ -206,7 +201,8 @@
 
         <div class="table-container rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full"> <thead class="table-header">
+                <table class="min-w-full">
+                    <thead class="table-header">
                         <tr>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Employee</th>
                             <th scope="col" class="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider">Date</th>
@@ -218,7 +214,8 @@
                             <th scope="col" class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="attendanceTableBody"> <tr th:each="attendance : ${attendances}" class="table-row">
+                    <tbody id="attendanceTableBody">
+                        <tr th:each="attendance : ${attendances}" class="table-row">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center justify-start">
                                     <div class="flex-shrink-0 h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">
@@ -226,7 +223,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-white" th:text="${attendance.username}">username</div>
-                                        </div>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -242,7 +239,8 @@
                                  <div class="text-sm text-white" th:text="${attendance.duration != null ? attendance.duration : '-'}">-</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                 <div class="text-sm text-white">-</div> </td>
+                                 <div class="text-sm text-white">-</div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                       th:classappend="${attendance.checkInTime != null && attendance.duration != null} ? 'badge-success' : 'badge-danger'"
@@ -277,11 +275,10 @@
 <script>
     // CSRF and common DOM elements
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content'); // Used csrfHeaderName previously, ensure consistency
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.querySelector('.sidebar-overlay');
-    const actualMainContent = document.querySelector('.flex-1.flex.flex-col.ml-0'); // Main content area that shifts
-
+    const actualMainContent = document.querySelector('.flex-1.flex.flex-col');
     const searchResultsList = document.getElementById('searchResults');
     const searchInput = document.getElementById('searchUser');
     let suggestionTimeout = null;
@@ -301,11 +298,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        setDefaultDate();
-        updateCurrentTime(); 
-        setInterval(updateCurrentTime, 60000); 
+        // Sets filter values from URL or defaults on page load
+        setFilterValuesFromURL();
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 60000);
 
-        // Sidebar state initialization
         if (sidebar.classList.contains('open')) {
             actualMainContent.classList.add('ml-64');
             actualMainContent.classList.remove('ml-0');
@@ -313,7 +310,6 @@
             actualMainContent.classList.remove('ml-64');
             actualMainContent.classList.add('ml-0');
         }
-        // Active nav link
         const navLinks = document.querySelectorAll('.nav-links a');
         const currentPath = window.location.pathname;
         navLinks.forEach(link => {
@@ -321,43 +317,64 @@
         });
     });
 
-    function toggleSidebar() { 
+    function toggleSidebar() {
         sidebar.classList.toggle('open');
         sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
         actualMainContent.classList.toggle('ml-64', sidebar.classList.contains('open'));
         actualMainContent.classList.toggle('ml-0', !sidebar.classList.contains('open'));
     }
-    function closeSidebar() { 
+
+    function closeSidebar() {
         sidebar.classList.remove('open');
         sidebarOverlay.style.display = 'none';
         actualMainContent.classList.remove('ml-64');
         actualMainContent.classList.add('ml-0');
     }
-    function setDefaultDate() {
-        const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
+
+    // Reads URL params to persist filter state after reload
+    function setFilterValuesFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get('date');
+        const userParam = urlParams.get('user');
         const filterDateInput = document.getElementById('filterDate');
-        if (filterDateInput && !filterDateInput.value) { // Set only if not already set (e.g. by query param)
-             filterDateInput.value = formattedDate;
+        const searchUserInput = document.getElementById('searchUser');
+
+        if (dateParam) {
+            // If 'date' param exists, use it
+            filterDateInput.value = dateParam;
+        } else {
+            // Otherwise, set to today's date
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            filterDateInput.value = formattedDate;
+        }
+
+        if (userParam) {
+            // If 'user' param exists, set the search input value
+            searchUserInput.value = decodeURIComponent(userParam);
         }
     }
+
     function suggestUsers(searchText) {
         clearTimeout(suggestionTimeout);
         if (searchText.trim() === "") {
             searchResultsList.style.display = 'none';
-            searchResultsList.innerHTML = ''; 
-            currentFocus = -1; 
+            searchResultsList.innerHTML = '';
+            currentFocus = -1;
             return;
         }
         suggestionTimeout = setTimeout(() => {
             $.ajax({
-                url: '/admin/users/suggestions', type: 'GET', data: { query: searchText },
+                url: '/admin/users/suggestions',
+                type: 'GET',
+                data: { query: searchText },
                 beforeSend: (xhr) => { xhr.setRequestHeader(csrfHeader, csrfToken); },
                 success: (data) => {
-                    searchResultsList.innerHTML = ''; currentFocus = -1;
+                    searchResultsList.innerHTML = '';
+                    currentFocus = -1;
                     if (data && data.length > 0) {
                         searchResultsList.style.display = 'block';
-                        data.slice(0, 5).forEach(user => { 
+                        data.slice(0, 5).forEach(user => {
                             const listItem = document.createElement('li');
                             listItem.textContent = user;
                             listItem.classList.add('px-4', 'py-2', 'cursor-pointer', 'hover:bg-orange-600', 'hover:text-white', 'rounded-md');
@@ -369,7 +386,7 @@
                         });
                     } else {
                         searchResultsList.innerHTML = '<li class="px-4 py-2 text-gray-400">No matching employees</li>';
-                        searchResultsList.style.display = 'block'; 
+                        searchResultsList.style.display = 'block';
                     }
                 },
                 error: (error) => {
@@ -380,18 +397,20 @@
             });
         }, 300);
     }
+
     searchInput.addEventListener("keydown", function(e) {
         let x = document.getElementById("searchResults");
         if (x) x = x.getElementsByTagName("li");
         if (!x || x.length === 0) return;
-        if (e.keyCode == 40) { currentFocus++; addActive(x); e.preventDefault(); } 
-        else if (e.keyCode == 38) { currentFocus--; addActive(x); e.preventDefault(); } 
-        else if (e.keyCode == 13) { 
-            e.preventDefault(); 
-            if (currentFocus > -1) { if (x) x[currentFocus].click(); } 
+        if (e.keyCode == 40) { currentFocus++; addActive(x); e.preventDefault(); }
+        else if (e.keyCode == 38) { currentFocus--; addActive(x); e.preventDefault(); }
+        else if (e.keyCode == 13) {
+            e.preventDefault();
+            if (currentFocus > -1) { if (x) x[currentFocus].click(); }
             else { searchResultsList.style.display = 'none'; }
         }
     });
+
     function addActive(x) {
         if (!x) return false;
         removeActive(x);
@@ -400,18 +419,21 @@
         x[currentFocus].classList.add("active-suggestion");
         x[currentFocus].scrollIntoView({ block: "nearest", inline: "nearest" });
     }
+
     function removeActive(x) {
         for (let i = 0; i < x.length; i++) {
             x[i].classList.remove("active-suggestion");
         }
     }
+
     document.addEventListener('click', function(event) {
         if (!event.target.closest('#searchUser') && !event.target.closest('#searchResults')) {
-            searchResultsList.style.display = 'none'; // Changed from classList.add('hidden')
-            searchResultsList.innerHTML = ''; 
-            currentFocus = -1; 
+            searchResultsList.style.display = 'none';
+            searchResultsList.innerHTML = '';
+            currentFocus = -1;
         }
     });
+
     function filterAttendance() {
         const date = document.getElementById('filterDate').value;
         const searchUser = document.getElementById('searchUser').value;
@@ -419,6 +441,7 @@
         if (searchUser) { url += `&user=${encodeURIComponent(searchUser)}`; }
         window.location.href = url;
     }
+
     function confirmLogout() {
         Swal.fire({
             title: 'Are you sure?', text: "You will be logged out.", icon: 'warning', showCancelButton: true,

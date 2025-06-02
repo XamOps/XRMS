@@ -228,21 +228,23 @@
                 <span>Dashboard</span>
             </a>
             <a href="/employees/profile" class="nav-item">
-                <i class="fas fa-user-circle"></i> <span>My Profile</span>
+                <i class="fas fa-user-circle"></i> <span>Employee Profile</span>
             </a>
             <a href="/attendance/view" class="nav-item">
                 <i class="fas fa-calendar-check"></i>
-                <span>My Attendance</span>
+                <span>Attendance</span>
             </a>
             <a th:if="${employee != null and employee.roles != null and #strings.containsIgnoreCase(employee.roles.toString(), 'MANAGER')}" 
                href="/manager/dashboard" class="nav-item active"> <i class="fas fa-users-cog"></i> <span>Team Requests</span>
             </a>
+
+                 <a href="/manager/dashboard" class="nav-item active"> <i class="fas fa-users-cog"></i>
+                <span>Team Requests</span>
+            </a>
             <a href="/leave/apply" class="nav-item">
-                <i class="fas fa-calendar-plus"></i> <span>Apply for Leave</span>
+                <i class="fas fa-calendar-plus"></i> <span>Leave Request</span>
             </a>
-            <a href="#" class="nav-item"> <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a>
+       
         </div>
     </div>
     <div class="sidebar-footer"> <button class="logout-btn" onclick="confirmLogout()">
