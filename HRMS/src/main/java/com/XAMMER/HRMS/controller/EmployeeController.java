@@ -1,133 +1,147 @@
 package com.XAMMER.HRMS.controller;
 
-import com.XAMMER.HRMS.dto.PersonalDetailsUpdateDTO; // You need to create this DTO
+import com.XAMMER.HRMS.dto.*; // Ensure all DTOs are imported
 import com.XAMMER.HRMS.model.User;
 import com.XAMMER.HRMS.service.UserService;
+import com.XAMMER.HRMS.service.S3Service; // <-- Import S3Service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable; // Import this
-import org.springframework.web.bind.annotation.PostMapping;  // Import this
-import org.springframework.web.bind.annotation.RequestBody;  // Import this
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody; // If @Controller is used for HTML and JSON
-import java.util.HashMap; // Make sure this import is present
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest; // Import this
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map; // For simple JSON responses
+import java.util.List;
+import java.util.Map;
+import java.util.Optional; // Keep if you use Optional directly in this controller
+
 
 @Controller
 @RequestMapping("/employees")
 public class EmployeeController {
 
     private final UserService userService;
-    // Formatter for displaying dates in "Month dd, yyyy" format
-    private final DateTimeFormatter displayDateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-    // Formatter for parsing dates from "yyyy-MM-dd" format (from <input type="date">)
-    private final DateTimeFormatter inputDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-
+    private final S3Service s3Service; // <-- Inject S3Service here
+    private final DateTimeFormatter displayDateFormatter = DateTimeFormatter.ofPattern("MMMM dd,yyyy"); // Corrected pattern example
 
     @Autowired
-    public EmployeeController(UserService userService) {
+    public EmployeeController(UserService userService, S3Service s3Service) { // <-- Add S3Service to constructor
         this.userService = userService;
+        this.s3Service = s3Service; // <-- Assign S3Service
     }
 
     @GetMapping("/profile")
     public String viewProfile(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        User employee = userService.findByUsername(username)
+
+        // This method relies on userService.findByUsernameWithAllDetails(String username)
+        // being defined in UserService and UserRepository and eagerly fetching all collections.
+        User employeeEntity = userService.findByUsernameWithAllDetails(username) // This fetches the User entity
                 .orElseThrow(() -> new RuntimeException("Employee profile not found for username: " + username));
 
-        String birthDateFormatted = null;
-        if (employee.getBirthDate() != null) {
-            birthDateFormatted = employee.getBirthDate().format(displayDateFormatter);
-        }
+        // CRITICAL FIX: Pass the s3Service instance to the UserDTO constructor
+        UserDTO employeeDTO = new UserDTO(employeeEntity, s3Service); // <-- Correct: Pass s3Service
 
-        String joiningDateFormatted = null;
-        if (employee.getJoiningDate() != null) {
-            joiningDateFormatted = employee.getJoiningDate().format(displayDateFormatter);
-        }
+        model.addAttribute("birthDateFormatted", (employeeDTO.getBirthDate() != null) ? employeeDTO.getBirthDate().format(displayDateFormatter) : "N/A");
+        model.addAttribute("joiningDateFormatted", (employeeDTO.getJoiningDate() != null) ? employeeDTO.getJoiningDate().format(displayDateFormatter) : "N/A");
+        model.addAttribute("employee", employeeDTO);
 
-        model.addAttribute("birthDateFormatted", birthDateFormatted);
-        model.addAttribute("joiningDateFormatted", joiningDateFormatted);
-        model.addAttribute("employee", employee);
-        // If CSRF is enabled, Spring Security + Thymeleaf usually handle adding _csrf automatically.
-        // If not, you might need to add it to the model explicitly for AJAX POSTs if not using form submissions.
         return "employee_profile";
     }
 
-    // **NEW METHOD TO HANDLE PROFILE UPDATES**
-    @PostMapping("/profile/update-personal/{id}")
+    @PostMapping("/profile/personal/{id}")
     @ResponseBody
-    public ResponseEntity<?> updatePersonalDetails(
-            @PathVariable Long id,
-            @RequestBody PersonalDetailsUpdateDTO detailsUpdateDTO,
-            Authentication authentication) {
-
-        String currentUsername = authentication.getName();
-        User userToUpdate = userService.findById(id)
-            .orElse(null);
-
-        if (userToUpdate == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                 .body(Map.of("message", "Employee not found with ID: " + id));
-        }
-
-        if (!userToUpdate.getUsername().equals(currentUsername) /* && !isCurrentUserAdmin(authentication) */) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                 .body(Map.of("message", "You are not authorized to update this profile."));
-        }
-
+    public ResponseEntity<?> updatePersonalDetails(@PathVariable Long id, @RequestBody PersonalDetailsUpdateDTO dto, Authentication auth) {
+        if (!isAuthorized(id, auth)) return unauthorizedResponse();
         try {
-            User updatedUser = userService.updatePersonalDetails(id, detailsUpdateDTO);
-
-            // Construct the updatedEmployee map carefully, allowing for nulls
-            Map<String, Object> updatedEmployeeMap = new HashMap<>();
-            updatedEmployeeMap.put("dateOfBirth", updatedUser.getBirthDate() != null ? updatedUser.getBirthDate().format(inputDateFormatter) : null);
-            updatedEmployeeMap.put("gender", updatedUser.getGender());
-            updatedEmployeeMap.put("email", updatedUser.getEmail());
-            updatedEmployeeMap.put("phone", updatedUser.getPhone());
-            updatedEmployeeMap.put("address", updatedUser.getAddress());
-            // Add employmentType and workLocation if they are part of the DTO and response
-            // updatedEmployeeMap.put("employmentType", updatedUser.getEmploymentType());
-            // updatedEmployeeMap.put("workLocation", updatedUser.getWorkLocation());
-
-
-            return ResponseEntity.ok(Map.of(
-                "message", "Personal details updated successfully!",
-                "updatedEmployee", updatedEmployeeMap // Use the HashMap here
-            ));
-
-        } catch (DateTimeParseException e) {
-            System.err.println("----------- DATETIME PARSE EXCEPTION IN EmployeeController -----------");
-            e.printStackTrace(System.err);
-            System.err.println("--------------------------------------------------------------------");
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid date format. Please use yyyy-MM-dd. Details: " + e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            System.err.println("----------- ILLEGAL ARGUMENT EXCEPTION IN EmployeeController -----------");
-            e.printStackTrace(System.err);
-            System.err.println("----------------------------------------------------------------------");
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        } catch (Exception e) {
-            System.err.println("############################################################################");
-            System.err.println("UNEXPECTED EXCEPTION CAUGHT IN EmployeeController.updatePersonalDetails FOR ID: " + id);
-            System.err.println("Exception Type: " + e.getClass().getName());
-            System.err.println("Exception Message: " + e.getMessage());
-            System.err.println("FULL STACK TRACE:");
-            e.printStackTrace(System.err);
-            System.err.println("############################################################################");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(Map.of("message", "An unexpected error occurred: " + e.getMessage()));
-        }
+            UserDTO updatedUser = userService.updatePersonalDetails(id, dto);
+            // Assuming userService.updatePersonalDetails already returns a UserDTO that has the S3Service handled.
+            return ResponseEntity.ok(Map.of("message", "Personal details updated!", "employee", updatedUser));
+        } catch (Exception e) { return errorResponse(e); }
     }
+
+    @PostMapping("/profile/family/{id}")
+    @ResponseBody
+    public ResponseEntity<?> updateFamilyDetails(@PathVariable Long id, @RequestBody FamilyDetailsDTO dto, Authentication auth) {
+        if (!isAuthorized(id, auth)) return unauthorizedResponse();
+        try {
+            UserDTO updatedUser = userService.updateFamilyDetails(id, dto);
+            // Assuming userService.updateFamilyDetails already returns a UserDTO that has the S3Service handled.
+            return ResponseEntity.ok(Map.of("message", "Family details updated!", "employee", updatedUser));
+        } catch (Exception e) { return errorResponse(e); }
     }
+
+    @PostMapping(value = "/profile/education/{id}", consumes = "multipart/form-data")
+    @ResponseBody
+    public ResponseEntity<?> updateEducationDetails(
+            @PathVariable Long id,
+            @RequestPart("educationChanges") List<EducationChangeDTO> changes,
+            MultipartHttpServletRequest request,
+            Authentication auth) {
+
+        if (!isAuthorized(id, auth)) return unauthorizedResponse();
+        try {
+            Map<String, MultipartFile> filesMap = request.getFileMap();
+            UserDTO updatedUser = userService.updateEducationDetails(id, changes, filesMap);
+            // Assuming userService.updateEducationDetails already returns a UserDTO that has the S3Service handled.
+            return ResponseEntity.ok(Map.of("message", "Education details updated!", "employee", updatedUser));
+        } catch (Exception e) { return errorResponse(e); }
+    }
+
+    @PostMapping(value = "/profile/financial/{id}", consumes = "multipart/form-data")
+    @ResponseBody
+    public ResponseEntity<?> updateFinancialDetails(
+            @PathVariable Long id,
+            @RequestPart("dto") FinancialDetailsDTO dto,
+            @RequestPart(value = "aadhaarDoc", required = false) MultipartFile aadhaarDoc,
+            @RequestPart(value = "panDoc", required = false) MultipartFile panDoc,
+            Authentication auth) {
+
+        if (!isAuthorized(id, auth)) return unauthorizedResponse();
+        try {
+            UserDTO updatedUser = userService.updateFinancialDetails(id, dto, aadhaarDoc, panDoc);
+            // Assuming userService.updateFinancialDetails already returns a UserDTO that has the S3Service handled.
+            return ResponseEntity.ok(Map.of("message", "Financial details updated!", "employee", updatedUser));
+        } catch (Exception e) { return errorResponse(e); }
+    }
+
+    @PostMapping(value = "/profile/professionalExperience/{id}", consumes = "multipart/form-data")
+    @ResponseBody
+    public ResponseEntity<?> updateProfessionalExperience(
+            @PathVariable Long id,
+            @RequestPart("experienceChanges") List<ProfessionalExperienceChangeDTO> changes,
+            MultipartHttpServletRequest request,
+            Authentication auth) {
+
+        if (!isAuthorized(id, auth)) return unauthorizedResponse();
+        try {
+            Map<String, MultipartFile> filesMap = request.getFileMap();
+            UserDTO updatedUser = userService.updateProfessionalExperience(id, changes, filesMap);
+            // Assuming userService.updateProfessionalExperience already returns a UserDTO that has the S3Service handled.
+            return ResponseEntity.ok(Map.of("message", "Experience details updated!", "employee", updatedUser));
+        } catch (Exception e) { return errorResponse(e); }
+    }
+
+    // Helper methods
+    private boolean isAuthorized(Long id, Authentication authentication) {
+        // This method does a findById, which likely returns a basic User entity.
+        // It's okay here as it only accesses username, not lazy collections.
+        User user = userService.findById(id).orElse(null);
+        return user != null && user.getUsername().equals(authentication.getName());
+    }
+
+    private ResponseEntity<Map<String, String>> unauthorizedResponse() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "You are not authorized to perform this action."));
+    }
+
+    private ResponseEntity<Map<String, String>> errorResponse(Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An error occurred: " + e.getMessage()));
+    }
+}

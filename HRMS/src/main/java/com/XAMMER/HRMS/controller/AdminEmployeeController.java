@@ -2,7 +2,8 @@ package com.XAMMER.HRMS.controller;
 
 import com.XAMMER.HRMS.model.User;
 import com.XAMMER.HRMS.service.UserService;
-import com.XAMMER.HRMS.dto.UserDTO; // Import your UserDTO
+import com.XAMMER.HRMS.service.S3Service; // <-- Make sure this is imported
+import com.XAMMER.HRMS.dto.UserDTO;
 import com.XAMMER.HRMS.model.Roles; // Keep if still relevant for setting roles
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -12,86 +13,90 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.LocalDate; // Keep if used elsewhere, otherwise can be removed
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors; // Make sure this is imported
+import java.util.function.Function; // Ensure this import is present for stream map
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/employees")
 public class AdminEmployeeController {
 
     private final UserService userService;
+    private final S3Service s3Service; // S3Service is correctly injected here
 
     @Autowired
-    public AdminEmployeeController(UserService userService) {
+    public AdminEmployeeController(UserService userService, S3Service s3Service) {
         this.userService = userService;
+        this.s3Service = s3Service;
     }
 
-    
-
-    /**
-     * Handles GET requests to /admin/employees to render the employees.html page.
-     * This might still pass User entities to the Thymeleaf template,
-     * but if the template itself tries to access lazy collections, you'll need to adapt.
-     * For now, let's assume the template only needs basic user info or handles eager loading separately.
-     */
     @GetMapping
     public String showEmployeeManagementPage(Model model) {
-        // Option 1: If your Thymeleaf template only needs basic fields (not lazy collections)
-        // model.addAttribute("employees", userService.getAllUsers());
-
-        // Option 2 (Recommended for consistency with API): Pass DTOs to the model
-        // If your frontend JavaScript relies on this initial load to populate a table,
-        // it's better to pass DTOs here too. You'll need to adapt your Thymeleaf template
-        // to expect UserDTO objects.
-        model.addAttribute("employees", userService.findAllUsersDTO()); // Use the DTO method
-        return "employee-admin";
+        // This method calls userService.findAllUsersDTO() which is already configured
+        // to return List<UserDTO> by calling new UserDTO(user, s3Service) internally.
+        model.addAttribute("employees", userService.findAllUsersDTO());
+        return "employee-admin"; // Assuming your admin page is named 'employees.html'
     }
 
-    // --- REST API Endpoints for your frontend JavaScript ---
-
-    // Get all employees (users with employee roles) - NOW RETURNS UserDTO
+    // Get all employees (users with employee roles) - Returns List<UserDTO>
     @GetMapping("/api")
     @ResponseBody
     public ResponseEntity<List<UserDTO>> getAllEmployeesApi() {
-        // Call the service method that returns DTOs
+        // userService.findAllUsersDTO() already returns List<UserDTO>, so this is fine.
         List<UserDTO> employees = userService.findAllUsersDTO();
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
     // Add a new employee (which means creating a new User)
-    // Client sends a User entity, but the response should be a DTO
     @PostMapping("/api")
     @ResponseBody
     public ResponseEntity<UserDTO> addEmployeeApi(@RequestBody User user) {
-        User newEmployee = userService.addUser(user); // addUser likely returns a User entity
-        // Convert the returned User entity to a UserDTO before sending the response
-        return new ResponseEntity<>(new UserDTO(newEmployee), HttpStatus.CREATED);
+        try {
+            User newEmployee = userService.addUser(user);
+            // FIX: Pass s3Service to the UserDTO constructor
+            return new ResponseEntity<>(new UserDTO(newEmployee, s3Service), HttpStatus.CREATED);
+        } catch (Exception e) {
+            // Log the error
+            e.printStackTrace();
+            // Return a null body with an error status if the method signature expects UserDTO
+            // If the client explicitly needs an error message, consider a generic ErrorDTO.
+            // For compilation, returning null is acceptable if the client handles it.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
-    // Get a single employee by ID - NOW RETURNS UserDTO
+    // Get a single employee by ID - Returns UserDTO
     @GetMapping("/api/{id}")
     @ResponseBody
     public ResponseEntity<UserDTO> getEmployeeApi(@PathVariable Long id) {
-        // You'll need a service method that specifically returns a UserDTO by ID,
-        // or convert the Optional<User> to Optional<UserDTO>.
-        Optional<User> employeeOptional = Optional.empty(); // getUserById still returns User
-        return employeeOptional.map(user -> new ResponseEntity<>(new UserDTO(user), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        // This method relies on userService.findByUsernameWithAllDetails(Long id)
+        // being defined in UserService and UserRepository and eagerly fetching all collections.
+        Optional<User> userEntityOptional = userService.findByUsernameWithAllDetails(id);
+
+        if (userEntityOptional.isPresent()) {
+            User userEntity = userEntityOptional.get();
+            // FIX: Pass s3Service to the UserDTO constructor
+            return new ResponseEntity<>(new UserDTO(userEntity, s3Service), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Handles not found, no UserDTO needed
+        }
     }
 
-    // Search and filter employees - NOW RETURNS UserDTO
+    // Search and filter employees - Returns List<UserDTO>
     @GetMapping("/api/search")
     @ResponseBody
     public ResponseEntity<List<UserDTO>> searchAndFilterEmployeesApi(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String department) {
-        // Assuming searchAndFilterUsers returns List<User>, convert it to List<UserDTO>
+        // userService.searchAndFilterUsers returns List<User>. Map them to UserDTO.
+        // CRITICAL: Ensure searchAndFilterUsers fetches all collections eagerly if UserDTO needs them.
         List<User> employees = userService.searchAndFilterUsers(query, department);
         List<UserDTO> employeeDTOs = employees.stream()
-                .map(UserDTO::new)
+                .map(user -> new UserDTO(user, s3Service)) // FIX: Pass s3Service
                 .collect(Collectors.toList());
         return new ResponseEntity<>(employeeDTOs, HttpStatus.OK);
     }
@@ -111,29 +116,28 @@ public class AdminEmployeeController {
         }
     }
 
-    // Delete an employee - No change needed as it returns Void
-@DeleteMapping("/api/{id}")
-@ResponseBody
-public ResponseEntity<Void> deleteEmployeeApi(@PathVariable Long id) {
-    try {
-        userService.deleteUser(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
-    } catch (EmptyResultDataAccessException ex) { // Catch specific exception
-        System.err.println("Attempted to delete non-existent employee with ID: " + id);
-        ex.printStackTrace(); // For debugging in server logs
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-    } catch (Exception e) { // Catch any other unexpected exceptions
-        System.err.println("Error deleting employee with ID " + id + ": " + e.getMessage());
-        e.printStackTrace();
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error for unexpected issues
+    // Delete an employee - Returns Void
+    @DeleteMapping("/api/{id}")
+    @ResponseBody
+    public ResponseEntity<Void> deleteEmployeeApi(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
+        } catch (EmptyResultDataAccessException ex) {
+            System.err.println("Attempted to delete non-existent employee with ID: " + id);
+            ex.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        } catch (Exception e) {
+            System.err.println("Error deleting employee with ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+        }
     }
-}
 
-        @GetMapping("/api/suggestions") // New endpoint for search suggestions
+    @GetMapping("/api/suggestions")
     @ResponseBody
     public ResponseEntity<List<String>> getUserSuggestions(@RequestParam("query") String query) {
-        // Assuming your UserService has a method to find user usernames by partial query
-        List<String> usernames = userService.findUsernamesByQuery(query); // You'll need to implement this in UserService
+        List<String> usernames = userService.findUsernamesByQuery(query);
         if (usernames.isEmpty()) {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
         }
