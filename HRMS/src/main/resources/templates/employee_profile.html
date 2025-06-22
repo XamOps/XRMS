@@ -109,11 +109,11 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
                     <option value="Prefer not to say" th:selected="${employee.gender == 'Prefer not to say'}">Prefer not to say</option>
                 </select>
             </div>
-            <div class="info-item">
+            <!-- <div class="info-item">
                <span class="info-label">Email</span>
                <span class="info-value display-field" data-field="email" th:text="${employee.email ?: 'N/A'}">N/A</span>
                <input type="email" class="form-input form-input-field" data-field="email" th:value="${employee.email}">
-            </div>
+            </div> -->
             <div class="info-item">
                 <span class="info-label">Personal Phone</span>
                 <span class="info-value display-field" data-field="phone" th:text="${employee.phone ?: 'N/A'}">N/A</span>
@@ -147,8 +147,11 @@ crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <h2 class="profile-section-title"><i class="fa-solid fa-briefcase"></i> Professional Details</h2>
     <div class="profile-info-grid">
         <div class="info-item"><span class="info-label">Employee ID</span><span class="info-value" th:text="${employee.id ?: 'N/A'}">N/A</span></div>
-        <!-- <div class="info-item"><span class="info-label">Official Email</span><span class="info-value" th:text="${employee.email ?: 'N/A'}">N/A</span></div> -->
-        <div class="info-item"><span class="info-label">Department</span><span class="info-value" th:text="${employee.department ?: 'N/A'}">N/A</span></div>
+            <div class="info-item">
+               <span class="info-label">Email</span>
+               <span class="info-value display-field" data-field="email" th:text="${employee.email ?: 'N/A'}">N/A</span>
+               <input type="email" class="form-input form-input-field" data-field="email" th:value="${employee.email}">
+            </div>        <div class="info-item"><span class="info-label">Department</span><span class="info-value" th:text="${employee.department ?: 'N/A'}">N/A</span></div>
         <div class="info-item">
             <span class="info-label">Manager</span>
             <span class="info-value" th:text="${employee.managerFullName ?: 'N/A'}">N/A</span>
