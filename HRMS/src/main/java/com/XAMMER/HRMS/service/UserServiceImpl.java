@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,17 +68,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getUpcomingBirthdays() {
         LocalDate today = LocalDate.now();
-        // Simplified for brevity, ensure your original logic is sound
+        LocalDate todayPlusTwoWeeks = today.plus(12, ChronoUnit.MONTHS);
+
         return userRepository.findAll().stream()
-            .filter(user -> user.getBirthDate() != null && 
-                           user.getBirthDate().getMonthValue() >= today.getMonthValue() &&
-                           user.getBirthDate().getDayOfMonth() >= today.getDayOfMonth())
-            .collect(Collectors.toList());
-    }
-    
-    @Override
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+                .filter(user -> {
+                    if (user.getBirthDate() == null) {
+                        return false;
+                    }
+                    LocalDate birthdayThisYear = user.getBirthDate().withYear(today.getYear());
+                    if (birthdayThisYear.isBefore(today)) {
+                        birthdayThisYear = birthdayThisYear.plusYears(1);
+                    }
+                    return !birthdayThisYear.isBefore(today) && !birthdayThisYear.isAfter(todayPlusTwoWeeks);
+                })
+                .sorted((u1, u2) -> {
+                    LocalDate b1 = u1.getBirthDate().withYear(today.getYear());
+                    if (b1.isBefore(today)) b1 = b1.plusYears(1);
+                    LocalDate b2 = u2.getBirthDate().withYear(today.getYear());
+                    if (b2.isBefore(today)) b2 = b2.plusYears(1);
+                    return b1.compareTo(b2);
+                })
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -558,6 +569,12 @@ public class UserServiceImpl implements UserService {
     public Optional<User> findByUsernameWithAllDetails(Long id) {
         // This calls the UserRepository method that fetches by ID with all details.
         return userRepository.findByUsernameWithAllDetails(id);
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getUserByUsername'");
     }
 
 

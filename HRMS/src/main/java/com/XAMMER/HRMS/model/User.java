@@ -90,22 +90,20 @@ public class User implements UserDetails {
 
     // --- RELATIONSHIPS ---
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id")
-    @JsonIgnore
-    private User manager;
+// Old User.java
+@ManyToOne
+@JoinColumn(name = "manager_id")
+private User manager;
 
-    @OneToMany(mappedBy = "manager", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<User> subordinates = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendances = new ArrayList<>(); // Initialize the list to avoid NullPointerException
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Attendance> attendances = new ArrayList<>();
+    // *** CRITICAL CHANGES HERE ***
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LeaveRequest> leaveRequests = new ArrayList<>(); // Initialize the list to avoid NullPointerException
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<LeaveRequest> leaveRequests = new ArrayList<>();
+    @OneToMany(mappedBy = "manager") // No cascade on delete for subordinates, as they are not "owned" and should not be deleted with the manager.
+    private List<User> subordinates = new ArrayList<>(); // Initialize the list
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("user-educations")
