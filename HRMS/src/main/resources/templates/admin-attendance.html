@@ -136,9 +136,7 @@
 </head>
 <body class="relative">
 
-<button class="sidebar-toggle-button" onclick="toggleSidebar()">
-    <i class="fa-solid fa-bars"></i>
-</button>
+<button class="sidebar-toggle-button" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
 <div class="sidebar-overlay" onclick="closeSidebar()"></div>
 <div class="sidebar">
     <div>
@@ -150,16 +148,14 @@
             <a href="/admin/requests/pending"><i class="fa fa-calendar-check"></i> Team Requests</a>
         </div>
     </div>
-    <div class="logout" onclick="confirmLogout()">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-    </div>
+    <div class="logout" onclick="confirmLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
 </div>
 
 <div class="flex-1 flex flex-col overflow-hidden h-full ml-0 transition-all duration-300 ease-in-out">
     <div class="page-header">
         <div class="page-header-flank page-header-flank-left"></div>
         <div class="page-header-main-title">
-            <i class="fas fa-calendar-alt page-header-icon"></i> <h1 th:text="${'Attendance Management'}">Attendance Management</h1>
+            <i class="fas fa-calendar-alt page-header-icon"></i> <h1>Attendance Management</h1>
         </div>
         <div class="page-header-flank page-header-flank-right">
             <div class="page-header-right-content"></div>
@@ -168,36 +164,53 @@
 
     <div class="main-content-wrapper flex-1 overflow-y-auto">
         <div class="filter-container rounded-xl p-6 mb-6 shadow-lg">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                 <div>
                     <label for="searchUser" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SEARCH EMPLOYEE</label>
                     <div class="relative">
-                        <input type="text" id="searchUser" placeholder="Type to search employees..."
-                               class="search-input w-full px-4 py-3 rounded-lg focus:outline-none"
-                               onkeyup="suggestUsers(this.value)">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <i class="bi bi-search text-gray-500"></i>
-                        </div>
+                        <input type="text" id="searchUser" placeholder="Type to search..." class="search-input w-full px-4 py-3" onkeyup="suggestUsers(this.value)">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"><i class="bi bi-search text-gray-500"></i></div>
                     </div>
                     <ul id="searchResults" class="search-results absolute z-20 mt-1 w-full rounded-lg shadow-lg hidden max-h-60 overflow-y-auto"></ul>
                 </div>
                 <div>
+                    <label for="viewType" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">VIEW TYPE</label>
+                    <select id="viewType" onchange="toggleViewType()" class="form-input w-full px-4 py-3">
+                        <option value="daily">Daily Attendance</option>
+                        <option value="monthly">Monthly Attendance</option>
+                    </select>
+                </div>
+                <div id="date-picker-container">
                     <label for="filterDate" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SELECT DATE</label>
-                    <div class="relative">
-                        <input type="date" id="filterDate" class="date-picker w-full px-4 py-3 rounded-lg focus:outline-none">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <i class="bi bi-calendar3 text-gray-500"></i>
-                        </div>
-                    </div>
+                    <input type="date" id="filterDate" class="date-picker w-full px-4 py-3">
+                </div>
+                <div id="month-picker-container" style="display: none;">
+                    <label for="filterMonth" class="block text-sm font-medium text-gray-400 mb-1 tracking-wide">SELECT MONTH</label>
+                    <input type="month" id="filterMonth" class="date-picker w-full px-4 py-3">
                 </div>
                 <div class="flex items-end">
-                    <button onclick="filterAttendance()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide">
-                        <i class="bi bi-funnel-fill mr-2"></i>
-                        VIEW ATTENDANCE
+                    <button id="viewAttendanceBtn" onclick="filterAttendance()" class="btn-primary w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium tracking-wide">
+                        <i class="bi bi-funnel-fill mr-2"></i> VIEW ATTENDANCE
                     </button>
                 </div>
             </div>
         </div>
+        
+<div class="mb-4">
+    <h2 class="text-xl font-semibold text-white" th:if="${viewType == 'monthly'}">
+        Showing Monthly Attendance for 
+        <span class="text-orange-400" th:if="${selectedUser}" th:text="${selectedUser}">User</span>
+        <span class="text-orange-400" th:unless="${selectedUser}">All Employees</span>
+        in <span class="text-orange-400" th:text="${selectedMonth + ', ' + selectedYear}">Month, Year</span>
+    </h2>
+
+    <h2 class="text-xl font-semibold text-white" th:if="${viewType == 'daily'}">
+        Showing Daily Attendance for 
+        <span class="text-orange-400" th:if="${selectedUser}" th:text="${selectedUser}">User</span>
+        <span class="text-orange-400" th:unless="${selectedUser}">All Employees</span>
+        on <span class="text-orange-400" th:text="${#temporals.format(selectedDate, 'dd MMMM, yyyy')}">Date</span>
+    </h2>
+</div>
 
         <div class="table-container rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
@@ -331,29 +344,70 @@
         actualMainContent.classList.add('ml-0');
     }
 
+function toggleViewType() {
+    const viewType = document.getElementById('viewType').value;
+    const datePicker = document.getElementById('date-picker-container');
+    const monthPicker = document.getElementById('month-picker-container');
+    const searchUserInput = document.getElementById('searchUser');
+    const viewButton = document.getElementById('viewAttendanceBtn');
+
+    if (viewType === 'monthly') {
+        datePicker.style.display = 'none';
+        monthPicker.style.display = 'block';
+        searchUserInput.placeholder = "Search employee (optional)";
+        viewButton.disabled = false; // Always enabled
+    } else { // daily view
+        datePicker.style.display = 'block';
+        monthPicker.style.display = 'none';
+        searchUserInput.placeholder = "Search employee (optional)";
+        viewButton.disabled = false; // Always enabled
+    }
+}
+
+    // This listener was also missing. It checks if the "View Attendance" button should be disabled.
+    // document.getElementById('searchUser').addEventListener('input', function() {
+    //     if (document.getElementById('viewType').value === 'monthly') {
+    //         document.getElementById('viewAttendanceBtn').disabled = this.value.trim() === '';
+    //     }
+    // });
+
+
     // Reads URL params to persist filter state after reload
-    function setFilterValuesFromURL() {
+function setFilterValuesFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
+        const viewTypeParam = urlParams.get('viewType') || 'daily';
         const dateParam = urlParams.get('date');
         const userParam = urlParams.get('user');
-        const filterDateInput = document.getElementById('filterDate');
-        const searchUserInput = document.getElementById('searchUser');
+        const yearParam = urlParams.get('year');
+        const monthParam = urlParams.get('month');
 
-        if (dateParam) {
-            // If 'date' param exists, use it
-            filterDateInput.value = dateParam;
-        } else {
-            // Otherwise, set to today's date
-            const today = new Date();
-            const formattedDate = today.toISOString().split('T')[0];
-            filterDateInput.value = formattedDate;
-        }
+        document.getElementById('viewType').value = viewTypeParam;
 
         if (userParam) {
-            // If 'user' param exists, set the search input value
-            searchUserInput.value = decodeURIComponent(userParam);
+            document.getElementById('searchUser').value = decodeURIComponent(userParam);
         }
+
+        if (viewTypeParam === 'monthly') {
+            const monthInput = document.getElementById('filterMonth');
+            if (yearParam && monthParam) {
+                // Format must be YYYY-MM
+                monthInput.value = `${yearParam}-${String(monthParam).padStart(2, '0')}`;
+            } else {
+                 monthInput.valueAsDate = new Date();
+            }
+        } else {
+            const dateInput = document.getElementById('filterDate');
+            if (dateParam) {
+                dateInput.value = dateParam;
+            } else {
+                dateInput.valueAsDate = new Date();
+            }
+        }
+        
+        // IMPORTANT: Trigger the toggle after setting values to show/hide the correct pickers
+        toggleViewType();
     }
+
 
     function suggestUsers(searchText) {
         clearTimeout(suggestionTimeout);
@@ -434,13 +488,38 @@
         }
     });
 
-    function filterAttendance() {
+function filterAttendance() {
+    const viewType = document.getElementById('viewType').value;
+    const searchUser = document.getElementById('searchUser').value;
+    let url = '/admin/attendance?';
+
+    if (viewType === 'monthly') {
+        const monthValue = document.getElementById('filterMonth').value;
+        if (!monthValue) {
+            Swal.fire({ title: 'Month Required', text: 'Please select a month and year.', icon: 'warning' });
+            return;
+        }
+        const [year, month] = monthValue.split('-');
+        url += `viewType=monthly&year=${year}&month=${parseInt(month, 10)}`;
+        // Add user parameter only if a user is specified
+        if (searchUser.trim() !== '') {
+            url += `&user=${encodeURIComponent(searchUser)}`;
+        }
+    } else { // daily
         const date = document.getElementById('filterDate').value;
-        const searchUser = document.getElementById('searchUser').value;
-        let url = `/admin/attendance?date=${encodeURIComponent(date)}`;
-        if (searchUser) { url += `&user=${encodeURIComponent(searchUser)}`; }
-        window.location.href = url;
+        if (!date) {
+            Swal.fire({ title: 'Date Required', text: 'Please select a date.', icon: 'warning' });
+            return;
+        }
+        url += `viewType=daily&date=${encodeURIComponent(date)}`;
+        // Add user parameter only if a user is specified
+        if (searchUser.trim() !== '') {
+            url += `&user=${encodeURIComponent(searchUser)}`;
+        }
     }
+    window.location.href = url;
+}
+
 
     function confirmLogout() {
         Swal.fire({

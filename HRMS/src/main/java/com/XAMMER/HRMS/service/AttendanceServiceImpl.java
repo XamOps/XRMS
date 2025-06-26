@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.Duration; // Import Duration
@@ -380,5 +381,37 @@ public boolean resetCheckoutTimeForDate(String username, LocalDate resetDate) {
     public List<Attendance> getAttendanceRecordsForUserAndDate(Long id, LocalDate effectiveDate) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRecordsForUserAndDate'");
+    }
+
+    @Override
+    public List<Attendance> getMonthlyAttendanceForUser(String username, int year, int month) {
+        User user = getUserOrThrowException(username);
+
+        // Create the start and end dates for the given month and year
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        logger.info("Fetching monthly attendance for user: {} from {} to {}", username, startDateTime, endDateTime);
+
+        // We can reuse the existing repository method that finds records between two dates.
+        return attendanceRepository.findByUserAndCheckInTimeBetweenOrderByCheckInTimeAsc(user, startDateTime, endDateTime);
+    }
+
+  @Override
+    public List<Attendance> getMonthlyAttendanceForAllUsers(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        logger.info("Fetching monthly attendance for ALL users from {} to {}", startDateTime, endDateTime);
+
+        return attendanceRepository.findByCheckInTimeBetweenOrderByUser_UsernameAscCheckInTimeAsc(startDateTime, endDateTime);
     }
 }

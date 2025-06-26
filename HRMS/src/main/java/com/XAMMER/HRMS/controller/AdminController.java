@@ -1,7 +1,5 @@
 package com.XAMMER.HRMS.controller;
 
-import com.XAMMER.HRMS.dto.AttendanceResetRequest;
-import com.XAMMER.HRMS.dto.ApiResponse;
 import com.XAMMER.HRMS.dto.AttendanceDTO;
 import com.XAMMER.HRMS.model.Attendance;
 import com.XAMMER.HRMS.model.Holiday;
@@ -17,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -28,8 +25,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter; // Keep this import, it's used elsewhere
+import java.time.YearMonth; // <-- ADDED IMPORT
 import java.util.List;
+import java.util.Optional; // <-- ADDED IMPORT
 import java.util.stream.Collectors;
 
 @Controller
@@ -49,7 +47,8 @@ public class AdminController {
 
     @Autowired
     private LeaveRequestService leaveRequestService;
-        @Autowired
+
+    @Autowired
     private HolidayService holidayService;
 
 
@@ -62,18 +61,16 @@ public class AdminController {
         userService.findByUsername(principal.getName())
                 .ifPresent(admin -> model.addAttribute("username", admin.getUsername()));
 
-        // *** THIS IS THE CORRECTED LINE ***
-        model.addAttribute("todayDate", LocalDateTime.now()); // Pass the LocalDateTime object directly
-
+        model.addAttribute("todayDate", LocalDateTime.now());
         model.addAttribute("dashboardMetrics", adminService.getDashboardMetrics());
         model.addAttribute("recentActivity", adminService.getRecentActivity());
 
-        // Handle date and user filtering for attendance
-                  List<User> upcomingBirthdays = userService.getUpcomingBirthdays();
-            model.addAttribute("upcomingBirthdays", upcomingBirthdays);
+        List<User> upcomingBirthdays = userService.getUpcomingBirthdays();
+        model.addAttribute("upcomingBirthdays", upcomingBirthdays);
 
-            List<Holiday> upcomingHolidays = holidayService.getUpcomingHolidays();
-            model.addAttribute("upcomingHolidays", upcomingHolidays);
+        List<Holiday> upcomingHolidays = holidayService.getUpcomingHolidays();
+        model.addAttribute("upcomingHolidays", upcomingHolidays);
+
         LocalDate selectedDate = (dateStr != null) ? LocalDate.parse(dateStr) : LocalDate.now();
         List<Attendance> filteredAttendance = attendanceService.getDailyAttendance(selectedDate);
         if (username != null && !username.isBlank()) {
@@ -94,37 +91,78 @@ public class AdminController {
         return "dashboard-admin";
     }
 
-       @GetMapping("/attendance")
-    public String showAttendancePage(@RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                     @RequestParam(value = "user", required = false) String username,
-                                     Model model) {
+    /**
+     * REVISED METHOD: This single endpoint now handles both daily and monthly attendance views
+     * by checking the 'viewType' parameter.
+     */
+@GetMapping("/attendance")
+public String showAttendancePage(
+        @RequestParam("viewType") Optional<String> viewTypeOpt,
+        @RequestParam("date") Optional<String> dateStrOpt,
+        @RequestParam("user") Optional<String> usernameOpt,
+        @RequestParam("year") Optional<Integer> yearOpt,
+        @RequestParam("month") Optional<Integer> monthOpt,
+        Model model,
+        Principal principal) {
 
-        // Set default date to today if not provided
-        LocalDate selectedDate = (date != null) ? date : LocalDate.now();
+    // Add common model attributes
+    userService.findByUsername(principal.getName())
+                   .ifPresent(admin -> model.addAttribute("username", admin.getUsername()));
+    model.addAttribute("allUsers", userService.getAllUsernames());
 
-        // Fetch attendance data for the selected date
-        List<Attendance> filteredAttendance = attendanceService.getDailyAttendance(selectedDate);
+    String viewType = viewTypeOpt.orElse("daily");
+    String username = usernameOpt.filter(u -> !u.isBlank()).orElse(null); // Treat blank as null
 
-        // Filter by username if provided
-        if (username != null && !username.isBlank()) {
-            filteredAttendance = filteredAttendance.stream()
-                    .filter(a -> a.getUser() != null && username.equalsIgnoreCase(a.getUser().getUsername()))
-                    .collect(Collectors.toList());
+    List<Attendance> attendanceData = new java.util.ArrayList<>();
+
+    if ("monthly".equals(viewType)) {
+        // --- MONTHLY VIEW LOGIC ---
+        int year = yearOpt.orElse(YearMonth.now().getYear());
+        int month = monthOpt.orElse(YearMonth.now().getMonthValue());
+        
+        if (username != null) {
+            // A specific user IS selected
+            attendanceData = attendanceService.getMonthlyAttendanceForUser(username, year, month);
+        } else {
+            // NO user is selected, get for ALL users
+            attendanceData = attendanceService.getMonthlyAttendanceForAllUsers(year, month);
         }
 
-        // Convert to DTOs for the view
-        List<AttendanceDTO> attendanceDTOs = filteredAttendance.stream()
-                .map(this::convertToDTO)
+        YearMonth yearMonth = YearMonth.of(year, month);
+        String monthName = yearMonth.getMonth().name();
+        model.addAttribute("selectedMonth", monthName.substring(0, 1) + monthName.substring(1).toLowerCase());
+        model.addAttribute("selectedYear", year);
+
+    } else {
+        // --- DAILY VIEW LOGIC (Default) ---
+        LocalDate selectedDate = dateStrOpt.map(LocalDate::parse).orElse(LocalDate.now());
+
+        if (username != null) {
+            // A specific user IS selected
+            // We first get all records for the day, then filter by the specified user
+            attendanceData = attendanceService.getDailyAttendance(selectedDate)
+                .stream()
+                .filter(a -> a.getUser() != null && username.equalsIgnoreCase(a.getUser().getUsername()))
                 .collect(Collectors.toList());
-
-        model.addAttribute("attendances", attendanceDTOs);
-        model.addAttribute("selectedDate", selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)); // Pass as string for HTML date input
-        model.addAttribute("selectedUser", username); // Pass the selected user back to input
-
-        return "admin-attendance"; // This will load src/main/resources/templates/admin/admin-attendance.html
+        } else {
+            // NO user is selected, get for ALL users
+            attendanceData = attendanceService.getDailyAttendance(selectedDate);
+        }
+        
+        model.addAttribute("selectedDate", selectedDate);
     }
+    
+    // --- Common logic for both views ---
+    List<AttendanceDTO> attendanceDTOs = attendanceData.stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
 
-    // ... rest of your AdminController code ...
+    model.addAttribute("attendances", attendanceDTOs);
+    model.addAttribute("selectedUser", username); // Will be null if no user was selected
+    model.addAttribute("viewType", viewType);
+
+    return "admin-attendance";
+}
 
     @GetMapping("/users/suggestions")
     @ResponseBody
@@ -133,12 +171,10 @@ public class AdminController {
         return ResponseEntity.ok(suggestions);
     }
 
-
-    // Handler for resetting checkout time
     @PostMapping("/attendance/reset/checkout/{username}")
     public String resetCheckout(@PathVariable String username,
-                                 @RequestParam("resetDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate resetDate,
-                                 RedirectAttributes redirectAttributes) {
+                                @RequestParam("resetDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate resetDate,
+                                RedirectAttributes redirectAttributes) {
         logger.info("Admin requested to reset checkout for user: {} on date: {}", username, resetDate);
         boolean success = attendanceService.resetCheckoutTimeForDate(username, resetDate);
         if (success) {
@@ -146,23 +182,27 @@ public class AdminController {
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to reset checkout time for " + username + " on " + resetDate);
         }
-        return "redirect:/admin/attendance";
+        // Redirect back with parameters to maintain the view
+        String referer = "?viewType=daily&date=" + resetDate + "&user=" + username;
+        return "redirect:/admin/attendance" + referer;
     }
 
-    // Handler for resetting the entire day's attendance
     @PostMapping("/attendance/reset/checkin/{username}")
-    public String resetToday(@PathVariable String username, RedirectAttributes redirectAttributes) {
+    public String resetToday(@PathVariable String username, 
+                             @RequestParam("resetDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate resetDate,
+                             RedirectAttributes redirectAttributes) {
         logger.warn("Admin requested to reset entire day's attendance for user: {}", username);
-        boolean success = attendanceService.resetDailyAttendance(username);
+        // Note: The service method seems to reset for 'today', you might want to adapt it to use `resetDate`
+        boolean success = attendanceService.resetDailyAttendance(username); 
         if (success) {
-            redirectAttributes.addFlashAttribute("successMessage", "Today's attendance reset successfully for " + username);
+            redirectAttributes.addFlashAttribute("successMessage", "Day's attendance reset successfully for " + username);
         } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to reset today's attendance for " + username);
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to reset day's attendance for " + username);
         }
-        return "redirect:/admin/attendance";
+        String referer = "?viewType=daily&date=" + resetDate + "&user=" + username;
+        return "redirect:/admin/attendance" + referer;
     }
 
-    // View pending leave requests for admin approval
     @GetMapping("/requests/pending")
     public String viewPendingAdminRequests(Model model) {
         List<LeaveRequest> pendingRequests = leaveRequestService.getAllPendingRequests();
@@ -170,7 +210,6 @@ public class AdminController {
         return "admin-pending-requests";
     }
 
-    // Admin approves a leave request
     @PostMapping("/requests/approve")
     public String approveLeaveRequestByAdmin(@RequestParam("requestId") Long requestId, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
@@ -186,7 +225,6 @@ public class AdminController {
         return "redirect:/admin/requests/pending";
     }
 
-    // Admin rejects a leave request
     @PostMapping("/requests/reject")
     public String rejectLeaveRequestByAdmin(@RequestParam("requestId") Long requestId, @RequestParam("rejectionReason") String rejectionReason, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
@@ -210,7 +248,8 @@ public class AdminController {
         dto.setCheckInTime(attendance.getCheckInTime());
         dto.setCheckOutTime(attendance.getCheckOutTime());
         dto.setAttendanceDate(attendance.getAttendanceDate());
-        logger.info("Converting Attendance for user: {}, date: {}", attendance.getUser() != null ? attendance.getUser().getUsername() : "N/A", attendance.getAttendanceDate());
+        // No need to log here, it can be very noisy
+        // logger.info("Converting Attendance for user: {}, date: {}", ...); 
         return dto;
     }
 }
