@@ -111,6 +111,29 @@ public class AttendanceServiceImpl implements AttendanceService {
             logger.warn(errorMessage);
             throw new IllegalStateException(errorMessage);
         }
+        
+        // =================================================================
+        // NEW LOGIC: Enforce 8-hour rule for the Business team
+        // =================================================================
+        if ("Business".equalsIgnoreCase(user.getDepartment())) {
+            LocalDateTime checkInTime = currentAttendance.getCheckInTime();
+            LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime();
+            Duration duration = Duration.between(checkInTime, now);
+
+            if (duration.toHours() < 8) {
+                long hours = duration.toHours();
+                long minutes = duration.toMinutes() % 60;
+                String errorMessage = String.format(
+                    "Cannot check out before completing 8 hours. Your current duration is %d hours and %d minutes.",
+                    hours, minutes
+                );
+                logger.warn("Early checkout attempt by {}: {}", username, errorMessage);
+                throw new IllegalStateException(errorMessage);
+            }
+        }
+        // =================================================================
+        // END OF NEW LOGIC
+        // =================================================================
 
         currentAttendance.setCheckOutTime(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime());
         Attendance updatedAttendance = attendanceRepository.save(currentAttendance);
