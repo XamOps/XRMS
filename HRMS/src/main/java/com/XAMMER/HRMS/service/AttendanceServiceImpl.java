@@ -115,7 +115,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         // =================================================================
         // NEW LOGIC: Enforce 8-hour rule for the Business team
         // =================================================================
-        if ("Business".equalsIgnoreCase(user.getDepartment())) {
+        if ("Business".equalsIgnoreCase(user.getDepartment()) || "Marketing".equalsIgnoreCase(user.getDepartment())) {
             LocalDateTime checkInTime = currentAttendance.getCheckInTime();
             LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime();
             Duration duration = Duration.between(checkInTime, now);
